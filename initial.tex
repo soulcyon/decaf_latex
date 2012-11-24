@@ -1,0 +1,69 @@
+\documentclass[a4paper,12pt]{article}
+\author{Mihir Sanghavi}
+\date{November 2012}
+
+\usepackage{algorithm}
+\usepackage{algorithmic}
+
+\begin{document}
+
+\begin{algorithm}
+\caption{GenTree($\Gamma$)}
+\label{alg:gentree}
+\begin{algorithmic}[1]
+\STATE $C = $ types($Components$);
+\FOR{$i \in \textit{C}$}
+   \IF{(NotEmpty($\Gamma_i$))}
+   	\STATE $l = \{\};$ \COMMENT{Stores a level of a SubTree}
+   	\STATE push $i$ into $l;$
+   	\STATE $S = state$(0)$;$
+    \STATE $S[i] =1;$
+    \STATE $\Gamma Cache_i = \mathcal{P}$($\Gamma_i$)$;$
+    \COMMENT{Cache is assigned Power Set}
+    \STATE $\beta _i =$ emptyMap(ComponentType, ListOfComponentTypes) $;$
+    \STATE push $i$ into $\beta _i;$
+    \STATE GrowSubTrees($l,S,\beta,1.0$f$);$
+   \ENDIF
+\ENDFOR
+\end{algorithmic}
+\end{algorithm}
+
+\begin{algorithm}
+\caption{GrowSubTrees($l,S,\beta,r$)}
+\label{alg:growsubtrees}
+\begin{algorithmic}[1]
+% L : all possible nodes at last level
+% r : rate of the curent subTree
+\STATE $F = $ failed($L$)$;$
+\STATE $\rho = \prod\limits_{i=1}^{|F|}\Gamma_{F[i]};$ \COMMENT{Cartesian Product}
+% rho : product set
+\FOR{$i \in \rho$}
+  \STATE $nl = \{\};$ \COMMENT{Next level of SubTree to be built}
+  \FOR{$j \in \rho_i$}
+    \STATE $p = L[i];$ \COMMENT{To be parent} 
+    \STATE append $\Gamma Cache_p[j]$ to $nl;$
+    \FOR{$k \in \Gamma Cache_p[j]$}
+      \IF{MarkedToBeAdded($k$)}
+        \STATE $S[k] = S[k] + 1;$
+        \STATE push $k$ into $\beta _k;$ \COMMENT{Store added child's information}
+        \STATE $r = r * \phi_{i,k};$ \COMMENT{Update SubTree rate}
+      \ELSE
+        \STATE push $i$ into $\beta _k;$ \COMMENT{Store parent info where child not added}
+      \ENDIF
+    \ENDFOR
+  \ENDFOR
+  \FOR{$s \in S$}
+    \IF{$S[s] > $redundancy($s$)}
+      \STATE goto line 3$;$ \COMMENT{SubTree is invalid because it has more components than in the system}
+    \ENDIF
+  \ENDFOR
+  \IF{AtleastOneChildAdded}
+  \STATE GrowSubTrees($nl,S,\beta,r$); \COMMENT {Grow the SubTree further}
+  \ELSE
+  \STATE ProcessRates($l,S,\beta,r$); \COMMENT {A stunted SubTree's rate is calculated and then it is discarded}
+  \ENDIF
+\ENDFOR
+\end{algorithmic}
+\end{algorithm}
+
+\end{document}
