@@ -8,21 +8,20 @@
 \begin{document}
 
 \begin{algorithm}
-\caption{GenTree($\Gamma$)}
-\label{alg:gentree}
+\caption{SeedSubTrees($\Gamma$)}
+\label{alg:seedsubtrees}
 \begin{algorithmic}[1]
-\STATE $C = $ types($Components$);
-\FOR{$i \in \textit{C}$}
-   \IF{(NotEmpty($\Gamma_i$))}
-   	\STATE $l = \{\};$ \COMMENT{Stores a level of a SubTree}
-   	\STATE push $i$ into $l;$
-   	\STATE $S = state$(0)$;$
-    \STATE $S[i] =1;$
-    \STATE $\Gamma Cache_i = \mathcal{P}$($\Gamma_i$)$;$
-    \COMMENT{Cache is assigned Power Set}
-    \STATE $\beta _i =$ emptyMap(ComponentType, ListOfComponentTypes) $;$
-    \STATE push $i$ into $\beta _i;$
-    \STATE GrowSubTrees($l,S,\beta,1.0$f$);$
+\FOR{$comp \in \{Components\}$}
+   \STATE $level = \{\};$ \COMMENT{A Level of a SubTree}
+   \STATE $nFailed = \{0,0,...0\};$ \COMMENT {Counts Failed Components}
+   \STATE $\beta = \{$Array of Linked Lists$\};$ \COMMENT {Breadth First History of Trees}
+   \STATE $\Gamma Cache = \{$Array of size $2 ^{|\Gamma_{comp}|}\};$ \COMMENT {Stores all possible subsets of $\Gamma_{comp}$} 
+   \IF{(NotEmpty($\Gamma_{comp}$))}
+   	\STATE append $comp$ to $level;$
+    \STATE $nFailed[comp] = 1;$
+    \STATE $\Gamma Cache_{comp} = \mathcal{P}(\Gamma_{comp});$ \COMMENT{Power Set (Ordered Set) is cached}
+    \STATE append $|$ to $\beta[comp];$
+    \STATE GrowSubTrees($level, nFailed, \beta, 1$);
    \ENDIF
 \ENDFOR
 \end{algorithmic}
