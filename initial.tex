@@ -4,6 +4,7 @@
 
 \usepackage{algorithm}
 \usepackage{algorithmic}
+\usepackage{mathabx}
 
 \begin{document}
 
@@ -12,55 +13,51 @@
 \label{alg:seedsubtrees}
 \begin{algorithmic}[1]
 \FOR{$comp \in \{Components\}$}
-   \STATE $level = \{\};$ \COMMENT{A Level of a SubTree}
+   \STATE $level = \{\};$ %\COMMENT{Level of a SubTree}
    \STATE $nFailed = \{0,0,...0\};$ \COMMENT {Counts Failed Components}
    \STATE $\beta = \{$Array of Linked Lists$\};$ \COMMENT {Breadth First History of Trees}
-   \STATE $\Gamma Cache = \{$Array of size $2 ^{|\Gamma_{comp}|}\};$ \COMMENT {Stores all possible subsets of $\Gamma_{comp}$} 
+   %\STATE $\Gamma Cache = \{$Array of Size $2 ^{|\Gamma_{comp}|}\};$ \COMMENT {Stores All Possible Subsets of $\Gamma_{comp}$} 
    \IF{(NotEmpty($\Gamma_{comp}$))}
    	\STATE append $comp$ to $level;$
     \STATE $nFailed[comp] = 1;$
-    \STATE $\Gamma Cache_{comp} = \mathcal{P}(\Gamma_{comp});$ \COMMENT{Power Set (Ordered Set) is cached}
+    %\STATE $\Gamma Cache_{comp} = \mathcal{P}(\Gamma_{comp});$ \COMMENT{Power Set (Ordered Set) is Cached}
     \STATE append $|$ to $\beta[comp];$
-    \STATE GrowSubTrees($level, nFailed, \beta, 1$);
+    \STATE GrowSubTrees($level,\, nFailed,\, \beta,\, 1$);
    \ENDIF
 \ENDFOR
 \end{algorithmic}
 \end{algorithm}
 
 \begin{algorithm}
-\caption{GrowSubTrees($l,S,\beta,r$)}
-\label{alg:growsubtrees}
+\caption{GrowSubTree($level,\, nFailed,\, \beta,\, subTreeRate$)}
+\label{alg:growsubtree}
 \begin{algorithmic}[1]
-% L : all possible nodes at last level
-% r : rate of the curent subTree
-\STATE $F = $ failed($L$)$;$
-\STATE $\rho = \prod\limits_{i=1}^{|F|}\Gamma_{F[i]};$ \COMMENT{Cartesian Product}
-% rho : product set
-\FOR{$i \in \rho$}
-  \STATE $nl = \{\};$ \COMMENT{Next level of SubTree to be built}
-  \FOR{$j \in \rho_i$}
-    \STATE $p = L[i];$ \COMMENT{To be parent} 
-    \STATE append $\Gamma Cache_p[j]$ to $nl;$
-    \FOR{$k \in \Gamma Cache_p[j]$}
-      \IF{MarkedToBeAdded($k$)}
-        \STATE $S[k] = S[k] + 1;$
-        \STATE push $k$ into $\beta _k;$ \COMMENT{Store added child's information}
-        \STATE $r = r * \phi_{i,k};$ \COMMENT{Update SubTree rate}
-      \ELSE
-        \STATE push $i$ into $\beta _k;$ \COMMENT{Store parent info where child not added}
-      \ENDIF
+\STATE $FC =$ FailedComponents($level$)$;$
+\STATE $\times\mathcal{P}(\Gamma) = \bigtimes\limits_{i=1}^{|FC|}\mathcal{P}(\Gamma_{FC[i]});$ 
+\\ \COMMENT{Cartesian Product (Power Sets (Ordered Set))}
+  \FOR{$\times\Gamma \in \times\mathcal{P}(\Gamma)$}
+    \STATE $nextLevel = \times\Gamma;$ %\COMMENT{Next Level of SubTree}
+    \STATE $nextFC =$ FailedComponents($nextLevel$)$;$
+    \FOR{$parC \in FC$}
+      \FOR{$childC \in nextLevel$}
+        \IF{$childC \in nextFC$}
+          \IF{$nFailed[childC] == redundancy(childC)$}
+            \STATE goto line 3$;$ 
+            \COMMENT {Invalid Subtree as it Requires More Components of a Type than in System}   
+            \STATE $nFailed[childC] = nFailed[childC] + 1;$
+            \STATE append $|$ to $\beta_{childC};$ \COMMENT {Expend a Component}
+            \STATE $subTreeRate = subTreeRate * \phi_{parC,\; childC};$ \COMMENT {Update SubTree Rate}
+          \ELSE
+           \STATE append $parC$ to $\beta_{childC};$ \COMMENT{Mark Could Have Failed, But Did Not Fail}
+         \ENDIF
+       \ENDIF
+      \ENDFOR
     \ENDFOR
-  \ENDFOR
-  \FOR{$s \in S$}
-    \IF{$S[s] > $redundancy($s$)}
-      \STATE goto line 3$;$ \COMMENT{SubTree is invalid because it has more components than in the system}
+    \IF{AtleastOneChildAdded}
+      \STATE GrowSubTree($nextLevel,\, nFailed,\, \beta,\, subTreeRate$); \COMMENT {SubTree Can Be Grown Further}
+    \ELSE
+      \STATE ProcessRates($nFailed,\, \beta,\, subTreeRate$); \COMMENT {SubTree is Stunted}
     \ENDIF
-  \ENDFOR
-  \IF{AtleastOneChildAdded}
-  \STATE GrowSubTrees($nl,S,\beta,r$); \COMMENT {Grow the SubTree further}
-  \ELSE
-  \STATE ProcessRates($l,S,\beta,r$); \COMMENT {A stunted SubTree's rate is calculated and then it is discarded}
-  \ENDIF
 \ENDFOR
 \end{algorithmic}
 \end{algorithm}
