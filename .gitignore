@@ -1,5 +1,7 @@
 # Ignore any files and directories
 *
+*.*
+*/*
 
 # Except for specific extensions
 !.gitignore
