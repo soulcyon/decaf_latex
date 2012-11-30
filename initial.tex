@@ -49,7 +49,7 @@
               \COMMENT {invalid subtree, requires more comps than total}
             \ENDIF 
             \STATE \VARNAME{nFailed}[\VARNAME{childC}] = \VARNAME{nFailed}[\VARNAME{childC}] + 1;
-            \STATE append $|$ to  \VARNAME{BFHist}[\VARNAME{comp}]; \COMMENT {signifies comp has failed}
+            \STATE append $|$ to \VARNAME{BFHist}[\VARNAME{comp}]; \COMMENT {signifies comp has failed}
             \STATE $\VARNAME{subTreeRate} = \VARNAME{subTreeRate} * \phi_{parentC,\; childC};$ 
             \\ \COMMENT {update rate with $\phi$}
           \ELSE
@@ -73,17 +73,17 @@
 \caption{ProcessRates(\VARNAME{nFailed}, \VARNAME{BFHist}, \VARNAME{subTreeRate}, \VARNAME{rootC})}
 \label{alg:processrates}
 \begin{algorithmic}[1]
-\FOR { $\VARNAME{x} \in \VARNAME{Q}$ }
+\FOR {$\VARNAME{x} \in \VARNAME{Q}$ }
   \STATE $\VARNAME{y} = \VARNAME{x} + \VARNAME{nFailed};$
-  \STATE $\VARNAME{env} = $Environment$(\VARNAME{x});$  
-  \IF { $Valid State(\VARNAME{y})$ }
-    \STATE $\VARNAME{n} = $Redundancy$(\VARNAME{rootC}) - \VARNAME{x}[\VARNAME{rootC}];$
+  \STATE $\VARNAME{env} = \:$Environment$(\VARNAME{x});$  
+  \IF {Valid State($\VARNAME{y})$ }
+    \STATE $\VARNAME{n} = \:$Redundancy$(\VARNAME{rootC}) - \VARNAME{x}[\VARNAME{rootC}];$
     \STATE $\VARNAME{rootFailureRate} = \VARNAME{n} * \lambda_{\VARNAME{rootC},\; \VARNAME{env}}\,;$
     \STATE $\VARNAME{complementRate} = 1;$ \COMMENT{complement rate of comps that could have failed}
-    \FOR { $\VARNAME{comp} \in \{\VARNAME{Components}\}$ }
-      \STATE $\VARNAME{compsAvailable} =  $Redundancy$(\VARNAME{comp}) - \VARNAME{x}[\VARNAME{comp}];$
-      \FOR { $\VARNAME{parentC} \in \VARNAME{BFHist}[\VARNAME{comp}]$ }
-        \IF { \VARNAME{parentC} == $|$}
+    \FOR {$\VARNAME{comp} \in \{\VARNAME{Components}\}$ }
+      \STATE $\VARNAME{compsAvailable} = \:$Redundancy$(\VARNAME{comp}) - \VARNAME{x}[\VARNAME{comp}];$
+      \FOR {$\VARNAME{parentC} \in \VARNAME{BFHist}[\VARNAME{comp}]$ }
+        \IF {\VARNAME{parentC} == $|$}
           \STATE $\VARNAME{compsAvailable} = \VARNAME{compsAvailable} - 1;$
         \ELSIF {$\VARNAME{compsAvailable} > 0$} 
           \STATE $\VARNAME{complementRate} = \VARNAME{complementRate} * (1 - \phi_{parentC,\; comp});$
