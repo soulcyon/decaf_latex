@@ -14,20 +14,19 @@
 \caption{SeedSubTrees($\Gamma$)}
 \label{alg:seedsubtrees}
 \begin{algorithmic}[1]
-\FOR{\VARNAME{comp} $\in$ \{\VARNAME{Components}\}}
-   \STATE \VARNAME{level} = [ ]; \COMMENT {dynamic array of failed components at subTree level}
-   \STATE \VARNAME{nFailed} = (0,0,...,0); \COMMENT {counts failed components}
-   \STATE \VARNAME{BFHist} = $\{$Array of linked lists $\}$; 
-   \\ \COMMENT {breadth first history of subTrees, array is indexed by component, stores parent in linked list for each component}
-   %\STATE $\Gamma Cache = \{$Array of Size $2 ^{|\Gamma_{comp}|}\};$ \COMMENT {Stores All Possible Subsets of $\Gamma_{comp}$} 
-   \STATE 
-   \IF{(NotEmpty($\Gamma_{\VARNAME{comp}}$))}
-   	\STATE append \VARNAME{comp} to \VARNAME{level};
-    \STATE \VARNAME{nFailed}[\VARNAME{comp}] = 1;
-    %\STATE $\Gamma Cache_{comp} = \mathcal{P}(\Gamma_{comp});$ \COMMENT{Power Set (Ordered Set) is Cached}
-    \STATE append $|$ to  \VARNAME{BFHist}[\VARNAME{comp}]; \COMMENT {signifies comp has failed}
-    \STATE AddSubTreeLevel(\VARNAME{level}, \VARNAME{nFailed}, \VARNAME{BFHist}, 1);
-   \ENDIF
+\FOR{\VARNAME{comp} $\in$ \VARNAME{compSet}}
+  \IF{(Empty($\Gamma_{\VARNAME{comp}}$))}
+    \STATE continue;
+  \ENDIF
+  \STATE \VARNAME{level} = [ ]; \COMMENT {dynamic array of failed components at subTree level}
+  \STATE \VARNAME{nFailed} = $(0, 0, \ldots, 0)$; \COMMENT {counts failed components}
+  \STATE \VARNAME{BFHist} = $ (\{\}, \{\}, \ldots, \{\}) $; \COMMENT {an array of linked lists that keeps a breadth first history of subTrees, array is indexed by component, linked list for each component stores parents in breadth first order}
+  %\STATE $\Gamma Cache = \{$Array of Size $2 ^{|\Gamma_{comp}|}\};$ \COMMENT {Stores All Possible Subsets of $\Gamma_{comp}$} 
+  \STATE add \VARNAME{comp} to \VARNAME{level};
+  \STATE \VARNAME{nFailed}[\VARNAME{comp}] = 1;
+  %\STATE $\Gamma Cache_{comp} = \mathcal{P}(\Gamma_{comp});$ \COMMENT{Power Set (Ordered Set) is Cached}
+  \STATE add \# to  \VARNAME{BFHist}[\VARNAME{comp}]; \COMMENT {signifies one component of type comp has failed}
+  \STATE AddSubTreeLevel(\VARNAME{level}, \VARNAME{nFailed}, \VARNAME{BFHist}, 1, \VARNAME{comp});
 \ENDFOR
 \end{algorithmic}
 \end{algorithm}
@@ -39,31 +38,31 @@
 \STATE \VARNAME{nextLevelPossibilities} = $\bigtimes\limits_{i\,=\,1}^{|level|}\mathcal{P}(\Gamma_{level[i]});$ 
 \\ \COMMENT{Cartesian Product (Power Sets (Ordered Set))}
   \FOR{\VARNAME{oneNextLevelPossibility} $\in$ \VARNAME{nextLevelPossibilities}}
-    \STATE \VARNAME{nextLevel} = \VARNAME{oneNextLevelPossibility}; %\COMMENT{Next Level of SubTree}
-    \STATE
+    \STATE \VARNAME{childAddedFlag} = False;
     \FOR{\VARNAME{parentC} $\in$ \VARNAME{level}}
       \FOR{\VARNAME{childC} $\in$ $\Gamma_{\VARNAME{parentC}}$}
-          \IF{\VARNAME{childC} $\in$ \VARNAME{nextLevel}}  
+          \IF{\VARNAME{childC} $\in$ \VARNAME{oneNextLevelPossibility}}  
             \IF{\VARNAME{nFailed}[\VARNAME{childC}] == Redundancy(\VARNAME{childC})}
               \STATE goto line 3; 
-              \COMMENT {invalid subtree, requires more comps than total}
+              \COMMENT {invalid subtree, requires more comps than available in system}
             \ENDIF 
+            \STATE \VARNAME{childAddedFlag} = True;
             \STATE \VARNAME{nFailed}[\VARNAME{childC}] = \VARNAME{nFailed}[\VARNAME{childC}] + 1;
-            \STATE append $|$ to \VARNAME{BFHist}[\VARNAME{comp}]; \COMMENT {signifies comp has failed}
+            \STATE add \# to \VARNAME{BFHist}[\VARNAME{comp}]; \COMMENT {signifies one component of type comp has failed}
             \STATE $\VARNAME{subTreeRate} = \VARNAME{subTreeRate} * \phi_{parentC,\; childC};$ 
             \\ \COMMENT {update rate with $\phi$}
           \ELSE
-           \STATE append \VARNAME{parentC} to \VARNAME{BFHist}[\VARNAME{childC}]; \COMMENT {signifies comp has not failed}
+           \STATE add \VARNAME{parentC} to \VARNAME{BFHist}[\VARNAME{childC}]; \COMMENT {signifies one component of type comp has not failed}
          \ENDIF
       \ENDFOR
     \ENDFOR
     \STATE
-    \IF{Children Added}
-      \STATE AddSubTreeLevel(\VARNAME{level}, \VARNAME{nFailed}, \VARNAME{BFHist}, \VARNAME{subTreeRate}, \VARNAME{rootC}); 
+    \IF{\VARNAME{childAddedFlag}}
+      \STATE AddSubTreeLevel(\VARNAME{oneNextLevelPossibility}, \VARNAME{nFailed}, \VARNAME{BFHist}, \VARNAME{subTreeRate}, \VARNAME{rootC}); 
       \\ \COMMENT {subTree can be grown further}
     \ELSE
       \STATE ProcessRates(\VARNAME{nFailed}, \VARNAME{BFHist}, \VARNAME{subTreeRate}, \VARNAME{rootC});
-      \\ \COMMENT {subTree is stunted}
+      \\ \COMMENT {current subTree is completed because it cannot be grown further}
     \ENDIF
 \ENDFOR
 \end{algorithmic}
@@ -74,23 +73,29 @@
 \label{alg:processrates}
 \begin{algorithmic}[1]
 \FOR{$\VARNAME{x} \in \VARNAME{Q}$}
-  \STATE $\VARNAME{y} = \VARNAME{x} + \VARNAME{nFailed};$
-  \STATE $\VARNAME{env} = \:$Environment$(\VARNAME{x});$  
-  \IF{Valid State($\VARNAME{y})$ }
-    \STATE $\VARNAME{n} = \:$Redundancy$(\VARNAME{rootC}) - \VARNAME{x}[\VARNAME{rootC}];$
-    \STATE $\VARNAME{rootFailureRate} = \VARNAME{n} * \lambda_{\VARNAME{rootC},\; \VARNAME{env}}\,;$
-    \STATE $\VARNAME{complementRate} = 1;$ \COMMENT{complement rate of comps that could have failed}
-    \FOR{$\VARNAME{comp} \in \{\VARNAME{Components}\}$}
-      \STATE $\VARNAME{compsAvailable} = \:$Redundancy$(\VARNAME{comp}) - \VARNAME{x}[\VARNAME{comp}];$
-      \FOR{$\VARNAME{parentC} \in \VARNAME{BFHist}[\VARNAME{comp}]$}
-        \IF{\VARNAME{parentC} == $|$}
-          \STATE $\VARNAME{compsAvailable} = \VARNAME{compsAvailable} - 1;$
-        \ELSIF {$\VARNAME{compsAvailable} > 0$} 
-          \STATE $\VARNAME{complementRate} = \VARNAME{complementRate} * (1 - \phi_{parentC,\; comp});$
-        \ENDIF
-      \ENDFOR
-    \ENDFOR
+  \STATE \VARNAME{y} = \VARNAME{x};
+  \STATE \VARNAME{e} = Environment(x);
+  \FOR{\VARNAME{comp} $\in$ \VARNAME{compSet}}
+  \STATE \VARNAME{y}[\VARNAME{comp}] = \VARNAME{y}[\VARNAME{comp}] + \VARNAME{nFailed}[\VARNAME{comp}];
+  \ENDFOR
+  % \STATE Environment$(\VARNAME{y}) = \:$Environment$(\VARNAME{x});$
+  \IF{\VARNAME{y} is not a valid state}
+  \STATE continue;
   \ENDIF
+  % \STATE $\VARNAME{n} = \:$Redundancy$(\VARNAME{rootC}) - \VARNAME{x}[\VARNAME{rootC}];$
+  % \STATE $\VARNAME{rootFailureRate} = \VARNAME{n} * \lambda_{\VARNAME{rootC},\; \VARNAME{env}}\,;$
+  \STATE $\VARNAME{rootFailureRate} = \:($Redundancy$(\VARNAME{rootC}) - \VARNAME{x}[\VARNAME{rootC}]) * \lambda_{\VARNAME{rootC},\; \VARNAME{e}}\,;$
+  \STATE $\VARNAME{cumNotFailedProb} = 1;$ \COMMENT{cumulative probability of comps that could have failed but did not}
+  \FOR{$\VARNAME{comp} \in \{\VARNAME{Components}\}$}
+    \STATE $\VARNAME{compsAvailable} = \:$Redundancy$(\VARNAME{comp}) - \VARNAME{x}[\VARNAME{comp}];$
+    \FOR{$\VARNAME{parentC} \in \VARNAME{BFHist}[\VARNAME{comp}]$}
+      \IF{\VARNAME{parentC} == $|$}
+        \STATE $\VARNAME{compsAvailable} = \VARNAME{compsAvailable} - 1;$
+      \ELSIF {$\VARNAME{compsAvailable} > 0$} 
+        \STATE $\VARNAME{cumNotFailedProb} = \VARNAME{cumNotFailedProb} * (1 - \phi_{parentC,\; comp});$
+      \ENDIF
+    \ENDFOR
+  \ENDFOR
   \STATE $\VARNAME{Q}(\VARNAME{x},\VARNAME{y}) = \VARNAME{rootFailureRate} * \VARNAME{subTreeRate} * \VARNAME{complementRate};$
 \ENDFOR
 \end{algorithmic}
