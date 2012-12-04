@@ -38,7 +38,7 @@
 \STATE \VARNAME{nextLevelPossibilities} = $\bigtimes\limits_{i\,=\,1}^{|level|}\mathcal{P}(\Gamma_{level[i]});$ 
 \\ \COMMENT{Cartesian Product (Power Sets (Ordered Set))}
   \FOR{\VARNAME{oneNextLevelPossibility} $\in$ \VARNAME{nextLevelPossibilities}}
-    \STATE \VARNAME{childAddedFlag} = False;
+    \STATE \VARNAME{addedChildFlag} = False;
     \FOR{\VARNAME{parentC} $\in$ \VARNAME{level}}
       \FOR{\VARNAME{childC} $\in$ $\Gamma_{\VARNAME{parentC}}$}
           \IF{\VARNAME{childC} $\in$ \VARNAME{oneNextLevelPossibility}}  
@@ -46,7 +46,7 @@
               \STATE goto line 3; 
               \COMMENT {invalid subtree, requires more comps than available in system}
             \ENDIF 
-            \STATE \VARNAME{childAddedFlag} = True;
+            \STATE \VARNAME{addedChildFlag} = True;
             \STATE \VARNAME{nFailed}[\VARNAME{childC}] = \VARNAME{nFailed}[\VARNAME{childC}] + 1;
             \STATE add \# to \VARNAME{BFHist}[\VARNAME{comp}]; \COMMENT {signifies one component of type comp has failed}
             \STATE $\VARNAME{subTreeRate} = \VARNAME{subTreeRate} * \phi_{parentC,\; childC};$ 
@@ -57,7 +57,7 @@
       \ENDFOR
     \ENDFOR
     \STATE
-    \IF{\VARNAME{childAddedFlag}}
+    \IF{\VARNAME{addedChildFlag}}
       \STATE AddSubTreeLevel(\VARNAME{oneNextLevelPossibility}, \VARNAME{nFailed}, \VARNAME{BFHist}, \VARNAME{subTreeRate}, \VARNAME{rootC}); 
       \\ \COMMENT {subTree can be grown further}
     \ELSE
@@ -96,7 +96,7 @@
       \ENDIF
     \ENDFOR
   \ENDFOR
-  \STATE $\VARNAME{Q}(\VARNAME{x},\VARNAME{y}) = \VARNAME{rootFailureRate} * \VARNAME{subTreeRate} * \VARNAME{complementRate};$
+  \STATE $\VARNAME{Q}(\VARNAME{x},\VARNAME{y}) = \VARNAME{rootFailureRate} * \VARNAME{subTreeRate} * \VARNAME{cumNotFailedProb};$
 \ENDFOR
 \end{algorithmic}
 \end{algorithm}
