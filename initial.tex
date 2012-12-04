@@ -73,10 +73,10 @@
 \label{alg:processrates}
 \begin{algorithmic}[1]
 \FOR{$\VARNAME{x} \in \VARNAME{Q}$}
-  \STATE \VARNAME{y} = \VARNAME{x};
   \STATE \VARNAME{e} = Environment(x);
+  \STATE Initialize \VARNAME{y} as an empty state with environment \VARNAME{e};
   \FOR{\VARNAME{comp} $\in$ \VARNAME{compSet}}
-  \STATE \VARNAME{y}[\VARNAME{comp}] = \VARNAME{y}[\VARNAME{comp}] + \VARNAME{nFailed}[\VARNAME{comp}];
+  \STATE \VARNAME{y}[\VARNAME{comp}] = \VARNAME{x}[\VARNAME{comp}] + \VARNAME{nFailed}[\VARNAME{comp}];
   \ENDFOR
   % \STATE Environment$(\VARNAME{y}) = \:$Environment$(\VARNAME{x});$
   \IF{\VARNAME{y} is not a valid state}
@@ -89,7 +89,7 @@
   \FOR{$\VARNAME{comp} \in \{\VARNAME{Components}\}$}
     \STATE $\VARNAME{compsAvailable} = \:$Redundancy$(\VARNAME{comp}) - \VARNAME{x}[\VARNAME{comp}];$
     \FOR{$\VARNAME{parentC} \in \VARNAME{BFHist}[\VARNAME{comp}]$}
-      \IF{\VARNAME{parentC} == $|$}
+      \IF{\VARNAME{parentC} == \#}
         \STATE $\VARNAME{compsAvailable} = \VARNAME{compsAvailable} - 1;$
       \ELSIF {$\VARNAME{compsAvailable} > 0$} 
         \STATE $\VARNAME{cumNotFailedProb} = \VARNAME{cumNotFailedProb} * (1 - \phi_{parentC,\; comp});$
