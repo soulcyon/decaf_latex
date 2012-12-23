@@ -12,7 +12,8 @@
 
 \begin{algorithm}
 \caption{SeedSubTrees($\Gamma$)}
-\label{alg:seedsubtrees}
+\label{alg:SeedSubTrees}
+where $\Gamma$ is an ordered set that describes which components can cause which other components to fail\\
 \begin{algorithmic}[1]
 \FOR{\VARNAME{rootC} $\in$ \VARNAME{compSet}}
   \IF{(Empty($\Gamma_{\VARNAME{rootC}}$))}
@@ -22,6 +23,7 @@
   \STATE \VARNAME{nFailed} = $(0, 0, \ldots, 0)$; \COMMENT {counts failed components of each type}
   \STATE \VARNAME{BFHist} = $ ((\,), (\,), \ldots, (\,)) $; \COMMENT {an array of linked lists that keeps a breadth-first history of subTrees, array is indexed by component type, linked list for each component type stores parents in breadth-first order}
   %\STATE $\Gamma Cache = \{$Array of Size $2 ^{|\Gamma_{rootC}|}\};$ \COMMENT {Stores All Possible Subsets of $\Gamma_{rootC}$} 
+  %\STATE % empty line %
   \STATE add \VARNAME{rootC} to \VARNAME{level};
   \STATE \VARNAME{nFailed}[\VARNAME{rootC}] = 1;
   %\STATE $\Gamma Cache_{rootC} = \mathcal{P}(\Gamma_{rootC});$ \COMMENT{Power Set (Ordered Set) is Cached}
@@ -33,7 +35,8 @@
 
 \begin{algorithm}
 \caption{AddSubTreeLevel(\VARNAME{level}, \VARNAME{nFailed}, \VARNAME{BFHist}, \VARNAME{subTreeRate}, \VARNAME{rootC})}
-\label{alg:growsubtree}
+\label{alg:AddSubTreeLevel}
+where \VARNAME{level} describes failed components, \\\VARNAME{nFailed} counts failed components by type, \\\VARNAME{BFHist} is Breadth First History, \\\VARNAME{subTreeRate} is a cumulative probability of comps that failed, \\\VARNAME{rootC} is the root component of the current subtree \\
 \begin{algorithmic}[1]
 \STATE \VARNAME{nextLevelPossibilities} = $\bigtimes\limits_{i\,=\,1}^{|level|}\mathcal{P}(\Gamma_{level[i]});$
 \\ \COMMENT{Builds set of all possible nodes in next level as Cartesian product of powersets of $\Gamma$'s}
@@ -56,7 +59,7 @@
          \ENDIF
       \ENDFOR
     \ENDFOR
-    \STATE
+    %\STATE % empty line %
     \IF{\VARNAME{addedChildFlag}}
       \STATE AddSubTreeLevel(\VARNAME{oneNextLevelPossibility}, \VARNAME{nFailed}, \VARNAME{BFHist}, \VARNAME{subTreeRate}, \VARNAME{rootC}); 
       \\ \COMMENT {subTree can be grown further}
@@ -70,23 +73,12 @@
 
 \begin{algorithm}
 \caption{ComputeTreeRates(\VARNAME{nFailed}, \VARNAME{BFHist}, \VARNAME{subTreeRate}, \VARNAME{rootC})}
-\label{alg:processrates}
+\label{alg:computeTreeRates}
+where \VARNAME{level} describes failed components, \\\VARNAME{nFailed} counts failed components by type, \\\VARNAME{BFHist} is Breadth First History, \\\VARNAME{subTreeRate} is a cumulative probability of comps that failed, \\\VARNAME{rootC} is the root component of the current subtree \\
 \begin{algorithmic}[1]
-\FOR{$\VARNAME{x} \in \VARNAME{Q}$}
-  \STATE \VARNAME{e} = Environment(\VARNAME{x});
-  \STATE Initialize \VARNAME{y} as a state with no components failed and environment \VARNAME{e};
-  \FOR{\VARNAME{comp} $\in$ \VARNAME{compSet}}
-  \STATE \VARNAME{y}[\VARNAME{comp}] = \VARNAME{x}[\VARNAME{comp}] + \VARNAME{nFailed}[\VARNAME{comp}];
-  \ENDFOR
-  % \STATE Environment$(\VARNAME{y}) = \:$Environment$(\VARNAME{x});$
-  \IF{\VARNAME{y} is not a valid state}
-  \STATE continue;
-  \ENDIF
-  % \STATE $\VARNAME{n} = \:$Redundancy$(\VARNAME{rootC}) - \VARNAME{x}[\VARNAME{rootC}];$
-  % \STATE $\VARNAME{rootFailureRate} = \VARNAME{n} * \lambda_{\VARNAME{rootC},\; \VARNAME{env}}\,;$
-  \STATE $\VARNAME{rootFailureRate} = \:($Redundancy$(\VARNAME{rootC}) - \VARNAME{x}[\VARNAME{rootC}]) * \lambda_{\VARNAME{rootC},\; \VARNAME{e}}\,;$
+\FOR{$\VARNAME{x'} \in \VARNAME{S'}$}
   \STATE $\VARNAME{prodNotFailedProb} = 1;$ \COMMENT{cumulative probability of comps that could have failed but did not}
-  \FOR{$\VARNAME{comp} \in \{\VARNAME{compSet}\}$}
+  \FOR{$\VARNAME{comp} \in \VARNAME{compSet}$}
     \STATE $\VARNAME{compsAvailable} = \:$Redundancy$(\VARNAME{comp}) - \VARNAME{x}[\VARNAME{comp}];$
     \FOR{$\VARNAME{parentC} \in \VARNAME{BFHist}[\VARNAME{comp}]$}
       \IF{\VARNAME{parentC} == @}
@@ -95,6 +87,20 @@
         \STATE $\VARNAME{prodNotFailedProb} = \VARNAME{prodNotFailedProb} * (1 - \phi_{parentC,\; comp});$
       \ENDIF
     \ENDFOR
+  \ENDFOR
+  %\STATE % empty line %
+  \FOR{$\VARNAME{e} \in \VARNAME{envSet}$}
+    \STATE Initialize \VARNAME{y} as a state with no components failed and environment \VARNAME{e};
+    \FOR{\VARNAME{comp} $\in$ \VARNAME{compSet}}
+    \STATE \VARNAME{y}[\VARNAME{comp}] = \VARNAME{x}[\VARNAME{comp}] + \VARNAME{nFailed}[\VARNAME{comp}];
+    \ENDFOR
+    % \STATE Environment$(\VARNAME{y}) = \:$Environment$(\VARNAME{x});$
+    \IF{\VARNAME{y} is not a valid state}
+    \STATE continue;
+    \ENDIF
+    % \STATE $\VARNAME{n} = \:$Redundancy$(\VARNAME{rootC}) - \VARNAME{x}[\VARNAME{rootC}];$
+    % \STATE $\VARNAME{rootFailureRate} = \VARNAME{n} * \lambda_{\VARNAME{rootC},\; \VARNAME{env}}\,;$
+    \STATE $\VARNAME{rootFailureRate} = \:($Redundancy$(\VARNAME{rootC}) - \VARNAME{x}[\VARNAME{rootC}]) * \lambda_{\VARNAME{rootC},\; \VARNAME{e}}\,;$
   \ENDFOR
   \STATE $\VARNAME{Q}(\VARNAME{x},\VARNAME{y}) = \VARNAME{Q}(\VARNAME{x},\VARNAME{y}) + \VARNAME{rootFailureRate} * \VARNAME{subTreeRate} * \VARNAME{prodNotFailedProb};$
 \ENDFOR
