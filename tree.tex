@@ -1,0 +1,25 @@
+\documentclass[12pt]{article}
+
+\usepackage{vaucanson-g}
+
+\begin{document}
+
+\begin{VCPicture}{(-4,-12)(12,-2)}
+
+\StateVar[A, 1]{(0,0)}{A0}
+\StateVar[B, 2]{(-2,-2)}{B1} \StateVar[C, 3]{(2,-2)}{C1}
+\StateVar[A, 4]{(-4,-4)}{A2} \StateVar[C, 5]{(0,-4)}{C2} 
+\StateVar[A, 6]{(-2,-6)}{A3} \StateVar[B, 7]{(2,-6)}{B3}
+\StateVar[A, 8]{(0,-8)}{A4} \StateVar[C, 9]{(4,-8)}{C4}
+\StateVar[B, 10]{(-2,-10)}{B5} \StateVar[C, 11]{(2,-10)}{C5}
+
+% Set up so that after each line all parameters are at their default setting
+\EdgeR{A0}{B1}{} \ChgEdgeLineStyle{dashed} \EdgeL{A0}{C1}{} \RstEdgeLineStyle
+\ChgEdgeLineStyle{dashed} \EdgeR{B1}{A2}{} \RstEdgeLineStyle \EdgeL{B1}{C2}{}
+\ChgEdgeLineStyle{dashed} \EdgeR{C2}{A3}{} \RstEdgeLineStyle \EdgeL{C2}{B3}{}
+\EdgeR{B3}{A4}{}  \ChgEdgeLineStyle{dashed} \EdgeL{B3}{C4}{} \RstEdgeLineStyle
+\ChgEdgeLineStyle{dashed} \EdgeR{A4}{B5}{} \EdgeL{A4}{C5}{} \RstEdgeLineStyle
+
+\end{VCPicture}
+
+\end{document}
