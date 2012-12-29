@@ -1,17 +1,19 @@
-\documentclass[12pt]{article}
+\documentclass{article}
 
 \usepackage{vaucanson-g}
+\usepackage{tikz}
+\usetikzlibrary{matrix}
 
 \begin{document}
 
-\begin{VCPicture}{(-4,-12)(12,-2)}
+\begin{VCPicture}{(0,-12)(16,-2)}
 
-\StateVar[A, 1]{(0,0)}{A0}
-\StateVar[B, 2]{(-2,-2)}{B1} \StateVar[C, 3]{(2,-2)}{C1}
-\StateVar[A, 4]{(-4,-4)}{A2} \StateVar[C, 5]{(0,-4)}{C2} 
-\StateVar[A, 6]{(-2,-6)}{A3} \StateVar[B, 7]{(2,-6)}{B3}
-\StateVar[A, 8]{(0,-8)}{A4} \StateVar[C, 9]{(4,-8)}{C4}
-\StateVar[B, 10]{(-2,-10)}{B5} \StateVar[C, 11]{(2,-10)}{C5}
+\StateVar[A, 1]{(4,0)}{A0}
+\StateVar[B, 2]{(2,-2)}{B1} \StateVar[C, 3]{(6,-2)}{C1}
+\StateVar[A, 4]{(0,-4)}{A2} \StateVar[C, 5]{(4,-4)}{C2} 
+\StateVar[A, 6]{(2,-6)}{A3} \StateVar[B, 7]{(6,-6)}{B3}
+\StateVar[A, 8]{(4,-8)}{A4} \StateVar[C, 9]{(8,-8)}{C4}
+\StateVar[B, 10]{(2,-10)}{B5} \StateVar[C, 11]{(6,-10)}{C5}
 
 % Set up so that after each line all parameters are at their default setting
 \EdgeR{A0}{B1}{} \ChgEdgeLineStyle{dashed} \EdgeL{A0}{C1}{} \RstEdgeLineStyle
@@ -21,5 +23,26 @@
 \ChgEdgeLineStyle{dashed} \EdgeR{A4}{B5}{} \EdgeL{A4}{C5}{} \RstEdgeLineStyle
 
 \end{VCPicture}
+
+\begin{tikzpicture}[scale = 2.5, every node/.style = {scale = 2.5}]
+
+\matrix (m) [matrix of nodes,
+nodes in empty cells,
+column sep = 0, row sep = 0,
+column 2/.style = {nodes = {text width = 1.75cm, align = left, minimum width = 2cm}}]
+{
+	\textit{A} & \textit{@ B C @} \\
+	\textit{B} & \textit{@ @ A} \\
+	\textit{C} & \textit{A @ B A} \\
+};
+
+\draw (m-1-1.north west) rectangle (m-3-1.south east);
+\draw (m-1-1.north west) rectangle (m-3-2.south east);
+
+\foreach \x in {1,2} {
+	\draw (m-\x-1.south west) -- (m-\x-2.south east);
+};
+
+\end{tikzpicture}
 
 \end{document}
