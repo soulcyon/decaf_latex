@@ -8,12 +8,12 @@
 
 \begin{VCPicture}{(0,-12)(16,-2)}
 
-\StateVar[A, 1]{(4,0)}{A0}
-\StateVar[B, 2]{(2,-2)}{B1} \StateVar[C, 3]{(6,-2)}{C1}
-\StateVar[A, 4]{(0,-4)}{A2} \StateVar[C, 5]{(4,-4)}{C2} 
-\StateVar[A, 6]{(2,-6)}{A3} \StateVar[B, 7]{(6,-6)}{B3}
-\StateVar[A, 8]{(4,-8)}{A4} \StateVar[C, 9]{(8,-8)}{C4}
-\StateVar[B, 10]{(2,-10)}{B5} \StateVar[C, 11]{(6,-10)}{C5}
+\StateVar[A-1]{(4,0)}{A0}
+\StateVar[B-2]{(2,-2)}{B1} \StateVar[C-3]{(6,-2)}{C1}
+\StateVar[A-4]{(0,-4)}{A2} \StateVar[C-5]{(4,-4)}{C2} 
+\StateVar[A-6]{(2,-6)}{A3} \StateVar[B-7]{(6,-6)}{B3}
+\StateVar[A-8]{(4,-8)}{A4} \StateVar[C-9]{(8,-8)}{C4}
+\StateVar[B-10]{(2,-10)}{B5} \StateVar[C-11]{(6,-10)}{C5}
 
 % Set up so that after each line all parameters are at their default setting
 \EdgeR{A0}{B1}{} \ChgEdgeLineStyle{dashed} \EdgeL{A0}{C1}{} \RstEdgeLineStyle
@@ -29,18 +29,18 @@
 \matrix (m) [matrix of nodes,
 nodes in empty cells,
 column sep = 0, row sep = 0,
-column 2/.style = {nodes = {text width = 1.75cm, align = left, minimum width = 2cm}}]
+column 2/.style = {nodes = {text width = 5cm, align = left, minimum width = 5cm}}]
 {
-	\textit{A} & \textit{@ B C @} \\
-	\textit{B} & \textit{@ @ A} \\
-	\textit{C} & \textit{A @ B A} \\
+	\textit{A} & @ -- 1 \ \textit{B} -- 2 \ \textit{C} -- 5 \ @ -- 8 \\
+	\textit{B} & @ -- 2 \ @ -- 7 \ \textit{A} -- 8 \\
+	\textit{C} & \textit{A} -- 1 \ @ -- 5 \ \textit{B} -- 7 \ \textit{A} -- 8 \\
 };
 
 \draw (m-1-1.north west) rectangle (m-3-1.south east);
 \draw (m-1-1.north west) rectangle (m-3-2.south east);
 
 \foreach \x in {1,2} {
-	\draw (m-\x-1.south west) -- (m-\x-2.south east);
+	\draw (m-\x-1.south west)  --  (m-\x-2.south east);
 };
 
 \end{tikzpicture}
