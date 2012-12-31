@@ -4,16 +4,18 @@
 \usepackage{tikz}
 \usetikzlibrary{matrix}
 
+\newcommand{\nodelabel}[2]{\mbox{$#1$-$#2$}}
+
 \begin{document}
 
 \begin{VCPicture}{(0,-12)(16,-2)}
 
-\StateVar[A-1]{(4,0)}{A0}
-\StateVar[B-2]{(2,-2)}{B1} \StateVar[C-3]{(6,-2)}{C1}
-\StateVar[A-4]{(0,-4)}{A2} \StateVar[C-5]{(4,-4)}{C2} 
-\StateVar[A-6]{(2,-6)}{A3} \StateVar[B-7]{(6,-6)}{B3}
-\StateVar[A-8]{(4,-8)}{A4} \StateVar[C-9]{(8,-8)}{C4}
-\StateVar[B-10]{(2,-10)}{B5} \StateVar[C-11]{(6,-10)}{C5}
+\StateVar[\nodelabel{A}{1}]{(4,0)}{A0}
+\FinalStateVar[\nodelabel{B}{2}]{(2,-2)}{B1} \StateVar[\nodelabel{C}{3}]{(6,-2)}{C1}
+\StateVar[\nodelabel{A}{4}]{(0,-4)}{A2} \FinalStateVar[\nodelabel{C}{5}]{(4,-4)}{C2} 
+\StateVar[\nodelabel{A}{6}]{(2,-6)}{A3} \FinalStateVar[\nodelabel{B}{7}]{(6,-6)}{B3}
+\FinalStateVar[\nodelabel{A}{8}]{(4,-8)}{A4} \StateVar[\nodelabel{C}{9}]{(8,-8)}{C4}
+\StateVar[\nodelabel{B}{10}]{(2,-10)}{B5} \StateVar[\nodelabel{C}{11}]{(6,-10)}{C5}
 
 % Set up so that after each line all parameters are at their default setting
 \EdgeR{A0}{B1}{} \ChgEdgeLineStyle{dashed} \EdgeL{A0}{C1}{} \RstEdgeLineStyle
@@ -29,11 +31,11 @@
 \matrix (m) [matrix of nodes,
 nodes in empty cells,
 column sep = 0, row sep = 0,
-column 2/.style = {nodes = {text width = 5cm, align = left, minimum width = 5cm}}]
+column 2/.style = {nodes = {text width = 3.5cm, align = left, minimum width = 3.5cm}}]
 {
-	\textit{A} & @ -- 1 \ \textit{B} -- 2 \ \textit{C} -- 5 \ @ -- 8 \\
-	\textit{B} & @ -- 2 \ @ -- 7 \ \textit{A} -- 8 \\
-	\textit{C} & \textit{A} -- 1 \ @ -- 5 \ \textit{B} -- 7 \ \textit{A} -- 8 \\
+	\textit{A} & \nodelabel{@}{1} \ \nodelabel{B}{2} \ \nodelabel{C}{5} \ \nodelabel{@}{8} \\
+	\textit{B} & \nodelabel{@}{2} \ \nodelabel{@}{7} \ \nodelabel{A}{8} \\
+	\textit{C} & \nodelabel{A}{1} \ \nodelabel{@}{5} \ \nodelabel{B}{7} \ \nodelabel{A}{8} \\
 };
 
 \draw (m-1-1.north west) rectangle (m-3-1.south east);
