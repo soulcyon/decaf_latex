@@ -8,16 +8,18 @@
 
 \begin{document}
 
-\begin{VCPicture}{(0,-12)(16,-2)}
+\begin{VCPicture}{(-1,-12)(10,0)}
 
-\StateVar[\nodelabel{A}{1}]{(4,0)}{A0}
-\FinalStateVar[\nodelabel{B}{2}]{(2,-2)}{B1} \StateVar[\nodelabel{C}{3}]{(6,-2)}{C1}
-\StateVar[\nodelabel{A}{4}]{(0,-4)}{A2} \FinalStateVar[\nodelabel{C}{5}]{(4,-4)}{C2} 
-\StateVar[\nodelabel{A}{6}]{(2,-6)}{A3} \FinalStateVar[\nodelabel{B}{7}]{(6,-6)}{B3}
-\FinalStateVar[\nodelabel{A}{8}]{(4,-8)}{A4} \StateVar[\nodelabel{C}{9}]{(8,-8)}{C4}
-\StateVar[\nodelabel{B}{10}]{(2,-10)}{B5} \StateVar[\nodelabel{C}{11}]{(6,-10)}{C5}
+% Set up so that each state needs an explicit line width, line width is only reset at the end of state definition block  
+\ChgStateLineWidth{1.5} \FinalStateVar[\nodelabel{A}{1}]{(4,0)}{A0}
+\ChgStateLineWidth{1.5} \FinalStateVar[\nodelabel{B}{2}]{(2,-2)}{B1} \ChgStateLineWidth{0.3} \StateVar[\nodelabel{C}{3}]{(6,-2)}{C1}
+\ChgStateLineWidth{0.3} \StateVar[\nodelabel{A}{4}]{(0,-4)}{A2} \ChgStateLineWidth{1.5} \FinalStateVar[\nodelabel{C}{5}]{(4,-4)}{C2} 
+\ChgStateLineWidth{0.3} \StateVar[\nodelabel{A}{6}]{(2,-6)}{A3} \ChgStateLineWidth{1.5} \FinalStateVar[\nodelabel{B}{7}]{(6,-6)}{B3}
+\ChgStateLineWidth{1.5} \FinalStateVar[\nodelabel{A}{8}]{(4,-8)}{A4} \ChgStateLineWidth{0.3} \StateVar[\nodelabel{C}{9}]{(8,-8)}{C4}
+\ChgStateLineWidth{0.3} \StateVar[\nodelabel{B}{10}]{(2,-10)}{B5} \ChgStateLineWidth{0.3} \StateVar[\nodelabel{C}{11}]{(6,-10)}{C5}
+\RstStateLineWidth
 
-% Set up so that after each line all parameters are at their default setting
+% Set up so that after each line of tex code all parameters are at their default setting
 \EdgeR{A0}{B1}{} \ChgEdgeLineStyle{dashed} \EdgeL{A0}{C1}{} \RstEdgeLineStyle
 \ChgEdgeLineStyle{dashed} \EdgeR{B1}{A2}{} \RstEdgeLineStyle \EdgeL{B1}{C2}{}
 \ChgEdgeLineStyle{dashed} \EdgeR{C2}{A3}{} \RstEdgeLineStyle \EdgeL{C2}{B3}{}
