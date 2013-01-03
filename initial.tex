@@ -1,5 +1,5 @@
 % TODO 
-% Sasahank's and Nakayama's environmental, repair transitions and numerical optimizations.
+% Sashank's and Nakayama's environmental, repair transitions and numerical optimizations (U/D states).
 % Talk about environment dependent phis ? 
 
 \documentclass[12pt]{article}
@@ -10,13 +10,16 @@
 \usepackage{algorithmic}
 \usepackage{mathabx}
 
-\newcommand{\VARNAME}[1]{\textrm{\it#1}}
+\newcommand{\Varname}[1]{\textrm{\it#1}}
 
 \begin{document}
 
-\title{Title Title Title}
+\title{Working Title}
 \maketitle
 
+% \section{Introduction}
+
+% \section{Model}
 
 \section{Algorithms}
 \label{sec:alg}
@@ -26,70 +29,88 @@ We now provide highly optimized algorithms for generating all possible subTrees 
 Algorithm 1 SeedSubTrees starts the tree generation and initializes the necessary data structures for the recursion in Algorithm 2 AddSubTreeLevel. 
 
 $\Gamma$ describes cascading failures with details about which components can cause which other components to fail. 
-We start by iterating through the model's component set, \VARNAME{compSet} to choose a root component, \VARNAME{rootC} for an initial tree with one node. 
+We start by iterating through the model's component set, \Varname{compSet} to choose a root component, \Varname{rootC} for an initial tree with one node. We then initialize the following data structures: \Varname{level}, a dynamic array to hold all the failed nodes in a level in breadth first order, \Varname{nFailed} a list that counts the number of failed components differentiated by type and \Varname{BFHist} a data structure that is the Breadth First History of a subTree. It is implemented as an array of linked lists indexed by component type that stores parents of both nodes, which did and did not fail in a subTree. \Varname{BFHist} plays the role of a superTree to calculate the complement rates of nodes that did not fail.
 
-We then initialize the following data structures: \VARNAME{level}, a dynamic array to hold all the failed nodes in a level in breadth first order, \VARNAME{nFailed} a list that counts the number of failed components differentiated by type and \VARNAME{BFHist} a data structure that is the Breadth First History of a subTree. It is implemented as an array of linked lists indexed by component type that stores parents of both nodes, which did and did not fail in a subTree. \VARNAME{BFHist} plays the role of a superTree to calculate the complement rates of nodes that did not fail.
+Since the root must fail, we add \Varname{rootC} to \Varname{level}. We use @ to denote when a component has failed. We add @ \Varname{BFHist} at the index of type \Varname{rootC}. We update \Varname{nFailed} as well by setting the counter for type \Varname{rootC} to 1.         
 
-Since the root must fail, we add \VARNAME{rootC} to \VARNAME{level}. We use @ to denote when a component has failed. We add @ \VARNAME{BFHist} at the index of type \VARNAME{rootC}. We update \VARNAME{nFailed} as well by setting the counter for type \VARNAME{rootC} to 1.         
+If a component cannot cause any other components to fail only the trivial subTree of one node can be made. We then evaluate and process this single-node subTree's rate because it cannot be grown further. Otherwise for all types of components that have a nonempty $\Gamma$, or equivalently, can cause other types of components to fail, we call AddSubTreeLevel to proceed with building height-wise larger subTrees. 
 
-If a component cannot cause any other components to fail only the trivial subTree of one node can be made. We then evaluate and process this single-node subTree's rate because it cannot be grown further. Otherwise for all types of components that have a nonempty $\Gamma$, or equivalently, can cause other types of components to fail, we call AddSubTreeLevel to proceed with building larger subTrees.    
+In subTreeRate we only keep track of the cumulative product of failureRates by multiplying $\phi{i, j}$ for all edges from parent \Varname{i} to child \Varname{j} in the subTree. There are no failed nodes that have been triggered in the tree thus far, so we pass 1 to AddSubTreeLevel and ComputeTreeRates.\\
 
 \begin{algorithm}
 \caption{SeedSubTrees($\Gamma$)}
 \label{alg:SeedSubTrees}
 where $\Gamma$ is an ordered set that describes which components can cause which other components to fail\\
 \begin{algorithmic}[1]
-\FOR{\VARNAME{rootC} $\in$ \VARNAME{compSet}}
-  \STATE \VARNAME{level} = [ ]; \COMMENT {dynamic array of failed components at subTree's current level}
-  \STATE \VARNAME{nFailed} = $(0, 0, \ldots, 0)$; \COMMENT {counts failed components of each type}
-  \STATE \VARNAME{BFHist} = $ ((\,), (\,), \ldots, (\,)) $; \COMMENT {an array of linked lists that keeps a breadth-first history of subTrees, array is indexed by component type, linked list for each component type stores parents in breadth-first order}
+\FOR{\Varname{rootC} $\in$ \Varname{compSet}}
+  \STATE \Varname{level} = [ ]; \COMMENT {dynamic array of failed components at subTree's current level}
+  \STATE \Varname{nFailed} = $(0, 0, \ldots, 0)$; \COMMENT {counts failed components of each type}
+  \STATE \Varname{BFHist} = $ ((\,), (\,), \ldots, (\,)) $; \COMMENT {an array of linked lists that keeps a breadth-first history of subTrees, array is indexed by component type, linked list for each component type stores parents in breadth-first order}
   %\STATE $\Gamma Cache = \{$Array of Size $2 ^{|\Gamma_{rootC}|}\};$ \COMMENT {Stores All Possible Subsets of $\Gamma_{rootC}$} 
   %\STATE % empty line %
-  \STATE add \VARNAME{rootC} to \VARNAME{level};
-  \STATE \VARNAME{nFailed}[\VARNAME{rootC}] = 1;
+  \STATE add \Varname{rootC} to \Varname{level};
+  \STATE \Varname{nFailed}[\Varname{rootC}] = 1;
   %\STATE $\Gamma Cache_{rootC} = \mathcal{P}(\Gamma_{rootC});$ \COMMENT{Power Set (Ordered Set) is Cached}
-  \STATE add @ to \VARNAME{BFHist}[\VARNAME{rootC}]; \COMMENT {signifies one component of type rootC has failed}
-  \IF{(Empty($\Gamma_{\VARNAME{rootC}}$))}
-    \STATE ComputeTreeRates(\VARNAME{nFailed}, \VARNAME{BFHist}, \VARNAME{subTreeRate}, \VARNAME{rootC});
+  \STATE add @ to \Varname{BFHist}[\Varname{rootC}]; \COMMENT {signifies one component of type rootC has failed}
+  \IF{Empty($\Gamma_{\Varname{rootC}}$)}
+    \STATE ComputeTreeRates(\Varname{nFailed}, \Varname{BFHist}, \Varname{subTreeRate}, \Varname{rootC});
   \ELSE
-    \STATE AddSubTreeLevel(\VARNAME{level}, \VARNAME{nFailed}, \VARNAME{BFHist}, 1, \VARNAME{rootC});
+    \STATE AddSubTreeLevel(\Varname{level}, \Varname{nFailed}, \Varname{BFHist}, 1, \Varname{rootC});
   \ENDIF
 \ENDFOR
 \end{algorithmic}
 \end{algorithm}
 
+In Algorithm 2, given a subTree, we determine all the possibilities for subTrees with one more level by taking the Cartesian product of the power sets of $\Gamma$ for each of the failed components. We use $\mathcal{P}$ to denote the power set like operation on a ordered set. In our case each subset of the power set maintains the relative ordering in the original set.
+
+We implement this power set operation in line 1 by generating all possible $|\sum\limits_{i\,=\,1}^{|level|}\Gamma_{level[i]}|$ bit binary numbers. 1 denotes a failed node, 0 denotes a node that could have failed but did not fail. If it so happens that we have a tree where none of the leaf nodes can cause any other components to fail or equivalently, have empty $\Gamma$s, we get no nextLevelPossibilities. If there are no nextLevelPossibilities we immediately proceed to ComputeTreeRates.   
+
+Otherwise, we choose one possibility to work with. For each node \Varname{parentC} in the current level that acts as a parent potentially causing other nodes to fail, we iterate through all of its possible children or equivalently through its $\Gamma$. If any of these children actually fail then they will be members of the set \Varname{oneNextLevelPossibility}. Now if the redundancy of the component type we just added as a child, has already been exhausted, it cannot fail and hence our tree is invalid and we try the next possibility.
+
+If it is indeed possible to add a child of the type of \Varname{childC} we flag this occurrence and update the corresponding data structures. We add 1 to \Varname{nFailed} at the index of type of ChildC. We add @ \Varname{BFHist} at the index of type \Varname{chidC} to mark that a failure has occurred at this location in the subTree. We update subTree rate with the failure rate of parent triggering the child to fail. If the child does not actually fail but could have failed we add its would have been parent to \Varname{BFHist} at the index of the type pf the child. This come in use later in ComputeTreeRates.   
+
+We do the above updates to data structures for each potential parent node in \Varname{level} and each of its children in \Varname{oneNextLevelPossibility}. 
+
+If at least one child has been added we add another level to the current tree, otherwise this tree has not changed in this pass through AddSubTreeLevel and we call ComputeTreeRates on it. 
+
+We make sure that trees are not double counted because each oneNextLevelPossibility is unique and each time a tree does not change, it is processed and discarded. This ensures that each time a tree comes in it either has an additional level or has been enumerated with another next level possibility.    
+
 \begin{algorithm}
-\caption{AddSubTreeLevel(\VARNAME{level}, \VARNAME{nFailed}, \VARNAME{BFHist}, \VARNAME{subTreeRate}, \VARNAME{rootC})}
+\caption{AddSubTreeLevel(\Varname{level}, \Varname{nFailed}, \Varname{BFHist}, \Varname{subTreeRate}, \Varname{rootC})}
 \label{alg:AddSubTreeLevel}
-where \VARNAME{level} describes failed components, \\\VARNAME{nFailed} counts failed components by type, \\\VARNAME{BFHist} is Breadth First History, \\\VARNAME{subTreeRate} is a cumulative probability of comps that failed, \\\VARNAME{rootC} is the root component of the current subtree \\
+where \Varname{level} describes failed components, \\\Varname{nFailed} counts failed components by type, \\\Varname{BFHist} is Breadth First History, \\\Varname{subTreeRate} is a cumulative probability of comps that failed, \\\Varname{rootC} is the root component of the current subtree \\
 \begin{algorithmic}[1]
-\STATE \VARNAME{nextLevelPossibilities} = $\bigtimes\limits_{i\,=\,1}^{|level|}\mathcal{P}(\Gamma_{level[i]});$
-\\ \COMMENT{Builds set of all possible nodes in next level as Cartesian product of power sets of $\Gamma$'s}
-  \FOR{\VARNAME{oneNextLevelPossibility} $\in$ \VARNAME{nextLevelPossibilities}}
-    \STATE \VARNAME{addedChildFlag} = False;
-    \FOR{\VARNAME{parentC} $\in$ \VARNAME{level}}
-      \FOR{\VARNAME{childC} $\in$ $\Gamma_{\VARNAME{parentC}}$}
-          \IF{\VARNAME{childC} $\in$ \VARNAME{oneNextLevelPossibility}}  
-            \IF{\VARNAME{nFailed}[\VARNAME{childC}] == Redundancy(\VARNAME{childC})}
+\STATE \Varname{nextLevelPossibilities} = $\bigtimes\limits_{i\,=\,1}^{|level|}\mathcal{P}(\Gamma_{level[i]});$
+\\ \COMMENT{Builds set of all possible nodes in next level as Cartesian product of power sets of $\Gamma$s}
+  \IF{Empty(\Varname{nextLevelPossibilities})}
+    \STATE ComputeTreeRates(\Varname{nFailed}, \Varname{BFHist}, \Varname{subTreeRate}, \Varname{rootC});
+    \\ \COMMENT {current subTree cannot be grown further because its leaf nodes have empty $\Gamma$}
+  \ENDIF
+  \FOR{\Varname{oneNextLevelPossibility} $\in$ \Varname{nextLevelPossibilities}}
+    \STATE \Varname{addedChildFlag} = False;
+    \FOR{\Varname{parentC} $\in$ \Varname{level}}
+      \FOR{\Varname{childC} $\in$ $\Gamma_{\Varname{parentC}}$}
+          \IF{\Varname{childC} $\in$ \Varname{oneNextLevelPossibility}}  
+            \IF{\Varname{nFailed}[\Varname{childC}] == Redundancy(\Varname{childC})}
               \STATE goto line 3; 
               \COMMENT {invalid subtree, requires more comps than available in system}
-            \ENDIF 
-            \STATE \VARNAME{addedChildFlag} = True;
-            \STATE \VARNAME{nFailed}[\VARNAME{childC}] = \VARNAME{nFailed}[\VARNAME{childC}] + 1;
-            \STATE add @ to \VARNAME{BFHist}[\VARNAME{childC}]; \COMMENT {signifies one component of type childC has failed}
-            \STATE $\VARNAME{subTreeRate} = \VARNAME{subTreeRate} * \phi_{parentC,\; childC};$ 
+            \ENDIF
+            \STATE \Varname{addedChildFlag} = True;
+            \STATE \Varname{nFailed}[\Varname{childC}] = \Varname{nFailed}[\Varname{childC}] + 1;
+            \STATE add @ to \Varname{BFHist}[\Varname{childC}]; \COMMENT {signifies one component of type childC has failed}
+            \STATE $\Varname{subTreeRate} = \Varname{subTreeRate} * \phi_{parentC,\; childC};$ 
             \\ \COMMENT {update rate with $\phi$}
           \ELSE
-           \STATE add \VARNAME{parentC} to \VARNAME{BFHist}[\VARNAME{childC}]; \COMMENT {signifies one component of type childC has not failed, but was present in $\Gamma_{\VARNAME{parentC}}$}
+           \STATE add \Varname{parentC} to \Varname{BFHist}[\Varname{childC}]; \COMMENT {signifies one component of type childC has not failed, but was present in $\Gamma_{\Varname{parentC}}$}
          \ENDIF
       \ENDFOR
     \ENDFOR
     %\STATE % empty line %
-    \IF{\VARNAME{addedChildFlag}}
-      \STATE AddSubTreeLevel(\VARNAME{oneNextLevelPossibility}, \VARNAME{nFailed}, \VARNAME{BFHist}, \VARNAME{subTreeRate}, \VARNAME{rootC}); 
+    \IF{\Varname{addedChildFlag}}
+      \STATE AddSubTreeLevel(\Varname{oneNextLevelPossibility}, \Varname{nFailed}, \Varname{BFHist}, \Varname{subTreeRate}, \Varname{rootC}); 
       \\ \COMMENT {subTree can be grown further}
     \ELSE
-      \STATE ComputeTreeRates(\VARNAME{nFailed}, \VARNAME{BFHist}, \VARNAME{subTreeRate}, \VARNAME{rootC});
+      \STATE ComputeTreeRates(\Varname{nFailed}, \Varname{BFHist}, \Varname{subTreeRate}, \Varname{rootC});
       \\ \COMMENT {current subTree is completed because it cannot be grown further}
     \ENDIF
 \ENDFOR
@@ -97,37 +118,37 @@ where \VARNAME{level} describes failed components, \\\VARNAME{nFailed} counts fa
 \end{algorithm}
 
 \begin{algorithm}
-\caption{ComputeTreeRates(\VARNAME{nFailed}, \VARNAME{BFHist}, \VARNAME{subTreeRate}, \VARNAME{rootC})}
-\label{alg:computeTreeRates}
-where \VARNAME{level} describes failed components, \\\VARNAME{nFailed} counts failed components by type, \\\VARNAME{BFHist} is Breadth First History, \\\VARNAME{subTreeRate} is a cumulative probability of comps that failed, \\\VARNAME{rootC} is the root component of the current subtree \\
+\caption{ComputeTreeRates(\Varname{nFailed}, \Varname{BFHist}, \Varname{subTreeRate}, \Varname{rootC})}
+\label{alg:ComputeTreeRates}
+where \Varname{level} describes failed components, \\\Varname{nFailed} counts failed components by type, \\\Varname{BFHist} is Breadth First History, \\\Varname{subTreeRate} is a cumulative probability of comps that failed, \\\Varname{rootC} is the root component of the current subtree \\
 \begin{algorithmic}[1]
-\FOR{$\VARNAME{x'} \in \VARNAME{S'}$}
-  \STATE $\VARNAME{prodNotFailedProb} = 1;$ \COMMENT{cumulative probability of comps that could have failed but did not}
-  \FOR{$\VARNAME{comp} \in \VARNAME{compSet}$}
-    \STATE $\VARNAME{compsAvailable} = \:$Redundancy$(\VARNAME{comp}) - \VARNAME{x}[\VARNAME{comp}];$
-    \FOR{$\VARNAME{parentC} \in \VARNAME{BFHist}[\VARNAME{comp}]$}
-      \IF{\VARNAME{parentC} == @}
-        \STATE $\VARNAME{compsAvailable} = \VARNAME{compsAvailable} - 1;$
-      \ELSIF {$\VARNAME{compsAvailable} > 0$} 
-        \STATE $\VARNAME{prodNotFailedProb} = \VARNAME{prodNotFailedProb} * (1 - \phi_{parentC,\; comp});$
+\FOR{$\Varname{x'} \in \Varname{S'}$}
+  \STATE $\Varname{prodNotFailedProb} = 1;$ \COMMENT{cumulative probability of comps that could have failed but did not}
+  \FOR{$\Varname{comp} \in \Varname{compSet}$}
+    \STATE $\Varname{compsAvailable} = \:$Redundancy$(\Varname{comp}) - \Varname{x}[\Varname{comp}];$
+    \FOR{$\Varname{parentC} \in \Varname{BFHist}[\Varname{comp}]$}
+      \IF{\Varname{parentC} == @}
+        \STATE $\Varname{compsAvailable} = \Varname{compsAvailable} - 1;$
+      \ELSIF {$\Varname{compsAvailable} > 0$} 
+        \STATE $\Varname{prodNotFailedProb} = \Varname{prodNotFailedProb} * (1 - \phi_{parentC,\; comp});$
       \ENDIF
     \ENDFOR
   \ENDFOR
   %\STATE % empty line %
-  \FOR{$\VARNAME{e} \in \VARNAME{envSet}$}
-    \STATE Initialize \VARNAME{y} as a state with no components failed and environment \VARNAME{e};
-    \FOR{\VARNAME{comp} $\in$ \VARNAME{compSet}}
-    \STATE \VARNAME{y}[\VARNAME{comp}] = \VARNAME{x}[\VARNAME{comp}] + \VARNAME{nFailed}[\VARNAME{comp}];
+  \FOR{$\Varname{e} \in \Varname{envSet}$}
+    \STATE Initialize \Varname{y} as a state with no components failed and environment \Varname{e};
+    \FOR{\Varname{comp} $\in$ \Varname{compSet}}
+    \STATE \Varname{y}[\Varname{comp}] = \Varname{x}[\Varname{comp}] + \Varname{nFailed}[\Varname{comp}];
     \ENDFOR
-    % \STATE Environment$(\VARNAME{y}) = \:$Environment$(\VARNAME{x});$
-    \IF{\VARNAME{y} is not a valid state}
+    % \STATE Environment$(\Varname{y}) = \:$Environment$(\Varname{x});$
+    \IF{\Varname{y} is not a valid state}
     \STATE continue;
     \ENDIF
-    % \STATE $\VARNAME{n} = \:$Redundancy$(\VARNAME{rootC}) - \VARNAME{x}[\VARNAME{rootC}];$
-    % \STATE $\VARNAME{rootFailureRate} = \VARNAME{n} * \lambda_{\VARNAME{rootC},\; \VARNAME{env}}\,;$
-    \STATE $\VARNAME{rootFailureRate} = \:($Redundancy$(\VARNAME{rootC}) - \VARNAME{x}[\VARNAME{rootC}]) * \lambda_{\VARNAME{rootC},\; \VARNAME{e}}\,;$
+    % \STATE $\Varname{n} = \:$Redundancy$(\Varname{rootC}) - \Varname{x}[\Varname{rootC}];$
+    % \STATE $\Varname{rootFailureRate} = \Varname{n} * \lambda_{\Varname{rootC},\; \Varname{env}}\,;$
+    \STATE $\Varname{rootFailureRate} = \:($Redundancy$(\Varname{rootC}) - \Varname{x}[\Varname{rootC}]) * \lambda_{\Varname{rootC},\; \Varname{e}}\,;$
   \ENDFOR
-  \STATE $\VARNAME{Q}(\VARNAME{x},\VARNAME{y}) = \VARNAME{Q}(\VARNAME{x},\VARNAME{y}) + \VARNAME{rootFailureRate} * \VARNAME{subTreeRate} * \VARNAME{prodNotFailedProb};$
+  \STATE $\Varname{Q}(\Varname{x},\Varname{y}) = \Varname{Q}(\Varname{x},\Varname{y}) + \Varname{rootFailureRate} * \Varname{subTreeRate} * \Varname{prodNotFailedProb};$
 \ENDFOR
 \end{algorithmic}
 \end{algorithm}
