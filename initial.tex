@@ -1,6 +1,10 @@
+% TODO 
+% Sasahank's and Nakayama's environmental, repair transitions and numerical optimizations.
+% Talk about environment dependent phis ? 
+
 \documentclass[12pt]{article}
-\author{Mihir Sanghavi}
-\date{November 2012}
+\author{M. Sanghavi, S. Tadepalli, M. Nakayama}
+\date{January 2013}
 
 \usepackage{algorithm}
 \usepackage{algorithmic}
@@ -10,15 +14,32 @@
 
 \begin{document}
 
+\title{Title Title Title}
+\maketitle
+
+
+\section{Algorithms}
+\label{sec:alg}
+
+We now provide highly optimized algorithms for generating all possible subTrees and updating the Q Matrix. Since the number of trees for a model is exponential, we generate each unique subTree and its corresponding superTree (also unique) only once. We iterate through the Q Matrix and update all transitions where the subTree is applicable. This is the tree based approach to filling in the Q Matrix, which is mentioned in the remark in Section 4.2 of the preceding paper. \cite{Iyer:2009} Generating subtrees only once ensures the bottleneck of tree generation in DECaF takes the least possible execution time. The superTree is represented by keeping a Breadth First History of the subtree. We also generate larger subTrees by adding one level at at time to already generated subTrees. This ensures that work done to generate an existing tree can be reused. By not starting at the root each time we need to generate a tree saves DECaf a tremendous amount of execution time. We make optimizations to other areas in DECaF as well. \\ 
+
+Algorithm 1 SeedSubTrees starts the tree generation and initializes the necessary data structures for the recursion in Algorithm 2 AddSubTreeLevel. 
+
+$\Gamma$ describes cascading failures with details about which components can cause which other components to fail. 
+We start by iterating through the model's component set, \VARNAME{compSet} to choose a root component, \VARNAME{rootC} for an initial tree with one node. 
+
+We then initialize the following data structures: \VARNAME{level}, a dynamic array to hold all the failed nodes in a level in breadth first order, \VARNAME{nFailed} a list that counts the number of failed components differentiated by type and \VARNAME{BFHist} a data structure that is the Breadth First History of a subTree. It is implemented as an array of linked lists indexed by component type that stores parents of both nodes, which did and did not fail in a subTree. \VARNAME{BFHist} plays the role of a superTree to calculate the complement rates of nodes that did not fail.
+
+Since the root must fail, we add \VARNAME{rootC} to \VARNAME{level}. We use @ to denote when a component has failed. We add @ \VARNAME{BFHist} at the index of type \VARNAME{rootC}. We update \VARNAME{nFailed} as well by setting the counter for type \VARNAME{rootC} to 1.         
+
+If a component cannot cause any other components to fail only the trivial subTree of one node can be made. We then evaluate and process this single-node subTree's rate because it cannot be grown further. Otherwise for all types of components that have a nonempty $\Gamma$, or equivalently, can cause other types of components to fail, we call AddSubTreeLevel to proceed with building larger subTrees.    
+
 \begin{algorithm}
 \caption{SeedSubTrees($\Gamma$)}
 \label{alg:SeedSubTrees}
 where $\Gamma$ is an ordered set that describes which components can cause which other components to fail\\
 \begin{algorithmic}[1]
 \FOR{\VARNAME{rootC} $\in$ \VARNAME{compSet}}
-  \IF{(Empty($\Gamma_{\VARNAME{rootC}}$))}
-    \STATE continue;
-  \ENDIF
   \STATE \VARNAME{level} = [ ]; \COMMENT {dynamic array of failed components at subTree's current level}
   \STATE \VARNAME{nFailed} = $(0, 0, \ldots, 0)$; \COMMENT {counts failed components of each type}
   \STATE \VARNAME{BFHist} = $ ((\,), (\,), \ldots, (\,)) $; \COMMENT {an array of linked lists that keeps a breadth-first history of subTrees, array is indexed by component type, linked list for each component type stores parents in breadth-first order}
@@ -28,7 +49,11 @@ where $\Gamma$ is an ordered set that describes which components can cause which
   \STATE \VARNAME{nFailed}[\VARNAME{rootC}] = 1;
   %\STATE $\Gamma Cache_{rootC} = \mathcal{P}(\Gamma_{rootC});$ \COMMENT{Power Set (Ordered Set) is Cached}
   \STATE add @ to \VARNAME{BFHist}[\VARNAME{rootC}]; \COMMENT {signifies one component of type rootC has failed}
-  \STATE AddSubTreeLevel(\VARNAME{level}, \VARNAME{nFailed}, \VARNAME{BFHist}, 1, \VARNAME{rootC});
+  \IF{(Empty($\Gamma_{\VARNAME{rootC}}$))}
+    \STATE ComputeTreeRates(\VARNAME{nFailed}, \VARNAME{BFHist}, \VARNAME{subTreeRate}, \VARNAME{rootC});
+  \ELSE
+    \STATE AddSubTreeLevel(\VARNAME{level}, \VARNAME{nFailed}, \VARNAME{BFHist}, 1, \VARNAME{rootC});
+  \ENDIF
 \ENDFOR
 \end{algorithmic}
 \end{algorithm}
@@ -39,7 +64,7 @@ where $\Gamma$ is an ordered set that describes which components can cause which
 where \VARNAME{level} describes failed components, \\\VARNAME{nFailed} counts failed components by type, \\\VARNAME{BFHist} is Breadth First History, \\\VARNAME{subTreeRate} is a cumulative probability of comps that failed, \\\VARNAME{rootC} is the root component of the current subtree \\
 \begin{algorithmic}[1]
 \STATE \VARNAME{nextLevelPossibilities} = $\bigtimes\limits_{i\,=\,1}^{|level|}\mathcal{P}(\Gamma_{level[i]});$
-\\ \COMMENT{Builds set of all possible nodes in next level as Cartesian product of powersets of $\Gamma$'s}
+\\ \COMMENT{Builds set of all possible nodes in next level as Cartesian product of power sets of $\Gamma$'s}
   \FOR{\VARNAME{oneNextLevelPossibility} $\in$ \VARNAME{nextLevelPossibilities}}
     \STATE \VARNAME{addedChildFlag} = False;
     \FOR{\VARNAME{parentC} $\in$ \VARNAME{level}}
