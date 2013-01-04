@@ -1,6 +1,7 @@
 % TODO 
 % Sashank's and Nakayama's environmental, repair transitions and numerical optimizations (U/D states).
-% Talk about environment dependent phis ? 
+% Talk about environment dependent phis ?
+% Cache for BFH 
 
 \documentclass[12pt]{article}
 \author{M. Sanghavi, S. Tadepalli, M. Nakayama}
@@ -61,7 +62,7 @@ where $\Gamma$ is an ordered set that describes which components can cause which
 \end{algorithmic}
 \end{algorithm}
 
-In Algorithm 2, given a subTree, we determine all the possibilities for subTrees with one more level by taking the Cartesian product of the power sets of $\Gamma$ for each of the failed components. We use $\mathcal{P}$ to denote the power set like operation on a ordered set. In our case each subset of the power set maintains the relative ordering in the original set.
+In Algorithm 2 AddSubTreeLevel, given a subTree, we determine all the possibilities for subTrees with one more level by taking the Cartesian product of the power sets of $\Gamma$ for each of the failed components. We use $\mathcal{P}$ to denote the power set like operation on a ordered set. In our case each subset of the power set maintains the relative ordering in the original set.
 
 We implement this power set operation in line 1 by generating all possible $|\sum\limits_{i\,=\,1}^{|level|}\Gamma_{level[i]}|$ bit binary numbers. 1 denotes a failed node, 0 denotes a node that could have failed but did not fail. If it so happens that we have a tree where none of the leaf nodes can cause any other components to fail or equivalently, have empty $\Gamma$s, we get no nextLevelPossibilities. If there are no nextLevelPossibilities we immediately proceed to ComputeTreeRates.   
 
@@ -73,7 +74,7 @@ We do the above updates to data structures for each potential parent node in \Va
 
 If at least one child has been added we add another level to the current tree, otherwise this tree has not changed in this pass through AddSubTreeLevel and we call ComputeTreeRates on it. 
 
-We make sure that trees are not double counted because each oneNextLevelPossibility is unique and each time a tree does not change, it is processed and discarded. This ensures that each time a tree comes in it either has an additional level or has been enumerated with another next level possibility.    
+We make sure that trees are not double counted because each oneNextLevelPossibility is unique and each time a tree does not change, it is processed and discarded. This ensures that each time a tree comes in it either has an additional level or has been enumerated with another next level possibility.\\
 
 \begin{algorithm}
 \caption{AddSubTreeLevel(\Varname{level}, \Varname{nFailed}, \Varname{BFHist}, \Varname{subTreeRate}, \Varname{rootC})}
@@ -117,6 +118,12 @@ where \Varname{level} describes failed components, \\\Varname{nFailed} counts fa
 \end{algorithmic}
 \end{algorithm}
 
+In Algorithm 3 ComputeTreeRates we fill in all transitions in the Q matrix where the subtree is applicable. 
+
+We use \Varname{'} to denote a state independent of an environment. \Varname{x'} is a particular from state (independent of environment) from the state space \Varname{S'} (also independent of environment.) \Varname{prodNotFailedProb} denotes the product of the probabilities of all the nodes in the tree not failing. Within each \Varname{x'}, for each component type we calculate the number of components by type that are available in the system as redundancy minus already failed in the from state. The number of available components, \Varname{compsAvailable}, determines at which point, while traversing through the \Varname{BFHist}, we can no longer have any components of a certain type that could have failed but did not fail. We can have no more components that \textit{could} fail when they have been exhausted or equivalently, their total number failed equals redundancy. Each time we encounter @ in the \Varname{BFHist} we reduce the number available by one. If there are components still available we update \Varname{prodNotFailedProb}. As soon as \Varname{compsAvailable} reaches zero we break because that type has been exhausted and hence there are no more could have failed for the type.
+
+Once we have finished calculating the \Varname{prodNotFailedProb} we loop through all environments. We generate to states \Varname{y} (with an environment) by adding \Varname{nFailed} to \Varname{x'}. Invalid to states will be generated in some instances because simply adding \Varname{nFailed} will cause component types' number failed to exceed their redundancy. The failure rate of the root as per the model is calculated. With all parts of the rate calculation done, we update the failure transition. We add because each tree is independent of the others.
+
 \begin{algorithm}
 \caption{ComputeTreeRates(\Varname{nFailed}, \Varname{BFHist}, \Varname{subTreeRate}, \Varname{rootC})}
 \label{alg:ComputeTreeRates}
@@ -129,8 +136,11 @@ where \Varname{level} describes failed components, \\\Varname{nFailed} counts fa
     \FOR{$\Varname{parentC} \in \Varname{BFHist}[\Varname{comp}]$}
       \IF{\Varname{parentC} == @}
         \STATE $\Varname{compsAvailable} = \Varname{compsAvailable} - 1;$
-      \ELSIF {$\Varname{compsAvailable} > 0$} 
+      \ELSIF {$\Varname{compsAvailable} > 0$}
         \STATE $\Varname{prodNotFailedProb} = \Varname{prodNotFailedProb} * (1 - \phi_{parentC,\; comp});$
+      \ELSE
+        \STATE break;
+        \COMMENT{compsAvailable must equal 0 so no more $1 - \phi$}
       \ENDIF
     \ENDFOR
   \ENDFOR
@@ -146,7 +156,7 @@ where \Varname{level} describes failed components, \\\Varname{nFailed} counts fa
     \ENDIF
     % \STATE $\Varname{n} = \:$Redundancy$(\Varname{rootC}) - \Varname{x}[\Varname{rootC}];$
     % \STATE $\Varname{rootFailureRate} = \Varname{n} * \lambda_{\Varname{rootC},\; \Varname{env}}\,;$
-    \STATE $\Varname{rootFailureRate} = \:($Redundancy$(\Varname{rootC}) - \Varname{x}[\Varname{rootC}]) * \lambda_{\Varname{rootC},\; \Varname{e}}\,;$
+    \STATE $\Varname{rootFailureRate} = \:($Redundancy$(\Varname{rootC}) - \Varname{x'}[\Varname{rootC}]) * \lambda_{\Varname{rootC},\; \Varname{e}}\,;$
   \ENDFOR
   \STATE $\Varname{Q}(\Varname{x},\Varname{y}) = \Varname{Q}(\Varname{x},\Varname{y}) + \Varname{rootFailureRate} * \Varname{subTreeRate} * \Varname{prodNotFailedProb};$
 \ENDFOR
