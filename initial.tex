@@ -15,8 +15,8 @@
 \usepackage[left = 1.0in, top = 1in, right = 1.0in, bottom = 1in, nohead]{geometry}
 
 \newcommand{\varName}[1]{\textrm{\it#1}}
-\newcommand{\citeLine}[1]{$[\,#1\,]$}
-\newcommand{\citeBlock}[2]{$[\,#1 - #2\,]$}
+\newcommand{\citeLine}[1]{$\{\,#1\,\}$}
+\newcommand{\citeBlock}[2]{$\{\,#1 - #2\,\}$}
 
 \begin{document}
 
@@ -34,7 +34,7 @@ We now provide efficient algorithms for generating all possible trees and updati
 
 Computing the rate of a given tree depends on the state from which the cascading failure began and the set of components that fails in the cascade. Each component $i$ can possibly cause any subset of components from a set $\Gamma_i$ to simultaneously fail when $i$ fails; i.e., not all components in $\Gamma_i$ actually fail in a given cascade. We also consider the supertree from a given tree by adding in the components that did not fail from the $\Gamma_i$ that were used, which is necessary to compute the rate of a tree. We do not actually build the supertree in our algorithm, but instead build a \textit{breadth-first history} to keep track of the information necessary to compute a tree's rate. A breadth-first history accounts for the contribution to the tree's rate of the components that could have failed (i.e., belong to the set $\Gamma_i$ of a node of type $i$ that actually did fail), but did not. We explain the process of building a breadth-first history and using it to compute the rate of a tree in Algorithms 2 (AddTreeLevel) and 3 (ComputeTreeRate), respectively.
 
-SeedTrees (Algorithm 1), starts the tree generation and initializes the necessary data structures for AddTreeLevel (Algorithm 2). AddTreeLevel adds a new level to an existing tree in a recursive fashion, updates the cumulative failed probability for the tree for the components that actually failed as well as builds the tree's breadth-first history. ComputeTreeRate computes the rate of a completed tree for all the transitions it corresponds to using the cumulative failed probability and the breadth-first history populated in AddTreeLevel. We will now discuss each algorithm in detail. Line numbers from each the algorithms are given in their corresponding texts within square brackets \citeLine{}.
+SeedTrees (Algorithm 1), starts the tree generation and initializes the necessary data structures for AddTreeLevel (Algorithm 2). AddTreeLevel adds a new level to an existing tree in a recursive fashion, updates the cumulative failed probability for the tree for the components that actually failed as well as builds the tree's breadth-first history. ComputeTreeRate computes the rate of a completed tree for all the transitions it corresponds to using the cumulative failed probability and the breadth-first history populated in AddTreeLevel. We will now discuss each algorithm in detail. Line numbers from each the algorithms are given in their corresponding texts within braces \citeLine{}.
 
 \subsection{SeedTrees}
 
