@@ -14,12 +14,14 @@
 \usepackage{mathabx}
 \usepackage[left = 1.0in, top = 1in, right = 1.0in, bottom = 1in, nohead]{geometry}
 
+\newcommand{\captionAmerica}[2]{
+\noindent\hspace{\fill}\rule{1.0\linewidth}{.7pt}\hspace{\fill}\vspace{-0.25em}\\*\raggedright\textbf{Algorithm #1} #2 \vspace{-0.8em}\\*\hspace{\fill}\rule{1.0\linewidth}{.7pt}\hspace{\fill}
+}
 \newcommand{\varName}[1]{\textrm{\it#1}}
 \newcommand{\citeLine}[1]{$\{\,#1\,\}$}
 \newcommand{\citeBlock}[2]{$\{\,#1 - #2\,\}$}
 
 \begin{document}
-
 \title{Working Title}
 \maketitle
 
@@ -45,11 +47,11 @@ Since the root must fail, we initialize \textit{level} with \textit{rootC}. We a
 If the component \textit{rootC} at the root cannot cause any other components to fail, only the trivial tree of one node can be made with this type of root. We then evaluate this single-node tree's rate in ComputeTreeRate because it cannot be grown further. If $\Gamma_{\textrm{\textit{rootC}}} \neq \emptyset$, i.e., it can cause other types of components to fail, then we call AddTreeLevel to proceed with building taller trees by adding another level to the current tree \citeBlock{8}{13}.
 
 In treeRate we only keep track of the cumulative product of the component-affected probabilities $\phi_{i,j}$ for the transition rate of the tree, which entails multiplying $\phi_{i, j}$ for all edges from parent \varName{i} to child \varName{j} in the tree. The total transition rate of a completed tree consists of three parts: the failure rate of the root, the treeRate and the cumulative product of the complement probabilities of components that could have failed. The failure rate of the root is given by the $n*\lambda_{rootC, \,e}$ term, where $n$ is the number of components up in the system of the type of \varName{rootC} and $\lambda_{rootC, \,e}$ is the failure rate of the type of \varName{rootC} in environment $e$. The cumulative product of complement probabilities consists of products of the form $1-\phi_{i, j}$ for all edges from parent \varName{i} to child \varName{j} in the tree, where failures did not occur but could have because of components of type \varName{j} were still up. We multiply the $1-\phi_{i,j}$ terms and the $n*\lambda_{rootC, \,e}$ later in ComputeTreeRate as they depend on the ``from" state of the failure transition. Since the tree has only one node, there are no failed nodes from a cascade (i.e., nodes have been caused to fail by other nodes). Hence, we pass 1 as the value for treeRate to the subroutines AddTreeLevel and ComputeTreeRate.
+\\*\\*\\*
 
-\begin{algorithm}
-\caption{SeedTrees($\Gamma$)}
-\label{alg:Seedtrees}
-where $\Gamma$ is an array of ordered sets that describes which components can cause which other components to fail \\
+\captionAmerica{1}{SeedTrees($\Gamma$)}
+where $\Gamma$ is an array of ordered sets that describes which components can cause which other components to fail
+\\*\vspace{0.8em}
 \begin{algorithmic}[1]
 \FOR{\varName{rootC} $\in$ \varName{compSet}}
   \STATE \varName{level} = [ ]; \COMMENT {dynamic array of failed components at tree's current bottom level}
@@ -68,30 +70,28 @@ where $\Gamma$ is an array of ordered sets that describes which components can c
   \ENDIF
 \ENDFOR
 \end{algorithmic}
-\end{algorithm}
 
 \subsection{AddTreeLevel}
 
- In AddTreeLevel, given a tree, we determine all the possibilities for the next level that can be added to the current tree by taking the Cartesian product of the power sets of $\Gamma$ for each of the failed components at the current bottom level. For each next level we recursively call AddTreeLevel. We use $\mathcal{P}$ to denote the power set-like operation on an ordered set. In our realization of the power set operation, components in each subset maintain their relative ordering from the original set.
+In AddTreeLevel, given a tree, we determine all the possibilities for the next level that can be added to the current tree by taking the Cartesian product of the power sets of $\Gamma$ for each of the failed components at the current bottom level. For each next level we recursively call AddTreeLevel. We use $\mathcal{P}$ to denote the power set-like operation on an ordered set. In our realization of the power set operation, components in each subset maintain their relative ordering from the original set.
 
- We implement this power set-like operation by generating all possible binary numbers with $\sum\limits_{i\,=\,1}^{|level|}\Gamma_{level[i]}$ bits. A total of $\prod\limits_{i\,=\,1}^{|level|}2^{\Gamma_{level[i]}}$ such binary numbers are generated. In the binary number, 1 denotes a failed node, 0 denotes a node that could have failed but did not fail. If it so happens that we have a tree where none of the leaf nodes at the current bottom level can cause any other components to fail (i.e., have empty $\Gamma$s), we get no nextLevelPossibilities \citeLine{1}. If there are no nextLevelPossibilities we immediately proceed to ComputeTreeRate \citeBlock{2}{4}.
+We implement this power set-like operation by generating all possible binary numbers with $\sum\limits_{i\,=\,1}^{|level|}\Gamma_{level[i]}$ bits. A total of $\prod\limits_{i\,=\,1}^{|level|}2^{\Gamma_{level[i]}}$ such binary numbers are generated. In the binary number, 1 denotes a failed node, 0 denotes a node that could have failed but did not fail. If it so happens that we have a tree where none of the leaf nodes at the current bottom level can cause any other components to fail (i.e., have empty $\Gamma$s), we get no nextLevelPossibilities \citeLine{1}. If there are no nextLevelPossibilities we immediately proceed to ComputeTreeRate \citeBlock{2}{4}.
 
- Otherwise, we choose one possible choice for the failed components in the next level to work with from the nextLevelPossibilities \citeLine{5}. To find out whether any new children will be added in the upcoming next level, we create a Boolean variable \textit{addedChildFlag}, initially with the value of False \citeLine{6}. For each node \textit{parentC} in the current bottom level that acts as a parent, potentially causing other nodes to fail, we iterate through all of its possible children, i.e., through its $\Gamma$. If any of these children actually fail, then they will be members of the set \textit{oneNextLevelPossibility} \citeBlock{7}{9}. Now if the redundancy of the component type we just tried to add as a child has already been exhausted, it cannot fail and hence our tree is invalid and we move on to the next possibility \citeBlock{10}{12}.
+Otherwise, we choose one possible choice for the failed components in the next level to work with from the nextLevelPossibilities \citeLine{5}. To find out whether any new children will be added in the upcoming next level, we create a Boolean variable \textit{addedChildFlag}, initially with the value of False \citeLine{6}. For each node \textit{parentC} in the current bottom level that acts as a parent, potentially causing other nodes to fail, we iterate through all of its possible children, i.e., through its $\Gamma$. If any of these children actually fail, then they will be members of the set \textit{oneNextLevelPossibility} \citeBlock{7}{9}. Now if the redundancy of the component type we just tried to add as a child has already been exhausted, it cannot fail and hence our tree is invalid and we move on to the next possibility \citeBlock{10}{12}.
 
- If it is indeed possible to add a child of the type of \textit{childC} we flag this occurrence and update the relevant data structures. We add 1 to \textit{nFailed} at the index of type \textit{childC}. We add the symbol @ to \textit{BFHist} at the index of type \textit{childC} to mark that a failure has occurred at this location in the tree. We update tree rate with the component-affected probability of the parent causing the child to fail \citeBlock{13}{16}. If the child does not actually fail but could have (because there are still operational components of the child's type at this point), then we add \textit{parentC} to \textit{BFHist}, at the index of the type of the child. \textit{BFHist} comes in use later in ComputeTreeRate, to determine when to multiply the current tree rate with the $1-\phi_{i,j}$ terms for the components that did not fail but could have \citeBlock{17}{19}.
+If it is indeed possible to add a child of the type of \textit{childC} we flag this occurrence and update the relevant data structures. We add 1 to \textit{nFailed} at the index of type \textit{childC}. We add the symbol @ to \textit{BFHist} at the index of type \textit{childC} to mark that a failure has occurred at this location in the tree. We update tree rate with the component-affected probability of the parent causing the child to fail \citeBlock{13}{16}. If the child does not actually fail but could have (because there are still operational components of the child's type at this point), then we add \textit{parentC} to \textit{BFHist}, at the index of the type of the child. \textit{BFHist} comes in use later in ComputeTreeRate, to determine when to multiply the current tree rate with the $1-\phi_{i,j}$ terms for the components that did not fail but could have \citeBlock{17}{19}.
 
- We do the above updates to data structures for each potential parent node in \textit{level} and each of its children in \textit{oneNextLevelPossibility} \citeBlock{7}{21}. If at least one child has been added, we add another level to the current tree \citeBlock{22}{23}. Otherwise, this tree has not changed in this pass through AddTreeLevel and we call ComputeTreeRate to compute the rate of the finalized tree \citeBlock{24}{26}. We make sure that trees are not double counted because once a tree passes through AddTreeLevel unmodified, it is processed and discarded. We do not make duplicate trees because each oneNextLevelPossibility is unique.
+We do the above updates to data structures for each potential parent node in \textit{level} and each of its children in \textit{oneNextLevelPossibility} \citeBlock{7}{21}. If at least one child has been added, we add another level to the current tree \citeBlock{22}{23}. Otherwise, this tree has not changed in this pass through AddTreeLevel and we call ComputeTreeRate to compute the rate of the finalized tree \citeBlock{24}{26}. We make sure that trees are not double counted because once a tree passes through AddTreeLevel unmodified, it is processed and discarded. We do not make duplicate trees because each oneNextLevelPossibility is unique.
 
-\begin{algorithm}
-\caption{AddTreeLevel(\varName{level}, \varName{nFailed}, \varName{BFHist}, \varName{treeRate}, \varName{rootC})}
-\label{alg:AddTreeLevel}
-where \varName{level} describes failed components, \\\varName{nFailed} counts failed components by type, \\\varName{BFHist} is breadth-first history, \\\varName{treeRate} is a cumulative probability of components that failed, \\\varName{rootC} is the root component of the current tree \\
+\captionAmerica{2}{AddTreeLevel(\varName{level}, \varName{nFailed}, \varName{BFHist}, \varName{treeRate}, \varName{rootC})}
+where \varName{level} describes failed components, \\*\varName{nFailed} counts failed components by type, \\*\varName{BFHist} is breadth-first history, \\*\varName{treeRate} is a cumulative probability of components that failed, \\*\varName{rootC} is the root component of the current tree
+\\*\vspace{0.8em}
 \begin{algorithmic}[1]
 \STATE \varName{nextLevelPossibilities} = $\bigtimes\limits_{i\,=\,1}^{|level|}\mathcal{P}(\Gamma_{level[i]});$
-\\ \COMMENT{Builds set of all possible nodes in next level as Cartesian product of power sets of $\Gamma$s}
+\\*\COMMENT{Builds set of all possible nodes in next level as Cartesian product of power sets of $\Gamma$s}
   \IF{Empty(\varName{nextLevelPossibilities})}
     \STATE ComputeTreeRate(\varName{nFailed}, \varName{BFHist}, \varName{treeRate}, \varName{rootC});
-    \\ \COMMENT {current tree cannot be grown further because its leaf nodes at the current bottom level have empty $\Gamma$}
+    \\*\COMMENT {current tree cannot be grown further because its leaf nodes at the current bottom level have empty $\Gamma$}
   \ENDIF
   \FOR{\varName{oneNextLevelPossibility} $\in$ \varName{nextLevelPossibilities}}
     \STATE \varName{addedChildFlag} = False;
@@ -106,7 +106,7 @@ where \varName{level} describes failed components, \\\varName{nFailed} counts fa
             \STATE \varName{nFailed}[\varName{childC}] = \varName{nFailed}[\varName{childC}] + 1;
             \STATE add @ to \varName{BFHist}[\varName{childC}]; \COMMENT {signifies one component of type childC has failed}
             \STATE $\varName{treeRate} = \varName{treeRate} * \phi_{parentC,\; childC};$ 
-            \\ \COMMENT {update rate with component-affected probability}
+            \\*\COMMENT {update rate with component-affected probability}
           \ELSE
            \STATE add \varName{parentC} to \varName{BFHist}[\varName{childC}]; \COMMENT {signifies one component of type childC has not failed, but was present in $\Gamma_{\varName{parentC}}$}
          \ENDIF
@@ -115,14 +115,14 @@ where \varName{level} describes failed components, \\\varName{nFailed} counts fa
     %\STATE % empty line %
     \IF{\varName{addedChildFlag}}
       \STATE AddTreeLevel(\varName{oneNextLevelPossibility}, \varName{nFailed}, \varName{BFHist}, \varName{treeRate}, \varName{rootC}); 
-      \\ \COMMENT {tree can be grown further}
+      \\*\COMMENT {tree can be grown further}
     \ELSE
       \STATE ComputeTreeRate(\varName{nFailed}, \varName{BFHist}, \varName{treeRate}, \varName{rootC});
-      \\ \COMMENT {current tree is completed because it cannot be grown further}
+      \\*\COMMENT {current tree is completed because it cannot be grown further}
     \ENDIF
 \ENDFOR
 \end{algorithmic}
-\end{algorithm}
+
 
 \subsection{ComputeTreeRate}
 
@@ -132,10 +132,9 @@ Let $x'$ be a particular ``from" state's failed component types count (which is 
 
 Once we have finished calculating the \textit{prodNotFailedProb}, we loop through all environments since the same tree can be used for transitions occurring in different environments. \citeLine{15}. We generate ``from" states by adding an environment \textit{e} to $x'$. from We generate ``to" states \textit{y} (with an environment \textit{e}) by adding \textit{nFailed} to $x'$ \citeBlock{16}{20}. Invalid ``to" states will be generated in some instances, because simply adding \textit{nFailed} will cause component types' number failed to exceed their redundancy. \citeBlock{21}{23}. The failure rate of the root is calculated as the number of components of the \varName{rootC}'s type up in the system, multiplied by the failure rate of the component in the environment of y.\citeLine{24}. With all parts of the rate calculation done, we update the failure transition's cell in the $Q$-matrix with the tree rate \citeLine{26}.
 
-\begin{algorithm}
-\caption{ComputeTreeRate(\varName{nFailed}, \varName{BFHist}, \varName{treeRate}, \varName{rootC})}
-\label{alg:ComputeTreeRate}
-where \varName{level} describes failed components, \\\varName{nFailed} counts failed components of each type in the tree, \\\varName{BFHist} is breadth-first history, \\\varName{treeRate} is a cumulative probability of components that failed, \\\varName{rootC} is the root component of the current tree \\
+\captionAmerica{3}{ComputeTreeRate(\varName{nFailed}, \varName{BFHist}, \varName{treeRate}, \varName{rootC})}
+where \varName{level} describes failed components, \\\varName{nFailed} counts failed components of each type in the tree, \\\varName{BFHist} is breadth-first history, \\\varName{treeRate} is a cumulative probability of components that failed, \\\varName{rootC} is the root component of the current tree
+\\*\vspace{0.8em}
 \begin{algorithmic}[1]
 \FOR{$x' \in S'$}
   \STATE $\varName{prodNotFailedProb} = 1;$ \COMMENT{cumulative product of complement probabilities of components that could have failed but did not}
@@ -170,9 +169,10 @@ where \varName{level} describes failed components, \\\varName{nFailed} counts fa
   \STATE $\varName{Q}(\varName{x},\varName{y}) = \varName{Q}(\varName{x},\varName{y}) + \varName{rootFailureRate} * \varName{treeRate} * \varName{prodNotFailedProb};$
 \ENDFOR
 \end{algorithmic}
-\end{algorithm}
+
+\section{Experimental}
+\subsection{Nested Experimental}
 
 \bibliographystyle{ieeetr}
 \bibliography{mkn}
-
 \end{document}
