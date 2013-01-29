@@ -5,8 +5,11 @@
 \usetikzlibrary{matrix}
 
 \newcommand{\nodelabel}[2]{\mbox{$#1$-$#2$}}
+\newcommand{\varName}[1]{\textrm{\it#1}}
 
 \begin{document}
+
+\iffalse
 
 \begin{VCPicture}{(-1,-12)(10,0)}
 
@@ -49,29 +52,24 @@ column 2/.style = {nodes = {text width = 3.5cm, align = left, minimum width = 3.
 
 \end{tikzpicture}
  
-Here is an example to illustrate the concept of our Breadth First History and how it lends itself to the rate evaluation for the subTree. We build the Breadth First History as follows: We iterate through the tree in a Breadth First Order. Whether the node is failed or not we always update the linked list at the index of this node's type in the Breadth First History. Whether the node is failed or not determines what we add at the end of the linked list. If we encounter a node that has failed we add @, whereas if we encounter a node that is not failed we add the parent of that node to the end of the list. The Breadth First History obtained for the tree is given below it. The nodes in the tree have been given IDs for convenience in seeing the correspondence between the tree and its Breadth First History.
+\fi
 
-The tree shown here is one of the trees that corresponds to this failure transition. Rate calculation proceeds as follows. \\
-% symbolic math for tree
-Given: \\ 
-$Component Set = \{A, B, C\}$ \\
-Redundancy(A) = 4, Redundancy(B) = 4, Redundancy(C) = 4 \\
-$\Gamma_{A} = \{B, C\}$ \\
-$\Gamma_{B} = \{A, C\}$ \\
-$\Gamma_{C} = \{A, B\}$ \\
-from state (2, 2, 2) \\ 
-to state (4, 4, 3) \\
-$\varepsilon = \{1\}$ \\
-Rate calculation for the root: \\ $n = 2$ given by subtracting count of A (root component) in from redundancy of A. \\ 
-Failure rate of root $= n * \lambda_{A, 1}$ \\
-Failure rate of subTree $= \phi_{A, B} * \phi_{B, C} * \phi_{C, B} * \phi_{B, A} $ (deals with failed nodes only)\\
-Failure rate from Breadth First History will be calculated as follows. \\
-Available(Type) = Redundancy(Type) - From(Type)
-This gives \\ Available(A) = 2, Available(B) = 2, Available(C) = 2 \\
-We iterate through the linked list for each type in the Breadth First History as follows: 
-For each @ we reduce Available(Type) by 1. As long as Available(Type) $> 0$ we include $1 - \phi_{parent, type}$. \\
-Iterating through at index A: Available(A) = 1, $ (1 - \phi_{B, A}) * (1 - \phi_{C, A}) $, Available(A) = 0 \\
-Iterating through at index B: Available(B) = 1, Available(B) = 0 (no contribution) \\
-Iterating through at index C: $ (1 - \phi_{A, C}) $, Available(C) = 1, $ (1 - \phi_{B, C}) * (1 - \phi_{A, C}) $ \\
-Multiplying all the individual rates, final rate for tree, given the transition is $ n * \lambda_{A, 1} * \phi_{A, B} * \phi_{B, C} * \phi_{C, B} * \phi_{B, A} * (1 - \phi_{B, A}) * (1 - \phi_{C, A}) * (1 - \phi_{A, C}) $ * $ (1 - \phi_{B, C}) * (1 - \phi_{A, C}) $. 
+Here is an example to illustrate the concept of our breadth-first history and how it lends itself to the rate evaluation for the tree. We build the breadth-first history as follows: We iterate through the tree in a breadth-first order. For each node in the supertree, we update the node type's linked list in the breadth-first history. Whether the node is failed or not determines what insertion we make at the end of the linked list. If we encounter a node that has failed, we add the symbol @, whereas if we encounter a node that has not failed, we add the parent of that node to the end of the list. The tree contains only double circled nodes, and the supertree includes all nodes. Each node label contains the type of the component and a a breadth-first order ID. The breadth-first history obtained for the supertree is given below it. The breadth-first order IDs have been given for convenience in seeing the correspondence between the supertree and its breadth-first history.
+
+Consider a model with $compSet = \{A, B, C\}$, where redundancy of each component type is 4. Each component type can cause all other component types to fail which gives us the following $\Gamma$ definitions: $\Gamma_{A} = \{B, C\}$, $\Gamma_{B} = \{A, C\}$, $\Gamma_{C} = \{A, B\}$. Take a failure transition with ``from" state: (2, 2, 2, $\mathcal{E}$) and ``to" state: (4, 4, 3, $\mathcal{E}$), where the first three numbers represent the number of failed components of type $A$, $B$, and $C$ respectively and $\mathcal{E}$ is the environment. The tree and supertree pair shown here is one of the pairs that corresponds to the given failure transition. Rate calculation for the given tree proceeds as follows:
+
+Failure rate of the root is the product of compsAvail for the root type, $n$, and this type's failure rate in the current environment, $\lambda_{A, \mathcal{E}}$. compsAvailable(Type) is given by Redundancy(Type) -  $x(\mbox{Type})$, where $x$ is the ``from" state and type is is the component type. In our case, $n = 2$. Similarly, compsAvailable($B$) = 2 and compsAvailable($C$) = 2; these will be required for evaluating the tree rate from the breadth-first history.
+
+For evaluating the failure rate of the tree, we take the product of $\phi_{i,j}$ for all edges from a parent \varName{i} to a child \varName{j} in the tree. We ignore edges that lead to nodes exclusive to the supertree because they have not failed. Hence, the failure rate of the tree equals $\phi_{A, B} \phi_{B, C} \phi_{C, B} \phi_{B, A}$.
+
+Now we calculate the cumulative complement probability of nodes that did not fail from breadth-first history.
+We iterate through the linked list for each type in the breadth-first history as follows:
+For each @ we reduce compsAvailable(Type) by 1, where Type is used to index the linked list as well. As long as compsAvailable(Type) $ > 0$ we include $1 - \phi_{parent, type}$.
+Iterating through at index $A$: compsAvailable($A$) = 1, $ (1 - \phi_{B, A}) (1 - \phi_{C, A}) $, compsAvailable($A$) = 0
+Iterating through at index $B$: compsAvailable($B$) = 1, compsAvailable($B$) = 0 (no contribution)
+Iterating through at index $C$: $ (1 - \phi_{A, C}) $, compsAvailable($C$) = 1, $ (1 - \phi_{B, C}) (1 - \phi_{A, C}) $
+Multiplying all the individual rates, final rate for tree, given the transition is $ n \lambda_{A, 1} \phi_{A, B} \phi_{B, C} \phi_{C, B} * \phi_{B, A} * (1 - \phi_{B, A}) (1 - \phi_{C, A}) (1 - \phi_{A, C}) (1 - \phi_{B, C}) (1 - \phi_{A, C}) $.
+
+This calculated rate then is added to the entry in the $Q$-matrix that corresponds to the failure transition given.
+
 \end{document}
