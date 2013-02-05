@@ -9,7 +9,7 @@
 
 \begin{document}
 
-%\iffalse
+\iffalse
 
 \begin{VCPicture}{(-1,-12)(10,0)}
 
@@ -51,7 +51,7 @@ column 2/.style = {nodes = {text width = 3.5cm, align = left, minimum width = 3.
 
 \end{tikzpicture}
  
-%\fi
+\fi
 
 Here is an example to illustrate the concept of our breadth-first history and how it lends itself to the rate evaluation for the tree. We build the breadth-first history as follows: We iterate through the tree in a breadth-first order. For each node in the supertree, we update the node type's linked list in the breadth-first history. Whether the node is failed or not determines what insertion we make at the end of the linked list. If we encounter a node that has failed, we add the symbol @, whereas if we encounter a node that has not failed, we add the parent of that node to the end of the list. The tree contains only double circled nodes, and the supertree includes all nodes. Each node label contains the type of the component and a breadth-first order ID. The breadth-first history obtained for the supertree is given below it. The breadth-first order IDs have been given for convenience in seeing the correspondence between the supertree and its breadth-first history.
 
