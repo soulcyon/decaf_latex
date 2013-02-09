@@ -422,15 +422,14 @@ where $\Gamma$ is an array of ordered sets that describes which components can c
 \\*\vspace{0.8em}
 \begin{algorithmic}[1]
 \FOR{\varName{rootC} $\in \Omega$}
-  \STATE \varName{level} = [ ]; \COMMENT {dynamic array of failed components at tree's current bottom level}
-  \STATE \varName{nFailed} = $(0, 0, \ldots, 0)$; \COMMENT {counts failed components of each type in the tree}
-  \STATE \varName{BFHist} = $ [(\,), (\,), \ldots, (\,)] $; \COMMENT {an array of linked lists that keeps a breadth-first history of trees; array is indexed by component type; linked list for each component type stores parents in breadth-first order}
-  %\STATE $\Gamma Cache = \{$Array of Size $2 ^{|\Gamma_{rootC}|}\};$ \COMMENT {Stores All Possible Subsets of $\Gamma_{rootC}$} 
-  %\STATE % empty line %
+  \STATE \varName{level} = [ ]; \COMMENT {Dynamic array of failed components at tree's current bottom level}
+  \STATE \varName{nFailed} = $(0, 0, \ldots, 0)$; \COMMENT {Counts failed components of each type in the tree}
+% Sashank - a little more concise explanation
+  \STATE \varName{BFHist} = $ [(\,), (\,), \ldots, (\,)] $; \COMMENT {Array of linked lists that keeps a history of parent component types in breadth-first order; BFHist is indexed by component typer}
   \STATE add \varName{rootC} to \varName{level};
   \STATE \varName{nFailed}[\varName{rootC}] = 1;
-  %\STATE $\Gamma Cache_{rootC} = \mathcal{P}(\Gamma_{rootC});$ \COMMENT{Power Set (Ordered Set) is Cached}
-  \STATE add @ to \varName{BFHist}[\varName{rootC}]; \COMMENT {signifies one component of type \varName{rootC} has failed}
+% Sashank - also a bit more concise
+  \STATE add @ to \varName{BFHist}[\varName{rootC}]; \COMMENT {We can assume one component of type \varName{rootC} has failed}
   \IF{$\Gamma_{\varName{rootC}} == \emptyset$}
     \STATE ComputeTreeRate(\varName{nFailed}, \varName{BFHist}, 1, \varName{rootC});
   \ELSE
@@ -457,11 +456,8 @@ where \varName{level} describes failed components, \\*\varName{nFailed} counts f
 \\*\vspace{0.8em}
 \begin{algorithmic}[1]
 \STATE \varName{nextLevelPossibilities} = $\bigtimes\limits_{i\,=\,1}^{|level|}\mathcal{P}(\Gamma_{level[i]});$
-\\*\COMMENT{Builds set of all possible nodes in next level as Cartesian product of power sets of $\Gamma$s}
-  \IF{Empty(\varName{nextLevelPossibilities})}
-    \STATE ComputeTreeRate(\varName{nFailed}, \varName{BFHist}, $\rho$, \varName{rootC});
-    \\*\COMMENT {current tree cannot be grown further because its leaf nodes at the current bottom level have empty $\Gamma$}
-  \ENDIF
+% Sashank - enforce non-empty Gamma sets, this also means we don't need a special if-statement for empty nextLevelPossibilities
+\\*\COMMENT{Builds set of all possible nodes in next level as Cartesian product of power sets of non-empty $\Gamma$ sets}
   \FOR{\varName{oneNextLevelPossibility} $\in$ \varName{nextLevelPossibilities}}
     \STATE \varName{addedChildFlag} = False;
     \FOR{\varName{parentC} $\in$ \varName{level}}
@@ -469,25 +465,26 @@ where \varName{level} describes failed components, \\*\varName{nFailed} counts f
           \IF{\varName{childC} $\in$ \varName{oneNextLevelPossibility}}  
             \IF{\varName{nFailed}[\varName{childC}] == $r_{\varName{childC}}$}
               \STATE goto line 3; 
-              \COMMENT {invalid tree, requires more components than available in system}
+              \COMMENT {Invalid Tree, it requires more components than available}
             \ENDIF
             \STATE \varName{addedChildFlag} = True;
             \STATE \varName{nFailed}[\varName{childC}] = \varName{nFailed}[\varName{childC}] + 1;
-            \STATE add @ to \varName{BFHist}[\varName{childC}]; \COMMENT {signifies one component of type childC has failed}
+            \STATE add @ to \varName{BFHist}[\varName{childC}]; \COMMENT {One component of type childC has failed}
             \STATE $\rho = \rho * \phi_{parentC,\; childC};$ 
-            \\*\COMMENT {update rate with component-affected probability}
+% Sashank - the old phrasing was a bit confusing
+            \\*\COMMENT {Update rate with appropriate phi}
           \ELSE
-           \STATE add \varName{parentC} to \varName{BFHist}[\varName{childC}]; \COMMENT {signifies one component of type childC has not failed, but was present in $\Gamma_{\varName{parentC}}$}
+           \STATE add \varName{parentC} to \varName{BFHist}[\varName{childC}]; \COMMENT {One component of type childC has not failed, but was present in $\Gamma_{\varName{parentC}}$}
          \ENDIF
       \ENDFOR
     \ENDFOR
     %\STATE % empty line %
     \IF{\varName{addedChildFlag}}
       \STATE AddTreeLevel(\varName{oneNextLevelPossibility}, \varName{nFailed}, \varName{BFHist}, $\rho$, \varName{rootC}); 
-      \\*\COMMENT {tree can be grown further}
+      \\*\COMMENT {Tree can be grown further}
     \ELSE
       \STATE ComputeTreeRate(\varName{nFailed}, \varName{BFHist}, $\rho$, \varName{rootC});
-      \\*\COMMENT {current tree is completed because it cannot be grown further}
+      \\*\COMMENT {Current tree is complete because it cannot be grown further}
     \ENDIF
 \ENDFOR
 \end{algorithmic}
@@ -499,14 +496,14 @@ In ComputeTreeRate, for a given tree, we determine all of the transitions $(x,y)
 
 Let state $x = (x_{1}, x_{2}, \ldots, x_{|\Omega|}, e)$ and let $x' = (x_{1}, x_{2}, \ldots, x_{|\Omega|})$. Let the state space $S = (x_{1}, x_{2}, \ldots, x_{|\Omega|}, e)$ and let $S' = (x_{1}, x_{2}, \ldots, x_{|\Omega|}): 0 \leq x_{i} \leq r_{i} \, \forall i \in \Omega$. We only loop through $x'$ and not $x$ because the structure of the trees do not depend on the environment; only the rate does \citeLine{1}. The variable $\eta$ denotes the product of the complement probabilities of all the nodes in the tree that did not fail, but could have if their respective type's redundancy had not been exhausted \citeLine{2}. For each component type in $\Omega$, we calculate the number of components that are available in the system as the type's redundancy minus the number already failed in the from-state. The number \varName{compsAvailable} determines until which point, while traversing through the \varName{BFHist}, we can still have components of a given type that could have failed but did not fail \citeLine{4}. We cannot have components that \varName{could have failed but did not} after a point in the tree where their type has been exhausted. A type is exhausted when the total number of failed components of the type in the system, i.e., the sum of the components failed in the from-state and in the tree in breadth-first order until the current node, equals the redundancy of the type. Each time we encounter the symbol @ in the \varName{BFHist}, we reduce the number available by one \citeBlock{5}{7}. If there are components still available, we update $\eta$ \citeBlock{8}{9}. As soon as \varName{compsAvailable} reaches zero, we break because that type has then been exhausted i.e., there are no more components that could have failed for the type \citeBlock{10}{12}.
 
-Once we have finished calculating the $\eta$, we loop through all environments since the same tree can be used for transitions occurring in different environments \citeLine{15}. We generate from-states by adding an environment \varName{e} to $x'$ \citeLine{16}. from We generate to-states \varName{y} (with an environment \varName{e}) by adding \varName{nFailed} to $x'$ \citeLine{17}. Invalid to-states will be generated in some instances, because simply adding \varName{nFailed} will cause component types' number failed to exceed their redundancies \citeBlock{18}{20}. The failure rate of the root is calculated as the number of components of the \varName{rootC}'s type up in the system, multiplied by the failure rate of the component in the environment of $y$ \citeLine{21}. With all parts of the rate calculation done, we add the rate of the current tree to the current cumulative rate for transition(x, y) in the $Q$-matrix \citeLine{23}.
+Once we have finished calculating the $\eta$, we loop through all environments since the same tree can be used for transitions occurring in different environments \citeLine{15}. We generate from-states by adding an environment \varName{e} to $x'$ \citeLine{16}. from We generate to-states \varName{y} (with an environment \varName{e}) by adding \varName{nFailed} to $x'$ \citeLine{17}. Invalid to-states will be generated in some instances, because simply adding \varName{nFailed} will cause component types' number failed to exceed their redundancies \citeBlock{18}{20}. The failure rate of the root is calculated as the number of components of the \varName{rootC}'s type up in the system, multiplied by the failure rate of the component in the environment of $y$ \citeLine{21}. With all parts of the rate calculation done, we add the rate of the current tree to the current cumulative rate for transition(x, y) in the $Q$-matrix \citeLine{22}.
 
 \captionAmerica{3}{ComputeTreeRate(\varName{nFailed}, \varName{BFHist}, $\rho$, \varName{rootC})}
 where \varName{level} describes failed components, \\*\varName{nFailed} counts failed components of each type in the tree, \\*\varName{BFHist} is breadth-first history, \\*$\rho$ is a cumulative probability of components that failed, \\*\varName{rootC} is the root component of the current tree
 \\*\vspace{0.8em}
 \begin{algorithmic}[1]
 \FOR{$x' \in S'$}
-  \STATE $\eta = 1;$ \COMMENT{cumulative product of complement probabilities of components that could have failed but did not}
+  \STATE $\eta = 1;$ \COMMENT{Cumulative product of complement probabilities of components that could have failed but did not}
   \FOR{\varName{comp} $\in \Omega$}
     \STATE $\varName{compsAvailable} = r_{\varName{comp}} - \varName{x'}[\varName{comp}];$
     \FOR{$\varName{parentC} \in \varName{BFHist}[\varName{comp}]$}
@@ -516,7 +513,8 @@ where \varName{level} describes failed components, \\*\varName{nFailed} counts f
         \STATE $\eta = \eta * (1 - \phi_{parentC,\; comp});$
       \ELSE
         \STATE break;
-        \COMMENT{compsAvailable must equal 0 which means there cannot be any more nodes that could have failed of Type(comp)}
+% Sashank - modified this text a bit
+        \COMMENT{compsAvailable must be greater than 0 or else there cannot be any more failed nodes of Type(comp)}
       \ENDIF
     \ENDFOR
   \ENDFOR
@@ -524,13 +522,13 @@ where \varName{level} describes failed components, \\*\varName{nFailed} counts f
   \FOR{$\varName{e} \in \mathcal{E}$}
     \STATE $x = (x', e)$;
     \STATE $y = (x' + nFailed, e)$;
-    % \STATE Environment$(\varName{y}) = \:$Environment$(\varName{x});$
     \IF{\varName{y} is not a valid state}
     \STATE continue;
     \ENDIF
     \STATE $\varName{rootFailureRate} = (r_{\varName{rootC}} - \varName{x}[\varName{rootC}]) * \lambda_{\varName{rootC},\; \varName{e}}\,;$
+% Sashank - Moved q(x,y) equation up here, since it wouldn't make sense to set rootFailureRate without updating qMatrix
+    \STATE $\varName{Q}(\varName{x},\varName{y}) = \varName{Q}(\varName{x},\varName{y}) + \varName{rootFailureRate} \rho \eta;$
   \ENDFOR
-  \STATE $\varName{Q}(\varName{x},\varName{y}) = \varName{Q}(\varName{x},\varName{y}) + \varName{rootFailureRate} \rho \eta;$
 \ENDFOR
 \end{algorithmic}
 \hrLine
