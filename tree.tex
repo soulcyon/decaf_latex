@@ -56,8 +56,7 @@ Consider a model with $compSet = \{A, B, C\}$, where redundancy of each componen
 
 compsAvailable for a type, $\zeta_{Type}$, is initialized with Redundancy(Type) -  $x(\mbox{Type})$, where $x$ is the ``from" state and Type is the component type. In our case, $n = 2$. Failure rate of the root is the product of  $\zeta_{RootType}$, $n$, and $\lambda_{A, \mathcal{E}}$.
 
-For evaluating the failure rate of the tree, we take the product of $\phi_{i,j}$ for all edges from a parent \varName{i} to a child \varName{j} in the tree. %We ignore edges that lead to nodes exclusive to the supertree because they have not failed.
-Hence, the failure rate of the tree equals $\phi_{A, B}\, \phi_{B, C}\, \phi_{C, B}\, \phi_{B, A}$.
+For evaluating the failure rate of the tree, we take the product of $\phi_{i,j}$ for all edges from a parent \varName{i} to a child \varName{j} in the tree. Hence, the failure rate of the tree equals $\phi_{A, B}\, \phi_{B, C}\, \phi_{C, B}\, \phi_{B, A}$.
 
 Now we calculate the cumulative complement probability of nodes, or the supertree rate, that did not fail from breadth-first history.
 We iterate through the linked list for each type in the breadth-first history as follows:
