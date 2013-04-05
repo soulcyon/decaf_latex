@@ -170,7 +170,7 @@ We implement this power set-like operation by generating all possible binary num
 
 Otherwise, we choose one possible choice for the failed components in the next level from the nextLevelPossibilities \citeLine{2}. Each node in $T$ has three attributes: a component type $i$; an ID, which is its breadth-first ID in the supertree; and a parentID, which is the breadth-first ID of this node's parent in the supertree. For each node \varName{parentC} in the current bottom level that acts as a parent, potentially causing other nodes to fail, we iterate through all of its possible children, i.e., through $\Gamma_{parentC.type}$. If any of these children actually fail, then they will be members of the set \varName{oneNextLevelPossibility} \citeBlock{4}{6}. Now if the redundancy of the component type we just tried to add as a child has already been exhausted, it cannot fail and hence our tree is invalid and we move on to the next possibility \citeBlock{10}{12}.
 
-If a child of type \varName{childC.type} has failed (i.e., it exists within nextLevelPossibilities), the relevant data structures are updated to signify this occurrence. We increment the number of failed components of type \varName{childC.type}, add the symbol @ to \varName{BFHist}[\varName{childC.type}] (to mark that a failure of this type has occurred at the current location in the tree), and update $\rho$ by multiplying it by $\phi_{i, j}$ \citeBlock{11}{13}. If the child does not actually fail\changed{,} then we add \varName{parentC.type} to \varName{BFHist}[\varName{childC.type}]. Later in ComputeTreeRate for each transition $(x, y)$, we evaluate which of these children could have failed but did not, and which could \changed{\textit{not} have failed} because their type's redundancy was exhausted. \citeBlock{14}{16}.
+If a child of type \varName{childC.type} has failed (i.e., it exists within nextLevelPossibilities), the relevant data structures are updated to signify this occurrence. We increment the number of failed components of type \varName{childC.type}, add the symbol @ to \varName{BFHist}[\varName{childC.type}] (to mark that a failure of this type has occurred at the current location in the tree), and update $\rho$ by multiplying it by $\phi_{i, j}$ \citeBlock{11}{13}. If the child does not actually fail, then we add \varName{parentC.type} to \varName{BFHist}[\varName{childC.type}]. Later in ComputeTreeRate for each transition $(x, y)$, we evaluate which of these children could have failed but did not, and which could \textit{not} have failed because their type's redundancy was exhausted. \citeBlock{14}{16}.
 
 We do the above updates to the data structures for each potential parent node in \varName{level} and each of its children in \varName{oneNextLevelPossibility}. If at least one child has been added, we recursively add another level to the current tree \citeBlock{19}{23}. Otherwise, this tree has not changed in this pass through \mbox{AddTreeLevel} and we call ComputeTreeRate to compute the rate of the finalized tree \citeBlock{24}{26}. We make sure that trees are not double counted because once a tree passes through \mbox{AddTreeLevel} unmodified, it is processed and discarded. We avoid making duplicate trees because each oneNextLevelPossibility is unique.
 
@@ -251,11 +251,11 @@ where \varName{level}  is the current bottom level of failed components, \\*\var
 \end{algorithmic}
 \hrLine
 
-\subsection{Computing a tree's rate revisited}
+\subsection{Computing a Tree's Rate Revisited}
 
-\changed{We now show how to compute $\eta$ from (\ref{eq:rate}) using the data structure \varName{BFHist} for Figure \ref{fig:tree} from our example in Section \ref{sec:exrate}. We assume the tree in Figure \ref{fig:tree} was first constructed from several recursive calls to AddTreeLevel, which also built \varName{BFHist} as follows.}
+We now use our example in Section \ref{sec:exrate} to show how to compute $\eta$ from (\ref{eq:rate}) using the data structure \varName{BFHist} for Figure \ref{fig:tree}. We assume the tree in Figure \ref{fig:tree} was first constructed from several recursive calls to AddTreeLevel, which also built \varName{BFHist} as follows.
 
-\changed{\begin{center}
+\begin{center}
 	\begin{tabular}{| c | l |}
 		\hline
 		\textit{A} & \nodeLabel{@}{1} \ \nodeLabel{B}{2} \ \nodeLabel{C}{5} \ \nodeLabel{@}{8} \\
@@ -265,19 +265,19 @@ where \varName{level}  is the current bottom level of failed components, \\*\var
 		\textit{C} & \nodeLabel{A}{1} \ \nodeLabel{@}{5} \ \nodeLabel{B}{7} \ \nodeLabel{A}{8} \\
 		\hline
 	\end{tabular}
-\end{center}}
+\end{center}
 
-\changed{We then proceed to ComputeTreeRate to compute $\eta$. As in Section \ref{sec:exrate}, prior to iterating through \varName{BFHist}, we have $u_A = 2$, $u_B = 2$ and $u_C = 1$. Iteration through \varName{BFHist} occurs as specified in ComputeTreeRate \citeBlock{3}{14}}.
+We then proceed to ComputeTreeRate to compute $\eta$. As in Section \ref{sec:exrate}, prior to iterating through \varName{BFHist}, we have $u_A = 2$, $u_B = 2$ and $u_C = 1$. Iteration through \varName{BFHist} occurs as specified in ComputeTreeRate \citeBlock{3}{14}.
 
-\changed{\begin{itemize}
-\item Iteration through the linked list at index $A$ is as follows: The \nodeLabel{@}{1} means a component of type $A$ has failed at ID 1, so we then decrement $u_{A}$ to 1. Then for the next two entries, since $u_{A}$ is still positive, $\eta$ includes $(1 - \phi_{B, A})$ and $(1 - \phi_{C, A})$ from \nodeLabel{B}{2} and \nodeLabel{C}{5} respectively in its product. Finally \nodeLabel{@}{8} means $u_{A} = 0$ a component of type $A$ failed at ID 8, so we decrease $u_A$ to 0. 
-\item Iteration through the linked list at index $B$ is as follows: \nodeLabel{@}{2} and \nodeLabel{@}{7} mean components of type $B$ have failed at IDs 2 and 7 respectively, so we decrement $u_{B}$ from 2 to 1 and then from 1 to 0. Since $u_{B}$ is now 0, we cannot include any more terms from this row in $\eta$. 
-\item Iteration through the linked list at index $C$ is as follows: Since $u_{C}$ starts out positive, we include $(1 - \phi_{A, C})$ from \nodeLabel{A}{1}. \nodeLabel{@}{5} means a component of type $C$ has failed at ID 5, so we decrement $u_{C}$ to 0. Since $u_{C} = 0$, again we cannot include any more terms from this row in $\eta$. 
+\begin{itemize}
+\item Iteration through the linked list at index $A$ is as follows: The \nodeLabel{@}{1} means a component of type $A$ has failed at ID 1, so we then decrement $u_{A}$ to 1. Then for the next two entries, since $u_{A}$ is still positive, $\eta$ includes $(1 - \phi_{B, A})$ and $(1 - \phi_{C, A})$ from \nodeLabel{B}{2} and \nodeLabel{C}{5} respectively in its product. Finally \nodeLabel{@}{8} means a component of type $A$ failed at ID 8, so we decrease $u_A$ to 0. 
+\item Iteration through the linked list at index $B$ is as follows: \nodeLabel{@}{2} and \nodeLabel{@}{7} mean components of type $B$ have failed at IDs 2 and 7 respectively, so we decrement $u_{B}$ from 2 to 1 and then from 1 to 0. Since $u_{B}$ is now 0, we cannot include any terms from this row in $\eta$.
+\item Iteration through the linked list at index $C$ is as follows: Since $u_{C}$ starts out positive, we include $(1 - \phi_{A, C})$ from \nodeLabel{A}{1}. \nodeLabel{@}{5} means a component of type $C$ has failed at ID 5, so we decrement $u_{C}$ to 0. Since $u_{C} = 0$, again we cannot include any terms from this row in $\eta$. 
 \end{itemize}
-Multiplying the contributions from each index, $\eta = (1 - \phi_{B, A}) (1 - \phi_{C, A}) (1 - \phi_{A, C})$.}
+Multiplying the contributions from each index results in $\eta = (1 - \phi_{B, A}) (1 - \phi_{C, A}) (1 - \phi_{A, C})$.
  
-\section{Experimental}
-\subsection{Nested Experimental}
+\section{Experimental Results}
+
 
 \bibliographystyle{plain}
 \bibliography{mkn}
