@@ -310,25 +310,25 @@ to discuss the performance of the Q-Matrix operations.  When we look at the tren
 	\label{fig:graph}
 \end{minipage}
 
-\\*\vspace{1em}
-In an effort to improving the running time of our algorithm, we introduce certain thresholds to stop
+\vspace{1em}
+In an effort to improve the running time of our algorithm, we introduce certain thresholds to stop
 generating trees based on simple test conditions.  To properly stop the recursion of the trees, we need to
-insert the threshold logic in Algorithm 2 before line 19.  We will denote the new threshold pseudo-code with
-lines [19.x].   The breaking conditions will cause the program to continue to the next enumeration of
+insert the threshold logic in Algorithm 2 before line \citeLine{19}.  We will denote the new threshold pseudo-code with
+lines \citeLine{19.x}.   The breaking conditions will cause the program to continue to the next enumeration of
 the bottom-most tree level, thereby ignoring any rate computations of trees that do not satisfy
 the threshold criteria.
 
 Our first threshold is the \textit{height threshold} where we stop generating trees after the height of a
-tree reaches $\tau_h$.  Rather than implementing a seperate variable for detecting the height of the current level, we will utilize \varName{level}.\\
+tree reaches $\tau_h$. \\
 
 \begin{algorithmic}
-\IF{$\varName{level}.length > \tau_h$}
+\IF{$\varName{depth} > \tau_h$}
  	\STATE goto line 2;
 \ENDIF
 \end{algorithmic}
 
 \vspace{1em}
-The second threshold we consider is the \textit{node threshold}, where trees will contain a maximum of $\tau_n$ components.  To properly keep track of the number of components, we will use the sum of the components failed in \varName{nFailed}.\\
+The second threshold we consider is the \textit{node threshold}, where trees will contain a maximum of $\tau_n$ components. We compute the sum of components in \varName{nFailed} to count the number of failed components in $T$.\\
 
 \begin{algorithmic}
 \IF{$\sum \varName{nFailed} > \tau_n$}
@@ -337,7 +337,7 @@ The second threshold we consider is the \textit{node threshold}, where trees wil
 \end{algorithmic}
 
 \vspace{1em}
-The final threshold we analyzed is the \textit{rate threshold}, where we stop generating trees after the $\rho$ drops below $\tau_r$.\\
+The final threshold we analyze is the \textit{rate threshold}, where we stop generating trees after the $\rho$ drops below $\tau_r$.\\
 
 \begin{algorithmic}
 	\IF{$\rho < \tau_r$}
@@ -346,9 +346,9 @@ The final threshold we analyzed is the \textit{rate threshold}, where we stop ge
 \end{algorithmic}
 
 \vspace{1em}
-The range of values for any $\tau$ is from 0 to $\infty$, however it is important to note that $\tau_h$ and $\tau_n$ depend on variables that increase as more trees are generated.  $\rho$ decreases as more components are attached, thus $\tau_r$ will need to be zero to generate all trees, while $\tau_h$ and $\tau_n$ need to be $\infty$.  In order to define a more appropriate range for our thresholds, we need to define the thresholds based on each model.   For initial loose bounds, we can assume the following limits: $\tau_n < \displaystyle\sum^i r_i$, $\tau_h < COUNT(LP)$ and $\tau_r < MAX(r_i \lambda_i)$.
+The range of values for any $\tau$ is from 0 to $\infty$. However, it is important to note that $\tau_h$ and $\tau_n$ depend on variables that increase as more trees are generated.  $\rho$ decreases as more components are attached, thus $\tau_r$ needs to be zero to generate all trees, while $\tau_h$ and $\tau_n$ needs to be $\infty$.  In order to define a more appropriate range for our thresholds, we need to define the thresholds based on each model.   For initial loose bounds, we can assume the following limits: $\tau_n < \displaystyle\sum^i r_i$, $\tau_h < COUNT(LP)$ and $\tau_r < MAX(r_i \lambda_i)$.
 
-To define the longest path ($LP$), we need to first describe our models as a graph data structure.  The graph's nodes are the component types, where each node's value is the $\lambda$ of that component type.  We define the directed edges to start at the parent component type and end at the cascading component type.  The value of each edge is $\phi_{i,j}$, where the edge starts at the ith node and ends at the jth node.  Since we know the longest path problem is not an NP-complete problem, we decided that the $\tau_h$ is not a reasonable threshold to pursue.
+To define the longest path ($LP$), we need to first describe our models as a graph data structure.  The graph's nodes are the component types, where each node's value is the $\lambda$ of that component type.  We define the directed edges to start at the parent component type and end at the cascading component type.  The value of each edge is $\phi_{i, j}$, where the edge starts at the node labeled $i$ and ends at the node labeled $j$.  Since we know the longest path problem is an NP-hard problem, we decided that the $\tau_h$ is not a ideal threshold to pursue.
 
 \begin{minipage}[c]{\textwidth}
 	\centering
@@ -357,7 +357,7 @@ To define the longest path ($LP$), we need to first describe our models as a gra
 	\label{fig:model}
 \end{minipage}
 
-\\*\vspace{1em}
+\vspace{1em}
 However, we can use our graph data structure to pursue a tighter bound for the $\tau_r$.
 
 \begin{center}
