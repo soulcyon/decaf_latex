@@ -15,6 +15,8 @@
 \usepackage[left = 1.0in, top = 1in, right = 1.0in, bottom = 1in, nohead]{geometry}
 \usepackage{color}
 \usepackage{ulem}
+\usepackage{pgfplots}
+\usepackage{caption}
 
 \def\myxout{\bgroup \markoverwith{\textcolor{red}{\hbox to.35em{\hss/\hss}}}\ULon}
 \def\myxoutii{\bgroup \markoverwith{\textcolor{blue}{\hbox to.35em{\hss/\hss}}}\ULon}
@@ -49,6 +51,7 @@
 \newcommand{\citeLine}[1]{$\langle \, #1 \, \rangle$}
 \newcommand{\citeBlock}[2]{$\langle \, #1 - #2 \, \rangle$}
 \newcommand{\nodeLabel}[2]{\mbox{$#1$-$#2$}}
+
 
 \begin{document}
 \title{Working Title}
@@ -143,7 +146,7 @@ If the component type \varName{rootC.type} at the root cannot cause any other co
 
 \captionAmerica{1}{SeedTrees($\Gamma$)}
 where $\Gamma$ is an array of ordered sets that describes which components can cause which other components to fail
-\\*\vspace{0.8em}
+\\*\vspace{0.3em}
 \begin{algorithmic}[1]
 \FOR{\varName{rootC.type} $\in \Omega$}
   \STATE \varName{level} = [ ]; \COMMENT {Dynamic array of failed components at tree's current bottom level}
@@ -176,7 +179,7 @@ We do the above updates to the data structures for each potential parent node in
 
 \captionAmerica{2}{AddTreeLevel(\varName{level}, \varName{nFailed}, \varName{BFHist}, $\rho$, \varName{rootC.type})}
 where \varName{level} is the current level of failed components, \\*\varName{nFailed} counts failed components by type in the tree, \\*\varName{BFHist} is breadth-first history, \\*$\rho$ is a cumulative product of component-affected probabilities, \\*\varName{rootC.type} is the root component's type in the current tree
-\\*\vspace{0.8em}
+\\*\vspace{0.3em}
 \begin{algorithmic}[1]
 \STATE \varName{nextLevelPossibilities} = $\bigtimes\limits_{i \, = \, 1: \atop \Gamma_{level[i]} \neq \emptyset}^{|level|}\mathcal{P}(\Gamma_{level[i]});$
 \\*\COMMENT{Builds all possibilities for the next level (given the current level) by taking a Cartesian product of the power sets of non-empty $\Gamma$ sets of failed nodes in the current level}
@@ -184,7 +187,7 @@ where \varName{level} is the current level of failed components, \\*\varName{nFa
 	\STATE \varName{addedAChildFlag} = False;
     \FOR{\varName{parentC} $\in$ \varName{level}}
       	\FOR{$i$ $\in$ $\Gamma_{\varName{parentC.type}}$}
-          	\IF{$\exists$ \varName{childC} $\in$ \varName{oneNextLevelPossibility} $:$ \varName{childC.type} == $i$ \AND \varName{childC.parentID} == \varName{parentC.ID}}
+          	\IF{$\exists$ \varName{childC} $\in$ \varName{oneNextLevelPossibility} $:$ \varName{childC.type} == $i$ $\&\&$ \varName{childC.parentID} == \varName{parentC.ID}}
           		\STATE \varName{addedAChildFlag} = True;
           		\IF{$\varName{nFailed}[\varName{childC.type}] == r_{\varName{childC.type}}$}
 	            	\STATE goto line 2;
@@ -222,7 +225,7 @@ Once we have finished calculating $\eta$, we loop through all environments since
 
 \captionAmerica{3}{ComputeTreeRate(\varName{nFailed}, \varName{BFHist}, $\rho$, \varName{rootC.type})}
 where \varName{level}  is the current bottom level of failed components, \\*\varName{nFailed} counts the failed components of each type in the tree, \\*\varName{BFHist} is breadth-first history, \\*$\rho$ is a cumulative product of component-affected probabilities, \\*\varName{rootC.type} is the root's type in the tree
-\\*\vspace{0.8em}
+\\*\vspace{0.3em}
 \begin{algorithmic}[1]
 \FOR{$x' \in S'$}
   \STATE $\eta = 1;$ \COMMENT{Cumulative product of complement probabilities of components that could have failed but did not}
@@ -276,7 +279,97 @@ We then proceed to ComputeTreeRate to compute $\eta$. As in Section \ref{sec:exr
 \end{itemize}
 Multiplying the contributions from each index results in $\eta = (1 - \phi_{B, A}) (1 - \phi_{C, A}) (1 - \phi_{A, C})$.
  
-\section{Experimental Results}
+\section{Performance Analysis}
+When analyzing the performance of our algorithm, it is important to note that the systems with larger
+numbers of states do not necessarily correspond to larger numbers of trees.  When computing statistics
+such as Mean time to failure (MTTF) and Steady state unavailability (SSU), we rely on third-party libraries to
+perform efficient matrix operations.  We can easily swap out libraries for these tasks so there is no need
+to discuss the performance of the Q-Matrix operations.  When we look at the trends show in Figure~\ref{fig:graph}, we see an expontentially increasing Time to Generate Trees (TGT) as the number of trees generated increases.
+
+\begin{minipage}[c]{\textwidth}
+	\centering
+	\begin{tikzpicture}
+	    \begin{axis}[
+	        symbolic x coords={0,978,4507,6328,27746,321372,1},
+	    	max space between ticks=20,
+	    	xtick=data,
+	        ylabel=TGT (seconds),
+	        xlabel=Number of Trees,
+	        ymin=0
+	      ]
+	        \addplot[ybar,fill=black] coordinates {
+	            (978,	0.12)
+	            (4507,	0.26)
+	            (6328,	1.42)
+	            (27746,	1.64)
+	            (321372,6.22)
+	        };
+	    \end{axis}
+	\end{tikzpicture}
+	\captionof{figure}{Relation of TGT vs Trees across various models}
+	\label{fig:graph}
+\end{minipage}
+
+\\*\vspace{1em}
+In an effort to improving the running time of our algorithm, we introduce certain thresholds to stop
+generating trees based on simple test conditions.  To properly stop the recursion of the trees, we need to
+insert the threshold logic in Algorithm 2 before line 19.  We will denote the new threshold pseudo-code with
+lines [19.x].   The breaking conditions will cause the program to continue to the next enumeration of
+the bottom-most tree level, thereby ignoring any rate computations of trees that do not satisfy
+the threshold criteria.
+
+Our first threshold is the \textit{height threshold} where we stop generating trees after the height of a
+tree reaches $\tau_h$.  Rather than implementing a seperate variable for detecting the height of the current level, we will utilize \varName{level}.\\
+
+\begin{algorithmic}
+\IF{$\varName{level}.length > \tau_h$}
+ 	\STATE goto line 2;
+\ENDIF
+\end{algorithmic}
+
+\vspace{1em}
+The second threshold we consider is the \textit{node threshold}, where trees will contain a maximum of $\tau_n$ components.  To properly keep track of the number of components, we will use the sum of the components failed in \varName{nFailed}.\\
+
+\begin{algorithmic}
+\IF{$\sum \varName{nFailed} > \tau_n$}
+		\STATE goto line 2;
+\ENDIF
+\end{algorithmic}
+
+\vspace{1em}
+The final threshold we analyzed is the \textit{rate threshold}, where we stop generating trees after the $\rho$ drops below $\tau_r$.\\
+
+\begin{algorithmic}
+	\IF{$\rho < \tau_r$}
+		\STATE goto line 2;
+	\ENDIF
+\end{algorithmic}
+
+\vspace{1em}
+The range of values for any $\tau$ is from 0 to $\infty$, however it is important to note that $\tau_h$ and $\tau_n$ depend on variables that increase as more trees are generated.  $\rho$ decreases as more components are attached, thus $\tau_r$ will need to be zero to generate all trees, while $\tau_h$ and $\tau_n$ need to be $\infty$.  In order to define a more appropriate range for our thresholds, we need to define the thresholds based on each model.   For initial loose bounds, we can assume the following limits: $\tau_n < \displaystyle\sum^i r_i$, $\tau_h < COUNT(LP)$ and $\tau_r < MAX(r_i \lambda_i)$.
+
+To define the longest path ($LP$), we need to first describe our models as a graph data structure.  The graph's nodes are the component types, where each node's value is the $\lambda$ of that component type.  We define the directed edges to start at the parent component type and end at the cascading component type.  The value of each edge is $\phi_{i,j}$, where the edge starts at the ith node and ends at the jth node.  Since we know the longest path problem is not an NP-complete problem, we decided that the $\tau_h$ is not a reasonable threshold to pursue.
+
+\begin{minipage}[c]{\textwidth}
+	\centering
+	\includegraphics[width=3.0in]{simulation125model.png}
+	\captionof{figure}{Graph of the 125-state model}
+	\label{fig:model}
+\end{minipage}
+
+\\*\vspace{1em}
+However, we can use our graph data structure to pursue a tighter bound for the $\tau_r$.
+
+\begin{center}
+	\begin{tabular}{| c | lllll |}
+    N  & Trees & TGT (s) & MTTF  & SSU    \\ \hline
+    12 & 321372  & 37.05   & 44.12 & 0.0326 \\ \hline
+    11 & 167022  & 18.76   & 47.66 & 0.0291 \\ \hline
+    10 & 63072   & 2.50    & 54.15 & 0.0246 \\ \hline
+    9  & 20322   & 1.91    & 65.42 & 0.0198 \\ \hline
+    8  & 6165    & 1.05    & 83.35 & 0.0152 \\ \hline
+    \end{tabular}
+\end{center}
 
 
 \bibliographystyle{plain}
