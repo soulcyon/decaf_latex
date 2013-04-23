@@ -346,9 +346,9 @@ The final threshold we analyze is the \textit{rate threshold}, where we stop gen
 \end{algorithmic}
 
 \vspace{1em}
-The range of values for any $\tau$ is from 0 to $\infty$. However, it is important to note that $\tau_h$ and $\tau_n$ depend on variables that increase as more trees are generated.  $\rho$ decreases as more components are attached, thus $\tau_r$ needs to be zero to generate all trees, while $\tau_h$ and $\tau_n$ needs to be $\infty$.  In order to define a more appropriate range for our thresholds, we need to define the thresholds based on each model.   For initial loose bounds, we can assume the following limits: $\tau_n < \displaystyle\sum^i r_i$, $\tau_h < COUNT(LP)$ and $\tau_r < MAX(r_i \lambda_i)$.
+The range of values for any $\tau$ is from 0 to $\infty$. However, it is important to note that $\tau_h$ and $\tau_n$ depend on variables that increase as more trees are generated.  $\rho$ decreases as more components are attached, thus $\tau_r$ needs to be zero to generate all trees, while $\tau_h$ and $\tau_n$ needs to be $\infty$.  In order to define a more appropriate range for our thresholds, we need to define the thresholds based on each model.   For initial loose bounds, we can assume the following limits: $\tau_n < \displaystyle\sum^i r_i$, $\tau_h < |LP|$ and $\tau_r < MAX(r_i \lambda_i)$.
 
-To define the longest path ($LP$), we need to first describe our models as a graph data structure.  The graph's nodes are the component types, where each node's value is the $\lambda$ of that component type.  We define the directed edges to start at the parent component type and end at the cascading component type.  The value of each edge is $\phi_{i, j}$, where the edge starts at the node labeled $i$ and ends at the node labeled $j$.  Since we know the longest path problem is an NP-hard problem, we decided that the $\tau_h$ is not a ideal threshold to pursue.
+To define the longest path ($LP$), we need to first describe our models as a graph data structure.  The graph's nodes are the component types, where each node's value is the $\lambda$ of that component type.  We define the directed edges to start at the parent component type and end at the cascading component type.  The value of each edge is $\phi_{i, j}$, where the edge starts at the node labeled $i$ and ends at the node labeled $j$.  The longest path problem is NP-hard for cyclic graphs, thus we cannot derive any finite upper bound for $\tau_h$.  It is possible to find the tallest tree in a model, however, we cannot calculate this height prior to running our algorithm.
 
 \begin{minipage}[c]{\textwidth}
 	\centering
@@ -360,17 +360,192 @@ To define the longest path ($LP$), we need to first describe our models as a gra
 \vspace{1em}
 However, we can use our graph data structure to pursue a tighter bound for the $\tau_r$.
 
+\subsection{Iterating over thresholds}
+Using the model shown in Figure~\ref{fig:model}, we step through each of the thresholds.
+Since the results vary from model to model, we use the loose upper bounds as starting points.  From there, 
+we simply subtract $\tau_n$ by 1.  $\tau_r$ starts at the largest $\lambda r$ and to calculate the next step we multiply by the smallest $\phi$.
+
+$\tau_n$
 \begin{center}
 	\begin{tabular}{| c | lllll |}
-    N  & Trees & TGT (s) & MTTF  & SSU    \\ \hline
-    12 & 321372  & 37.05   & 44.12 & 0.0326 \\ \hline
-    11 & 167022  & 18.76   & 47.66 & 0.0291 \\ \hline
-    10 & 63072   & 2.50    & 54.15 & 0.0246 \\ \hline
-    9  & 20322   & 1.91    & 65.42 & 0.0198 \\ \hline
-    8  & 6165    & 1.05    & 83.35 & 0.0152 \\ \hline
+    N  & Trees   & TGT (s) & MTTF   & SSU    \\ \hline
+    12 & 321372  & 6.69    & 44.12  & 0.0326 \\ \hline
+    11 & 167022  & 4.83    & 47.66  & 0.0291 \\ \hline
+    10 & 63072   & 3.12    & 54.15  & 0.0246 \\ \hline
+    9  & 20322   & 1.77    & 65.42  & 0.0198 \\ \hline
+    8  & 6165    & 1.18    & 83.35  & 0.0152 \\ \hline
+    7  & 1875    & 0.65    & 110.62 & 0.0152 \\ \hline
+    6  & 588     & 0.41    & 156.08 & 0.0152 \\ \hline
+    5  & 192     & 0.21    & 252.28 & 0.0152 \\ \hline
     \end{tabular}
 \end{center}
 
+$\tau_r$
+\begin{center}
+	\begin{tabular}{| c | lllll |}
+    R      & Trees  & TGT (s) & MTTF    & SSU    \\ \hline
+    4E-2   & 31     & 0.09    & 1018.21 & 0.0006 \\ \hline
+    8E-3   & 114    & 0.18    & 321.09  & 0.0028 \\ \hline
+    16E-4  & 486    & 0.35    & 157.52  & 0.0071 \\ \hline
+    32E-5  & 2378   & 0.72    & 98.95   & 0.0125 \\ \hline
+    64E-6  & 11688  & 1.42    & 69.48   & 0.0186 \\ \hline
+    128E-7 & 50396  & 2.83    & 53.93   & 0.0186 \\ \hline
+    256E-8 & 163722 & 4.37    & 46.42   & 0.0186 \\ \hline
+    512E-9 & 300316 & 6.41    & 44.18   & 0.0186 \\ \hline
+    \end{tabular}
+\end{center}
+
+\begin{minipage}[c]{\textwidth}
+	\centering
+	\begin{tikzpicture}
+	    \begin{axis}[
+	    	max space between ticks=30,
+	        ylabel=MTTF,
+	        xlabel=TGT (seconds),
+	        ymin=40
+	      ]
+	        \addplot+[const plot mark right,draw=blue] coordinates {
+	            %(6.69, 44.12)%
+	            (4.83, 47.66)
+	            (3.12, 54.15)
+	            (1.77, 65.42)
+	            (1.18, 83.35)
+	            (0.65, 110.62)
+	            (0.41, 156.08)
+	            %(0.21,252.28)
+	        };
+	        \addlegendentry{$\tau_n$}
+	        \addplot+[smooth,draw=red] coordinates {
+	            %(6.41, 44.180)%
+	            (4.37, 46.420)
+	            (2.83, 53.930)
+	            (1.42, 69.480)
+	            (0.72, 98.950)
+	            (0.35, 157.52)
+	            %(0.18, 321.09)
+	            %(0.09, 1018.21)
+	        };
+	        \addlegendentry{$\tau_r$}
+	    \end{axis}
+	\end{tikzpicture}
+	\captionof{figure}{Comparing rate and node thresholds}
+	\label{fig:graph1}
+\end{minipage}
+
+For the sake of brevity, we removed certain outlying points from the graph.  We used the constant left markup for the $\tau_n$ plot because the x-value represent the minimum required amount of time to achieve MTTF.  The $\tau_r$ is a generic smooth line, since the precision of the rate threshold can be very minute, it will still produce some increase in MTTF.  With enough points for $\tau_r$ we see a stepping effect at a smaller scale, similar to the $\tau_n$ plot.
+\begin{minipage}[c]{\textwidth}
+	\centering
+	\begin{tikzpicture}
+	    \begin{axis}[
+	    	max space between ticks=30,
+	        ylabel=MTTF,
+	        xlabel=TGT (seconds),
+	        ymin=40
+	      ]
+	        \addplot+[const plot mark right,draw=blue] coordinates {
+	            %(6.69, 44.12)%
+	            (4.83, 47.66)
+	            (3.12, 54.15)
+	            (1.77, 65.42)
+	            (1.18, 83.35)
+	            (0.65, 110.62)
+	            (0.41, 156.08)
+	            %(0.21,252.28)
+	        };
+	        \addlegendentry{$\tau_n$}
+	        \addplot+[const plot mark right,draw=red,opacity=0.2] coordinates {
+(0.344502149, 157.5190885463175)
+(0.344082552, 157.5190885463175)
+(0.378330792, 147.9078317370886)
+(0.382740174, 147.9078317370886)
+(0.379160362, 147.57625733995283)
+(0.404638214, 134.58099951972483)
+(0.407693398, 134.5105420836673)
+(0.408394303, 132.1944063794543)
+(0.422157951, 127.63862497221515)
+(0.4417392, 123.2682365622926)
+(0.447972678, 119.47800116980984)
+(0.446970534, 119.2609377366602)
+(0.499038684, 112.29985247933837)
+(0.526347074, 111.74281155144094)
+(0.576919899, 106.7691734648383)
+(0.622748098, 105.46713919346436)
+(0.634484917, 104.13078705240042)
+(0.720985005, 98.95502803212393)
+(0.723733977, 98.95502803212393)
+(0.742169427, 96.4620897905325)
+(0.747129889, 94.65375600479332)
+(0.748421806, 94.6483505713123)
+(0.82217861, 89.46596320539086)
+(0.818284129, 88.9319343901071)
+(0.825973617, 87.44953414900172)
+(0.891425726, 84.79442627438799)
+(0.908426726, 83.83796267263895)
+(0.945712346, 79.95200429617726)
+(0.97197172, 79.59074177462524)
+(1.152168268, 77.50326279827235)
+(1.178107901, 76.66838521971795)
+(1.278671691, 74.03705549185341)
+(1.306646895, 73.17459250012516)
+(1.317523567, 73.03713554330994)
+(1.423942375, 69.49588337998549)
+(1.439930543, 69.13775642408925)
+(1.447929816, 68.95959482654695)
+(1.503310099, 66.58295027531301)
+(1.580233072, 65.02199768949912)
+(1.586738225, 64.89884555254417)
+(1.607290545, 63.99041962668084)
+(1.640153371, 63.185081407549525)
+(1.762170192, 61.93014732885827)
+(1.762673321, 61.7841287726133)
+(2.026623655, 59.06709866009019)
+(2.040350385, 58.9177603427415)
+(2.202156341, 58.01120401464048)
+(2.378737703, 57.21566964408839)
+(2.548764516, 56.38877165851812)
+(2.589307001, 55.58690557429628)
+(2.591811272, 55.46368707648622)
+(2.797474913, 53.97297770438325)
+(2.815541258, 53.89772517671483)
+(2.921684062, 52.51281500942996)
+(3.001292371, 52.22648610967988)
+(3.068945932, 51.926465274486326)
+(3.235270871, 50.859779060861655)
+(3.230514106, 50.859779060861655)
+(3.414576006, 50.3358291324884)
+(3.440186832, 50.04789682353884)
+(3.440772488, 50.04088922919791)
+(3.767284412, 48.76703850295514)
+(3.783551227, 48.76703850295514)
+(3.892158063, 48.3199391302121)
+(4.120468587, 47.77464150795925)
+(4.171618623, 47.662915667165436)
+(4.429253872, 46.88154637849341)
+(4.413631229, 46.881328101249686)
+(4.357047837, 46.42155167256497)
+(4.358408584, 46.419419723163394)
+(4.98801497, 45.88158176521943)
+(4.764117562, 45.74789890258021)
+(5.575508072, 45.72257131523723)
+(5.662311278, 44.97715874824674)
+(5.307410718, 44.97715874824674)
+(5.396393051, 44.90584140426985)
+(5.784158034, 44.90584140426985)
+(5.424027912, 44.90584140426985)
+(5.725843844, 44.578034109756366)
+(5.662620359, 44.578034109756366)
+	        };
+	        \addlegendentry{$\tau_r$}
+	    \end{axis}
+	\end{tikzpicture}
+	\captionof{figure}{Smaller stepping for $\tau_r$}
+	\label{fig:graph2}
+\end{minipage}
+
+Points closer to the origin of the graph represent more efficient thresholds.  As shown in Figure~\ref{fig:graph2}, it is clear that stepping over $\tau_r$ results in better efficiency than $\tau_n$. Furthermore, since we cannot have decimal values for $\tau_n$, there is little reason to pursue this threshold.
+
+\subsection{Choosing an appropriate $\tau_r$}
+Use Djikstra's algorithm to find the shortest path with the largest rate.
 
 \bibliographystyle{plain}
 \bibliography{mkn}
