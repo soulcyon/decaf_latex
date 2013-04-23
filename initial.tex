@@ -547,6 +547,13 @@ Points closer to the origin of the graph represent more efficient thresholds.  A
 \subsection{Choosing an appropriate $\tau_r$}
 Use Djikstra's algorithm to find the shortest path with the largest rate.
 
+\section{Remarks}
+\subsection{MTTF Computation}
+We remove the down-states from the matrix to speed up MTTF calculation.
+
+\subsection{Bookmarks}
+We do not store all failed components \varname{BFHist}, we simply multiply until we hit a not-failed component.
+
 \bibliographystyle{plain}
 \bibliography{mkn}
 
