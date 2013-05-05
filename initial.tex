@@ -1,7 +1,6 @@
 %
-% TODO
-% Sashank's and Nakayama's environmental, repair transitions and numerical optimizations (U/D states).
-% Talk about environment dependent phis in Remarks?
+% TODO Sashank's and Nakayama's environmental, repair transitions and numerical
+% optimizations (U/D states). Talk about environment dependent phis in Remarks?
 % phi pinching
 
 \documentclass[12pt]{article}
@@ -60,30 +59,127 @@
 \section{Model}
 \label{sec:model}
 
-We work with the stochastic model of \cite{ING:2009}, which considers the evolution over time of a repairable dependability system operating in a randomly changing environment. The system consists of a collection $\Omega = \{ 1, 2, \ldots, N \}$ of $N < \infty$ component types. Each component type $i \in \Omega$ has a redundancy $1 \leq r_i < \infty$, and the $r_i$ components of type~$i$ are assumed to be identical. A component can be either operational (up) or failed (down).
+We work with the stochastic model of \cite{ING:2009}, which considers the
+evolution over time of a repairable dependability system operating in a randomly
+changing environment. The system consists of a collection $\Omega = \{ 1, 2,
+\ldots, N \}$ of $N < \infty$ component types. Each component type $i \in
+\Omega$ has a redundancy $1 \leq r_i < \infty$, and the $r_i$ components of
+type~$i$ are assumed to be identical. A component can be either operational (up)
+or failed (down).
 
-The environment changes randomly within a set $\mathcal{E} = \{ 0, 1, 2, \ldots, L \}$. For example, we can think of the environment as representing the current load on the system, and if there are two possible environments, $0$ and $1$, then $0$ (resp., $1$) may represent a low (resp., high) load. Once the environment enters $e \in \mathcal{E}$, it remains there for an exponentially distributed amount of time with rate $\nu_e > 0$, after which the environment changes to $e'$ with probability $\delta_{e, e'} \geq 0$, where $\delta_{e, e} = 0$ and $\sum_{e' \in \mathcal{E}} \delta_{e, e'} = 1$. We assume the matrix $\delta = (\delta_{e, e'} : e, e' \in \mathcal{E})$ is irreducible; i.e., for each $e, e' \in \mathcal{E}$, there exists $k \geq 1$ and a sequence $e_0 = e, e_1, e_2, \ldots, e_k = e'$ with each $e_i \in \mathcal{E}$ such that $\prod_{i = 0}^{k-1} \delta_{e_i, e_{i + 1}} > 0$. In other words, it is possible to eventually move from environment $e$ to environment $e'$.
+The environment changes randomly within a set $\mathcal{E} = \{ 0, 1, 2, \ldots,
+L \}$. For example, we can think of the environment as representing the current
+load on the system, and if there are two possible environments, $0$ and $1$,
+then $0$ (resp., $1$) may represent a low (resp., high) load. Once the
+environment enters $e \in \mathcal{E}$, it remains there for an exponentially
+distributed amount of time with rate $\nu_e > 0$, after which the environment
+changes to $e'$ with probability $\delta_{e, e'} \geq 0$, where $\delta_{e, e} =
+0$ and $\sum_{e' \in \mathcal{E}} \delta_{e, e'} = 1$. We assume the matrix
+$\delta = (\delta_{e, e'} : e, e' \in \mathcal{E})$ is irreducible; i.e., for
+each $e, e' \in \mathcal{E}$, there exists $k \geq 1$ and a sequence $e_0 = e,
+e_1, e_2, \ldots, e_k = e'$ with each $e_i \in \mathcal{E}$ such that $\prod_{i
+= 0}^{k-1} \delta_{e_i, e_{i + 1}} > 0$. In other words, it is possible to
+eventually move from environment $e$ to environment $e'$.
 
-The components in the system can randomly fail and then be repaired. When the environment is $e \in \mathcal{E}$, the failure rate and repair rate of each component of type $i$ are $\lambda_{i, e} > 0$ and $\mu_{i, e} > 0$, respectively.  If there is only one environment $e$, i.e., $| \mathcal{E} | = 1$, then the lifetimes and repair times of components of type $i$ are exponentially distributed with rates $\lambda_{i, e}$ and $\mu_{i, e}$, respectively. Exponential distributions are frequently used to model lifetimes of hardware and software components; e.g., see \cite{XDP:2004}. We assume that all operating components of a type~$i$ have the same failure rate $\lambda_{i, e}$ in environment $e$. Thus, in a system with  redundancies for which not all components of a type are needed for operation of the system, the extras are ``hot spares'' since they fail at the same rate as the main components.
+The components in the system can randomly fail and then be repaired. When the
+environment is $e \in \mathcal{E}$, the failure rate and repair rate of each
+component of type $i$ are $\lambda_{i, e} > 0$ and $\mu_{i, e} > 0$,
+respectively.  If there is only one environment $e$, i.e., $| \mathcal{E} | =
+1$, then the lifetimes and repair times of components of type $i$ are
+exponentially distributed with rates $\lambda_{i, e}$ and $\mu_{i, e}$,
+respectively. Exponential distributions are frequently used to model lifetimes
+of hardware and software components; e.g., see \cite{XDP:2004}. We assume that
+all operating components of a type~$i$ have the same failure rate $\lambda_{i,
+e}$ in environment $e$. Thus, in a system with  redundancies for which not all
+components of a type are needed for operation of the system, the extras are
+``hot spares'' since they fail at the same rate as the main components.
 
-Our model includes probabilistic instantaneous cascading failures, which occur as follows. The ordered set $\Gamma_i$ specifies the types of components that a failure of a type-$i$ component can cause to simultaneously fail. When a component of type $i$ fails, it causes a single  component of type~$j \in \Gamma_i$ to fail at the same time with probability $\phi_{i, j}$ (if there are components of type $j$ up), and we call $\phi_{i, j}$  a \textit{component-affected probability}. The events that the individual components of types $j \in \Gamma_i$ fail immediately are independent. Thus, when a component of type $i$ fails, there are independent ``coin flips'' to determine which components in $\Gamma_i$ fail, where the coin flip for $j \in \Gamma_i$ comes up heads (one component of type $j$ fails) with probability $\phi_{i, j}$ and tails (no components of type $j$ fail) with probability $1 - \phi_{i, j}$.
+Our model includes probabilistic instantaneous cascading failures, which occur
+as follows. The ordered set $\Gamma_i$ specifies the types of components that a
+failure of a type-$i$ component can cause to simultaneously fail. When a
+component of type $i$ fails, it causes a single  component of type~$j \in
+\Gamma_i$ to fail at the same time with probability $\phi_{i, j}$ (if there are
+components of type $j$ up), and we call $\phi_{i, j}$  a \textit{component-
+affected probability}. The events that the individual components of types $j \in
+\Gamma_i$ fail immediately are independent. Thus, when a component of type $i$
+fails, there are independent ``coin flips'' to determine which components in
+$\Gamma_i$ fail, where the coin flip for $j \in \Gamma_i$ comes up heads (one
+component of type $j$ fails) with probability $\phi_{i, j}$ and tails (no
+components of type $j$ fail) with probability $1 - \phi_{i, j}$.
 
-We allow for a cascading failure to continue as long as there are still components operational in the system.  For example, the failure of a component of type $i$ may cause a component of type $j$ to fail (with probability $\phi_{i, j}$), which in turn makes a component of type $k$ fail (with probability $\phi_{j, k}$), and so on. As noted in \cite{ING:2009}, the SAVE package \cite{BHLNS:1994} allows for only one level of cascading, but the unlimited cascading in our model makes it significantly more difficult to analyze.
+We allow for a cascading failure to continue as long as there are still
+components operational in the system.  For example, the failure of a component
+of type $i$ may cause a component of type $j$ to fail (with probability
+$\phi_{i, j}$), which in turn makes a component of type $k$ fail (with
+probability $\phi_{j, k}$), and so on. As noted in \cite{ING:2009}, the SAVE
+package \cite{BHLNS:1994} allows for only one level of cascading, but the
+unlimited cascading in our model makes it significantly more difficult to
+analyze.
 
-We can think of a cascading failure as a tree of simultaneously failing components. The root is the component, say of type $i$, whose failure \textit{triggers} the cascade. The root's children, which are from $\Gamma_i$, are those components whose immediate failures were directly caused by the root's failure. At any non-root level of the tree,  these components' failures were directly caused by the failure of their parents at the previous level. Although all the failing components in a cascade fail at the same time, we need to specify an order in which they fail for our problem to be well-defined, as we explain later in Section~\ref{sec:exrate}. We assume the components in a tree fail in breadth-first order.
+We can think of a cascading failure as a tree of simultaneously failing
+components. The root is the component, say of type $i$, whose failure
+\textit{triggers} the cascade. The root's children, which are from $\Gamma_i$,
+are those components whose immediate failures were directly caused by the root's
+failure. At any non-root level of the tree,  these components' failures were
+directly caused by the failure of their parents at the previous level. Although
+all the failing components in a cascade fail at the same time, we need to
+specify an order in which they fail for our problem to be well-defined, as we
+explain later in Section~\ref{sec:exrate}. We assume the components in a tree
+fail in breadth-first order.
 
-There is a single repairman who fixes failed components using a processor-sharing discipline. Specifically, if the current environment is $e$ and there is only one failed component, which is of type $i$, then the repairman fixes that component at rate $\mu_{i, e}$. If there are $b$ components currently failed, then the repairman allocates $1 / b$ of his effort to each failed component, so a failed component of type $i$ is repaired at rate $\mu_{i, e}/b$.
+There is a single repairman who fixes failed components using a processor-
+sharing discipline. Specifically, if the current environment is $e$ and there is
+only one failed component, which is of type $i$, then the repairman fixes that
+component at rate $\mu_{i, e}$. If there are $b$ components currently failed,
+then the repairman allocates $1 / b$ of his effort to each failed component, so
+a failed component of type $i$ is repaired at rate $\mu_{i, e}/b$.
 
 \section{Markov Chain}
 \label{sec:ctmc}
 
-We want to analyze the behavior of the system as it evolves over time.  Because of the processor-sharing repair discipline and the exponential rates for the event lifetimes, it will suffice to define the state of the system as a vector containing the number of failed components of each type and the current environment. Thus, let $S = \{ x = (x_1, x_2, \ldots, x_N, x_{N + 1}) : 0 \leq x_i \leq r_i \ \forall i \in \Omega, \, x_{N + 1} \in \mathcal{E} \}$ be the state space, and let $Z = [Z(t) : t \geq 0]$ be the continuous-time Markov time (CTMC) living on $S$ keeping track of the current state of the system. (If we had instead considered a first-come-first-served repair discipline, then the state space would need to be augmented to keep track of the order in which current set of down components failed.) We assume that $Z$ starts in environment $0 \in \mathcal{E}$ with no components failed, i.e., state $(0,0, \ldots, 0)$.  As noted in \cite{ING:2009} the CTMC is irreducible and positive recurrent.
+We want to analyze the behavior of the system as it evolves over time.  Because
+of the processor-sharing repair discipline and the exponential rates for the
+event lifetimes, it will suffice to define the state of the system as a vector
+containing the number of failed components of each type and the current
+environment. Thus, let $S = \{ x = (x_1, x_2, \ldots, x_N, x_{N + 1}) : 0 \leq
+x_i \leq r_i \ \forall i \in \Omega, \, x_{N + 1} \in \mathcal{E} \}$ be the
+state space, and let $Z = [Z(t) : t \geq 0]$ be the continuous-time Markov time
+(CTMC) living on $S$ keeping track of the current state of the system. (If we
+had instead considered a first-come-first-served repair discipline, then the
+state space would need to be augmented to keep track of the order in which
+current set of down components failed.) We assume that $Z$ starts in environment
+$0 \in \mathcal{E}$ with no components failed, i.e., state $(0,0, \ldots, 0)$.
+As noted in \cite{ING:2009} the CTMC is irreducible and positive recurrent.
 
-We now describe the CTMC's infinitesimal generator matrix $Q = (Q(x, y) : x, y \in S)$, where $Q(x, y)$ is the rate that the CTMC $Z$ moves from state $x = (x_1, \ldots, x_N, x_{N + 1})$ to state $y = (y_1, \ldots, y_N, y_{N + 1})$. If $y_i = x_i$ for each $i \in \Omega$ and $y_{N + 1} \neq x_{N + 1}$, then $(x, y)$ is an \textit{environment transition} with $Q(x, y) = \nu_{x_{N + 1}} \delta_{x_{N + 1},y_{N + 1}}$. If $y_i = x_i - 1$ for one $i \in \Omega$, $y_j = x_j$ for each $j \in \Omega - \{ i \}$, and $y_{N + 1} = x_{N + 1}$, then $(x, y)$ is a \textit{repair transition} corresponding to the repair of a component of type $i$, and $Q(x, y) = x_i \mu_{i,x_{N + 1}}/(\sum_{j \in \Omega} x_j)$. If $y_i \geq x_i$ for all $i \in \Omega$ with $y_j > x_j$ for some $j \in \Omega$ and $y_{N + 1} = x_{N + 1}$, then $(x, y)$ is a \textit{failure transition} in which $y_i - x_i$ components of type~$i$ fail, $i \in \Omega$. Any other $(x, y)$ with $x \neq y$ not falling into one of the above three categories is not possible, so $Q(x, y) = 0$. The diagonal entry $Q(x, x) = -\sum_{y \neq x} Q(x, y)$, as required for a CTMC; e.g., see Chapter~5 of \cite{Ross:1995}.
+We now describe the CTMC's infinitesimal generator matrix $Q = (Q(x, y) : x, y
+\in S)$, where $Q(x, y)$ is the rate that the CTMC $Z$ moves from state $x =
+(x_1, \ldots, x_N, x_{N + 1})$ to state $y = (y_1, \ldots, y_N, y_{N + 1})$. If
+$y_i = x_i$ for each $i \in \Omega$ and $y_{N + 1} \neq x_{N + 1}$, then $(x,
+y)$ is an \textit{environment transition} with $Q(x, y) = \nu_{x_{N + 1}}
+\delta_{x_{N + 1},y_{N + 1}}$. If $y_i = x_i - 1$ for one $i \in \Omega$, $y_j =
+x_j$ for each $j \in \Omega - \{ i \}$, and $y_{N + 1} = x_{N + 1}$, then $(x,
+y)$ is a \textit{repair transition} corresponding to the repair of a component
+of type $i$, and $Q(x, y) = x_i \mu_{i,x_{N + 1}}/(\sum_{j \in \Omega} x_j)$. If
+$y_i \geq x_i$ for all $i \in \Omega$ with $y_j > x_j$ for some $j \in \Omega$
+and $y_{N + 1} = x_{N + 1}$, then $(x, y)$ is a \textit{failure transition} in
+which $y_i - x_i$ components of type~$i$ fail, $i \in \Omega$. Any other $(x,
+y)$ with $x \neq y$ not falling into one of the above three categories is not
+possible, so $Q(x, y) = 0$. The diagonal entry $Q(x, x) = -\sum_{y \neq x} Q(x,
+y)$, as required for a CTMC; e.g., see Chapter~5 of \cite{Ross:1995}.
 
-We now determine the rate $Q(x, y)$ of a failure transition $(x, y)$. First consider the case when cascading failures are not possible, i.e., $\Gamma_i = \emptyset$ for each type~$i$. Then the only possible failure transitions $(x , y)$ have $y_i = x_i + 1$ for one $i \in \Omega$, $y_j = x_j$ for each $j \in \Omega - \{ i \}$, and $y_{N + 1} = x_{N + 1}$, and this corresponds to a single component of type~$i$ failing. Then $Q(x, y) = (r_i - x_i) \lambda_{i, x_{N + 1}}$.
+We now determine the rate $Q(x, y)$ of a failure transition $(x, y)$. First
+consider the case when cascading failures are not possible, i.e., $\Gamma_i =
+\emptyset$ for each type~$i$. Then the only possible failure transitions $(x ,
+y)$ have $y_i = x_i + 1$ for one $i \in \Omega$, $y_j = x_j$ for each $j \in
+\Omega - \{ i \}$, and $y_{N + 1} = x_{N + 1}$, and this corresponds to a single
+component of type~$i$ failing. Then $Q(x, y) = (r_i - x_i) \lambda_{i, x_{N +
+1}}$.
 
-Cascading failures complicate the computation of $Q(x, y)$ for a failure transition $(x, y)$. As mentioned before, a cascading failure is modeled as a tree $T$ built from the multiset $B$ of simultaneously failing components, where $B$ has $y_\ell - x_\ell$ failing components of type $\ell$, $\ell \in \Omega$. A tree $T$ has a rate
+Cascading failures complicate the computation of $Q(x, y)$ for a failure
+transition $(x, y)$. As mentioned before, a cascading failure is modeled as a
+tree $T$ built from the multiset $B$ of simultaneously failing components, where
+$B$ has $y_\ell - x_\ell$ failing components of type $\ell$, $\ell \in \Omega$.
+A tree $T$ has a rate
 
 \begin{equation}
 \label{eq:rate}
@@ -91,19 +187,33 @@ R(T) = (r_i - x_i) \lambda_{i,x_{N + 1}} \, \rho \, \eta,
 \end{equation}
 where
 \begin{itemize}
-\item $(r_i - x_i) \lambda_{i,x_{N + 1}}$ is the failure rate of the root (assumed here to be of type $i$),
+\item $(r_i - x_i) \lambda_{i,x_{N + 1}}$ is the failure rate of the root
+(assumed here to be of type $i$),
 \item $\rho = \rho(T)$ is the product of the
-$\phi_{j, k}$ terms for a parent node of type $j$ causing a child of type $k \in \Gamma_j$ to fail, and
-\item $\eta = \eta(T,x)$ is the product of the $1 - \phi_{j, k}$ terms from a node of type $j$ \textit{not} causing a component of type $k \in \Gamma_j$ to fail when there are components of type $k$ up.
+$\phi_{j, k}$ terms for a parent node of type $j$ causing a child of type $k \in
+\Gamma_j$ to fail, and
+\item $\eta = \eta(T,x)$ is the product of the $1 - \phi_{j, k}$ terms from a
+node of type $j$ \textit{not} causing a component of type $k \in \Gamma_j$ to
+fail when there are components of type $k$ up.
 \end{itemize}
 
-A difficulty arises since there can be many such trees corresponding to the multiset $B$ of components failing in $(x, y)$, and calculating $Q(x, y)$ requires summing $R(T)$ over all possible trees $T$ that can be constructed from $B$. The number of such trees grows exponentially in the number of failing components in the cascade; see \cite{ING:2009}.
+A difficulty arises since there can be many such trees corresponding to the
+multiset $B$ of components failing in $(x, y)$, and calculating $Q(x, y)$
+requires summing $R(T)$ over all possible trees $T$ that can be constructed from
+$B$. The number of such trees grows exponentially in the number of failing
+components in the cascade; see \cite{ING:2009}.
 
 \subsection{Example of Computing a Tree's Rate}
 \label{sec:exrate}
 
-We now provide an example of computing the rate $R(T)$ of a tree $T$. Let $\Omega = \{ A, B, C \}$, with $r_A = r_B = r_C = 4$. Also, let $\Gamma_A = \{ B, C \}$, $\Gamma_B = \{ A, C \}$, and $\Gamma_C = \{ A, B \}$. Suppose that $\mathcal{E} = \{ 0 \}$, and consider the failure transition $(x, y)$ with $x = (2, 2, 3, 0)$ and $y = (4, 4, 4, 0)$. Thus, $(x, y)$ corresponds to $2$ components each of types $A$ and $B$ failing and a single component of type $C$ failing. One possible tree $T$ corresponding to $(x, y)$ is shown in Figure~\ref{fig:tree}.
-We assume the nodes in $T$ fail in breadth-first order.
+We now provide an example of computing the rate $R(T)$ of a tree $T$. Let
+$\Omega = \{ A, B, C \}$, with $r_A = r_B = r_C = 4$. Also, let $\Gamma_A = \{
+B, C \}$, $\Gamma_B = \{ A, C \}$, and $\Gamma_C = \{ A, B \}$. Suppose that
+$\mathcal{E} = \{ 0 \}$, and consider the failure transition $(x, y)$ with $x =
+(2, 2, 3, 0)$ and $y = (4, 4, 4, 0)$. Thus, $(x, y)$ corresponds to $2$
+components each of types $A$ and $B$ failing and a single component of type $C$
+failing. One possible tree $T$ corresponding to $(x, y)$ is shown in
+Figure~\ref{fig:tree}. We assume the nodes in $T$ fail in breadth-first order.
 
 \begin{figure}
 \begin{center}
@@ -113,53 +223,151 @@ We assume the nodes in $T$ fail in breadth-first order.
 \label{fig:tree}
 \end{figure}
 
-The nodes depicted as double circles form the tree of failing components. The single circles correspond to components in some $\Gamma_i$ but did not fail.  A component type $j$ in some $\Gamma_i$ could have \textit{not failed} because either there are components of type $j$ up at this point but its coin flip came up tails (with probability $1 - \phi_{i, j}$), or there were no more components of type $j$ up at this point. Each node has a label of the form $i$-ID, where $i$ denotes the type of the component for that node, and ID is the position of the node in a breadth-first ordering of all the nodes (single and double circles). We include the IDs just to simplify the discussion here. We call the tree of all nodes the \textit{supertree} corresponding to the tree $T$ of failing nodes. The supertree is used to compute $R(T)$ of $T$ as follows. Let $u_i$ be the number of components of type $i$ available in the system. Since the root is a component of type $A$ and there are $u_A = r_A - x_A = 2$ components of type $A$ at the start of the transition $(x, y)$, the rate of the trigger of the cascade is $2 \lambda_{A, 0}$. The root then causes a component of type $B$ to fail at node ID 2, and this occurs with probability $\phi_{A, B}$. The node at ID 3 did not fail, and at this point there are $u_C = r_C - x_C = 1 > 0$ components of type $C$ still up, so this non-failure occurs with probability $1 - \phi_{A,C}$. Instead of stepping through the rest of the supertree one node at a time, we notice that all the $\phi_{i, j}$ terms must be included if $T$ is to correspond to $(x, y)$. Thus, in (\ref{eq:rate}) we have $\rho = \phi_{A, B} \, \phi_{B, C} \, \phi_{C, B} \, \phi_{B, A}$.
-We notice the following when calculating $\eta$ in (\ref{eq:rate}): 
+The nodes depicted as double circles form the tree of failing components. The
+single circles correspond to components in some $\Gamma_i$ but did not fail.  A
+component type $j$ in some $\Gamma_i$ could have \textit{not failed} because
+either there are components of type $j$ up at this point but its coin flip came
+up tails (with probability $1 - \phi_{i, j}$), or there were no more components
+of type $j$ up at this point. Each node has a label of the form $i$-ID, where
+$i$ denotes the type of the component for that node, and ID is the position of
+the node in a breadth-first ordering of all the nodes (single and double
+circles). We include the IDs just to simplify the discussion here. We call the
+tree of all nodes the \textit{supertree} corresponding to the tree $T$ of
+failing nodes. The supertree is used to compute $R(T)$ of $T$ as follows. Let
+$u_i$ be the number of components of type $i$ available in the system. Since the
+root is a component of type $A$ and there are $u_A = r_A - x_A = 2$ components
+of type $A$ at the start of the transition $(x, y)$, the rate of the trigger of
+the cascade is $2 \lambda_{A, 0}$. The root then causes a component of type $B$
+to fail at node ID 2, and this occurs with probability $\phi_{A, B}$. The node
+at ID 3 did not fail, and at this point there are $u_C = r_C - x_C = 1 > 0$
+components of type $C$ still up, so this non-failure occurs with probability $1
+- \phi_{A,C}$. Instead of stepping through the rest of the supertree one node at
+a time, we notice that all the $\phi_{i, j}$ terms must be included if $T$ is to
+correspond to $(x, y)$. Thus, in (\ref{eq:rate}) we have $\rho = \phi_{A, B} \,
+\phi_{B, C} \, \phi_{C, B} \, \phi_{B, A}$. We notice the following when
+calculating $\eta$ in (\ref{eq:rate}):
 \begin{itemize} 
-\item $1 - \phi_{i, j}$ terms are included if and only if there are still components of type $j$ up.
-\item Each time we encounter a node of type $j$ that has failed in the breadth-first enumeration of $T$, we decrement $u_j$ by 1. 
+\item $1 - \phi_{i, j}$ terms are included if and only if there are still
+components of type $j$ up.
+\item Each time we encounter a node of type $j$ that has failed in the breadth-
+first enumeration of $T$, we decrement $u_j$ by 1.
 \end{itemize}
-Keeping these observations in mind, we now calculate $\eta$. For component type $A$ we have $u_A = 2$ before we traverse through $T$. As we do a breadth-first traversal through $T$, at ID 1, $u_A = 1$. We see that $u_A > 0$ until ID 8. So $\eta$ includes terms $1 - \phi_{B, A}$ and $1 - \phi_{C, A}$ from IDs $4$ and $6$, respectively. For component type $B$ we have $u_B = r_B - x_B  = 2$ before we traverse through $T$. Since components of type $B$ have already been exhausted at ID 7, we do not include $1 - \phi_{A, B}$ at ID 10 in $\eta$. For component type $C$ we see that $u_C = 1$ before we traverse through $T$, and $u_C = 0$ at ID 5. Hence, the only contribution to $\eta$ from a component of type~$C$ not failing is $1 - \phi_{A, C}$ from ID 3. Taking the product over all component types yields $\eta = (1 - \phi_{B, A}) \, (1 - \phi_{C, A}) \, (1 - \phi_{A,C})$. Therefore, $R(T)$ is $2 \lambda_{A, 0} \; \rho \; \eta$. In our implementation $\eta$ is calculated through a data structure called \varName{BFHist}, which we describe later in Section~\ref{sec:seedtrees}.
+Keeping these observations in mind, we now calculate $\eta$. For component type
+$A$ we have $u_A = 2$ before we traverse through $T$. As we do a breadth-first
+traversal through $T$, at ID 1, $u_A = 1$. We see that $u_A > 0$ until ID 8. So
+$\eta$ includes terms $1 - \phi_{B, A}$ and $1 - \phi_{C, A}$ from IDs $4$ and
+$6$, respectively. For component type $B$ we have $u_B = r_B - x_B  = 2$ before
+we traverse through $T$. Since components of type $B$ have already been
+exhausted at ID 7, we do not include $1 - \phi_{A, B}$ at ID 10 in $\eta$. For
+component type $C$ we see that $u_C = 1$ before we traverse through $T$, and
+$u_C = 0$ at ID 5. Hence, the only contribution to $\eta$ from a component of
+type~$C$ not failing is $1 - \phi_{A, C}$ from ID 3. Taking the product over all
+component types yields $\eta = (1 - \phi_{B, A}) \, (1 - \phi_{C, A}) \, (1 -
+\phi_{A,C})$. Therefore, $R(T)$ is $2 \lambda_{A, 0} \; \rho \; \eta$. In our
+implementation $\eta$ is calculated through a data structure called
+\varName{BFHist}, which we describe later in Section~\ref{sec:seedtrees}.
 
-We previously stated that the order in which the components fail in a tree must be specified for the tree's rate to  be well defined. To see why, suppose instead that the components in Figure~\ref{fig:tree} fail
-in depth-first order. The depth-first traversal of $T$ is \nodeLabel{A}{1}, \nodeLabel{B}{2}, \nodeLabel{A}{4}, \nodeLabel{C}{5}, \nodeLabel{A}{6}, \nodeLabel{B}{7}, \nodeLabel{A}{8}, \nodeLabel{B}{10}, \nodeLabel{C}{11}, \nodeLabel{C}{9}, \nodeLabel{C}{3}. Initially, the number of components up of each type are $u_A = 2$, $u_B = 2$ and $u_C = 1$ as before. In this traversal a component of type $C$ fails at ID 5, which makes $u_C = 0$.
+We previously stated that the order in which the components fail in a tree must
+be specified for the tree's rate to  be well defined. To see why, suppose
+instead that the components in Figure~\ref{fig:tree} fail in depth-first order.
+The depth-first traversal of $T$ is \nodeLabel{A}{1}, \nodeLabel{B}{2},
+\nodeLabel{A}{4}, \nodeLabel{C}{5}, \nodeLabel{A}{6}, \nodeLabel{B}{7},
+\nodeLabel{A}{8}, \nodeLabel{B}{10}, \nodeLabel{C}{11}, \nodeLabel{C}{9},
+\nodeLabel{C}{3}. Initially, the number of components up of each type are $u_A =
+2$, $u_B = 2$ and $u_C = 1$ as before. In this traversal a component of type $C$
+fails at ID 5, which makes $u_C = 0$.
 
-Thus, $\eta$ for the depth-first traversal does not include the terms $1-\phi_{A,C}$, $1-\phi_{B,C}$ and $1-\phi_{A,C}$ from the subsequent type-$C$ nodes at IDs 11, 9 and 3. In contrast, the breadth-first traversal includes one $1-\phi_{A,C}$ term at ID 3. Hence, it is necessary to define the order in which the components fail, even though they fail simultaneously.
+Thus, $\eta$ for the depth-first traversal does not include the terms
+$1-\phi_{A,C}$, $1-\phi_{B,C}$ and $1-\phi_{A,C}$ from the subsequent type-$C$
+nodes at IDs 11, 9 and 3. In contrast, the breadth-first traversal includes one
+$1-\phi_{A,C}$ term at ID 3. Hence, it is necessary to define the order in which
+the components fail, even though they fail simultaneously.
 
 \section{Algorithms}
 \label{sec:alg}
 
-We now provide efficient algorithms for generating all possible trees and constructing the $Q$-matrix. A tree corresponds to a multiset of particular components failing, and cascading failures starting from different states can have the same multiset of components failing. Hence, a particular tree may correspond to several different transitions. Our algorithm generates each possible tree only once and determines all the transitions to which this tree corresponds. This avoids generating the same tree numerous times for each corresponding transition, as was originally done in \cite{ING:2009}. Moreover, rather than building each new tree from scratch, as was done in \cite{ING:2009}, our current algorithm builds larger trees from smaller ones already considered, leading to additional savings in the overall computational effort.
+We now provide efficient algorithms for generating all possible trees and
+constructing the $Q$-matrix. A tree corresponds to a multiset of particular
+components failing, and cascading failures starting from different states can
+have the same multiset of components failing. Hence, a particular tree may
+correspond to several different transitions. Our algorithm generates each
+possible tree only once and determines all the transitions to which this tree
+corresponds. This avoids generating the same tree numerous times for each
+corresponding transition, as was originally done in \cite{ING:2009}. Moreover,
+rather than building each new tree from scratch, as was done in \cite{ING:2009},
+our current algorithm builds larger trees from smaller ones already considered,
+leading to additional savings in the overall computational effort.
 
-Computing the rate (\ref{eq:rate}) of a given tree depends on the state from which the cascading failure began and the multiset of components that fail in the cascade. We do not actually construct the supertree in our algorithm to compute a tree's rate, but instead build a \varName{breadth-first history} to keep track of the information necessary to compute $\eta$ in (\ref{eq:rate}). This is all done in Algorithms 1 (SeedTrees), 2 \mbox{(AddTreeLevel)} and 3 (ComputeTreeRate).
+Computing the rate (\ref{eq:rate}) of a given tree depends on the state from
+which the cascading failure began and the multiset of components that fail in
+the cascade. We do not actually construct the supertree in our algorithm to
+compute a tree's rate, but instead build a \varName{breadth-first history} to
+keep track of the information necessary to compute $\eta$ in (\ref{eq:rate}).
+This is all done in Algorithms 1 (SeedTrees), 2 \mbox{(AddTreeLevel)} and 3
+(ComputeTreeRate).
 
-SeedTrees starts the tree generation and initializes the necessary data structures for \mbox{AddTreeLevel}. \mbox{AddTreeLevel} adds a new level to an existing tree in a recursive fashion, updates $\rho$ in (\ref{eq:rate}) to include the component-affected probabilities, and builds the tree's breadth-first history. ComputeTreeRate computes the rate of a completed tree for all the transitions it corresponds to using $\rho$ and $\eta$ computed from the breadth-first history populated in \mbox{AddTreeLevel}. We will now discuss each algorithm in detail. References to line numbers in the algorithms are given within angled brackets \citeLine{}.
+SeedTrees starts the tree generation and initializes the necessary data
+structures for \mbox{AddTreeLevel}. \mbox{AddTreeLevel} adds a new level to an
+existing tree in a recursive fashion, updates $\rho$ in (\ref{eq:rate}) to
+include the component-affected probabilities, and builds the tree's breadth-
+first history. ComputeTreeRate computes the rate of a completed tree for all the
+transitions it corresponds to using $\rho$ and $\eta$ computed from the breadth-
+first history populated in \mbox{AddTreeLevel}. We will now discuss each
+algorithm in detail. References to line numbers in the algorithms are given
+within angled brackets \citeLine{}.
 
 \subsection{SeedTrees}
 \label{sec:seedtrees}
 
-SeedTrees loops through all component types to choose a root for the tree to be constructed \citeLine{1}. One of the data structures initialized in SeedTrees is \varName{BFHist}, which stores the breadth-first history using an array of linked lists, where the array is indexed by component type. Each linked list stores the respective parents of nodes exclusive to the supertree and stores the symbol @ for the nodes that \textit{did} fail in the tree.
+SeedTrees loops through all component types to choose a root for the tree to be
+constructed \citeLine{1}. One of the data structures initialized in SeedTrees is
+\varName{BFHist}, which stores the breadth-first history using an array of
+linked lists, where the array is indexed by component type. Each linked list
+stores the respective parents of nodes exclusive to the supertree and stores the
+symbol @ for the nodes that \textit{did} fail in the tree.
 
-The dynamic array \varName{level} contains the current bottom level of the tree that we are building, and it initially contains the root, which is of type \varName{rootC.type} \citeLine{5}. We add the symbol @ to the list at \varName{BFHist}[\varName{rootC.type}] to denote that one component of the root's type has failed. We update \varName{nFailed} by setting the counter for \varName{rootC.type} to 1 \citeBlock{5}{7}. We initialize $\rho$ in (\ref{eq:rate}) to $1$ since no components so far have been caused to fail by the failure of other components \citeLine{8}.
+The dynamic array \varName{level} contains the current bottom level of the tree
+that we are building, and it initially contains the root, which is of type
+\varName{rootC.type} \citeLine{5}. We add the symbol @ to the list at
+\varName{BFHist}[\varName{rootC.type}] to denote that one component of the
+root's type has failed. We update \varName{nFailed} by setting the counter for
+\varName{rootC.type} to 1 \citeBlock{5}{7}. We initialize $\rho$ in
+(\ref{eq:rate}) to $1$ since no components so far have been caused to fail by
+the failure of other components \citeLine{8}.
 
-If the component type \varName{rootC.type} at the root cannot cause any other components to fail, only the trivial tree of one node can be made with this type of root. We then evaluate this single-node tree's rate in ComputeTreeRate because it cannot be grown further. If $\Gamma_{\varName{rootC.type}} \neq \emptyset$ (i.e., it can cause other types of components to fail), then we call \mbox{AddTreeLevel} to proceed with building taller trees by adding another level to the current tree \citeBlock{9}{13}.
+If the component type \varName{rootC.type} at the root cannot cause any other
+components to fail, only the trivial tree of one node can be made with this type
+of root. We then evaluate this single-node tree's rate in ComputeTreeRate
+because it cannot be grown further. If $\Gamma_{\varName{rootC.type}} \neq
+\emptyset$ (i.e., it can cause other types of components to fail), then we call
+\mbox{AddTreeLevel} to proceed with building taller trees by adding another
+level to the current tree \citeBlock{9}{13}.
 
 \captionAmerica{1}{SeedTrees($\Gamma$)}
-where $\Gamma$ is an array of ordered sets that describes which components can cause which other components to fail
+where $\Gamma$ is an array of ordered sets that describes which components can
+cause which other components to fail
 \\*\vspace{0.3em}
 \begin{algorithmic}[1]
 \FOR{\varName{rootC.type} $\in \Omega$}
-  \STATE \varName{level} = [ ]; \COMMENT {Dynamic array of failed components at tree's current bottom level}
-  \STATE \varName{nFailed} = $[0, 0, \ldots, 0]$; \COMMENT {Array that counts failed components of each type in the tree}
-  \STATE \varName{BFHist} = $[(\,), (\,), \ldots, (\,)]$; \COMMENT {Array of linked lists that keeps a history of parent component types in breadth-first order; BFHist is indexed by component types}
+  \STATE \varName{level} = [ ]; \COMMENT {Dynamic array of failed components at
+  tree's current bottom level}
+  \STATE \varName{nFailed} = $[0, 0, \ldots, 0]$; \COMMENT {Array that counts
+  failed components of each type in the tree}
+  \STATE \varName{BFHist} = $[(\,), (\,), \ldots, (\,)]$; \COMMENT {Array of
+  linked lists that keeps a history of parent component types in breadth-first
+  order; BFHist is indexed by component types}
   \STATE add \varName{rootC.type} to \varName{level};
   \STATE \varName{nFailed}[\varName{rootC.type}] = 1;
-  \STATE add @ to \varName{BFHist}[\varName{rootC.type}]; \COMMENT {Signifies one component of type \varName{rootC.type} has failed}
-  \STATE $\rho = 1$; \COMMENT {initialize product of component-affected probabilities}
+  \STATE add @ to \varName{BFHist}[\varName{rootC.type}]; \COMMENT {Signifies
+  one component of type \varName{rootC.type} has failed}
+  \STATE $\rho = 1$; \COMMENT {initialize product of component-affected
+  probabilities}
   \IF{$\Gamma_{\varName{rootC.type}} == \emptyset$}
-    \STATE ComputeTreeRate(\varName{nFailed}, \varName{BFHist}, $\rho$, \varName{rootC.type});
+    \STATE ComputeTreeRate(\varName{nFailed}, \varName{BFHist}, $\rho$,
+    \varName{rootC.type});
   \ELSE
-    \STATE AddTreeLevel(\varName{level}, \varName{nFailed}, \varName{BFHist}, $\rho$, \varName{rootC.type});
+    \STATE AddTreeLevel(\varName{level}, \varName{nFailed}, \varName{BFHist},
+    $\rho$, \varName{rootC.type});
   \ENDIF
 \ENDFOR
 \end{algorithmic}
@@ -167,46 +375,109 @@ where $\Gamma$ is an array of ordered sets that describes which components can c
 
 \subsection{AddTreeLevel}
 
-Given a tree, \mbox{AddTreeLevel} determines all the possibilities for the next level that can be added to the current tree by taking the Cartesian product of the power sets of the nonempty $\Gamma_{i}$ for each of the failed components at the current bottom level. For each possible next level, we recursively call \mbox{AddTreeLevel}. We use $\mathcal{P}$ to denote the power set-like operation on an ordered set. In our realization of the power-set operation, components in each subset maintain their relative ordering from the original set.
+Given a tree, \mbox{AddTreeLevel} determines all the possibilities for the next
+level that can be added to the current tree by taking the Cartesian product of
+the power sets of the nonempty $\Gamma_{i}$ for each of the failed components at
+the current bottom level. For each possible next level, we recursively call
+\mbox{AddTreeLevel}. We use $\mathcal{P}$ to denote the power set-like operation
+on an ordered set. In our realization of the power-set operation, components in
+each subset maintain their relative ordering from the original set.
 
-We implement this power set-like operation by generating all possible binary numbers with $\sum\limits_{i \, = \, 1}^{|level|}\Gamma_{level[i]}$ bits. A total of $\prod\limits_{i \, = \, 1}^{|level|}2^{\Gamma_{level[i]}}$ such binary numbers are generated. In the binary number, 1 denotes a failed node and 0 denotes a node that is included in a $\Gamma$ set but did not fail. If we have a tree where none of the leaf nodes at the current bottom level can cause any other components to fail (i.e., have empty $\Gamma_{i}$s), we get no nextLevelPossibilities \citeLine{1}.
+We implement this power set-like operation by generating all possible binary
+numbers with $\sum\limits_{i \, = \, 1}^{|level|}\Gamma_{level[i]}$ bits. A
+total of $\prod\limits_{i \, = \, 1}^{|level|}2^{\Gamma_{level[i]}}$ such binary
+numbers are generated. In the binary number, 1 denotes a failed node and 0
+denotes a node that is included in a $\Gamma$ set but did not fail. If we have a
+tree where none of the leaf nodes at the current bottom level can cause any
+other components to fail (i.e., have empty $\Gamma_{i}$s), we get no
+nextLevelPossibilities \citeLine{1}.
 
-Otherwise, we choose one possible choice for the failed components in the next level from the nextLevelPossibilities \citeLine{2}. Each node in $T$ has three attributes: a component type $i$; an ID, which is its breadth-first ID in the supertree; and a parentID, which is the breadth-first ID of this node's parent in the supertree. For each node \varName{parentC} in the current bottom level that acts as a parent, potentially causing other nodes to fail, we iterate through all of its possible children, i.e., through $\Gamma_{parentC.type}$. If any of these children actually fail, then they will be members of the set \varName{oneNextLevelPossibility} \citeBlock{4}{6}. Now if the redundancy of the component type we just tried to add as a child has already been exhausted, it cannot fail and hence our tree is invalid and we move on to the next possibility \citeBlock{10}{12}.
+Otherwise, we choose one possible choice for the failed components in the next
+level from the nextLevelPossibilities \citeLine{2}. Each node in $T$ has three
+attributes: a component type $i$; an ID, which is its breadth-first ID in the
+supertree; and a parentID, which is the breadth-first ID of this node's parent
+in the supertree. For each node \varName{parentC} in the current bottom level
+that acts as a parent, potentially causing other nodes to fail, we iterate
+through all of its possible children, i.e., through $\Gamma_{parentC.type}$. If
+any of these children actually fail, then they will be members of the set
+\varName{oneNextLevelPossibility} \citeBlock{4}{6}. Now if the redundancy of the
+component type we just tried to add as a child has already been exhausted, it
+cannot fail and hence our tree is invalid and we move on to the next possibility
+\citeBlock{10}{12}.
 
-If a child of type \varName{childC.type} has failed (i.e., it exists within nextLevelPossibilities), the relevant data structures are updated to signify this occurrence. We increment the number of failed components of type \varName{childC.type}, add the symbol @ to \varName{BFHist}[\varName{childC.type}] (to mark that a failure of this type has occurred at the current location in the tree), and update $\rho$ by multiplying it by $\phi_{i, j}$ \citeBlock{11}{13}. If the child does not actually fail, then we add \varName{parentC.type} to \varName{BFHist}[\varName{childC.type}]. Later in ComputeTreeRate for each transition $(x, y)$, we evaluate which of these children could have failed but did not, and which could \textit{not} have failed because their type's redundancy was exhausted. \citeBlock{14}{16}.
+If a child of type \varName{childC.type} has failed (i.e., it exists within
+nextLevelPossibilities), the relevant data structures are updated to signify
+this occurrence. We increment the number of failed components of type
+\varName{childC.type}, add the symbol @ to
+\varName{BFHist}[\varName{childC.type}] (to mark that a failure of this type has
+occurred at the current location in the tree), and update $\rho$ by multiplying
+it by $\phi_{i, j}$ \citeBlock{11}{13}. If the child does not actually fail,
+then we add \varName{parentC.type} to \varName{BFHist}[\varName{childC.type}].
+Later in ComputeTreeRate for each transition $(x, y)$, we evaluate which of
+these children could have failed but did not, and which could \textit{not} have
+failed because their type's redundancy was exhausted. \citeBlock{14}{16}.
 
-We do the above updates to the data structures for each potential parent node in \varName{level} and each of its children in \varName{oneNextLevelPossibility}. If at least one child has been added, we recursively add another level to the current tree \citeBlock{19}{23}. Otherwise, this tree has not changed in this pass through \mbox{AddTreeLevel} and we call ComputeTreeRate to compute the rate of the finalized tree \citeBlock{24}{26}. We make sure that trees are not double counted because once a tree passes through \mbox{AddTreeLevel} unmodified, it is processed and discarded. We avoid making duplicate trees because each oneNextLevelPossibility is unique.
+We do the above updates to the data structures for each potential parent node in
+\varName{level} and each of its children in \varName{oneNextLevelPossibility}.
+If at least one child has been added, we recursively add another level to the
+current tree \citeBlock{19}{23}. Otherwise, this tree has not changed in this
+pass through \mbox{AddTreeLevel} and we call ComputeTreeRate to compute the rate
+of the finalized tree \citeBlock{24}{26}. We make sure that trees are not double
+counted because once a tree passes through \mbox{AddTreeLevel} unmodified, it is
+processed and discarded. We avoid making duplicate trees because each
+oneNextLevelPossibility is unique.
 
-\captionAmerica{2}{AddTreeLevel(\varName{level}, \varName{nFailed}, \varName{BFHist}, $\rho$, \varName{rootC.type})}
-where \varName{level} is the current level of failed components, \\*\varName{nFailed} counts failed components by type in the tree, \\*\varName{BFHist} is breadth-first history, \\*$\rho$ is a cumulative product of component-affected probabilities, \\*\varName{rootC.type} is the root component's type in the current tree
+\captionAmerica{2}{AddTreeLevel(\varName{level}, \varName{nFailed},
+\varName{BFHist}, $\rho$, \varName{rootC.type})} where \varName{level} is the
+current level of failed components,
+\\*\varName{nFailed} counts failed components by type in the tree,
+\\*\varName{BFHist} is breadth-first history, \\*$\rho$ is a cumulative product
+of component-affected probabilities, \\*\varName{rootC.type} is the root
+component's type in the current tree
 \\*\vspace{0.3em}
 \begin{algorithmic}[1]
-\STATE \varName{nextLevelPossibilities} = $\bigtimes\limits_{i \, = \, 1: \atop \Gamma_{level[i]} \neq \emptyset}^{|level|}\mathcal{P}(\Gamma_{level[i]});$
-\\*\COMMENT{Builds all possibilities for the next level (given the current level) by taking a Cartesian product of the power sets of non-empty $\Gamma$ sets of failed nodes in the current level}
+\STATE \varName{nextLevelPossibilities} = $\bigtimes\limits_{i \, = \, 1: \atop
+\Gamma_{level[i]} \neq \emptyset}^{|level|}\mathcal{P}(\Gamma_{level[i]});$
+\\*\COMMENT{Builds all possibilities for the next level (given the current
+level) by taking a Cartesian product of the power sets of non-empty $\Gamma$
+sets of failed nodes in the current level}
 \FOR{\varName{oneNextLevelPossibility} $\in$ \varName{nextLevelPossibilities}}
 	\STATE \varName{addedAChildFlag} = False;
     \FOR{\varName{parentC} $\in$ \varName{level}}
       	\FOR{$i$ $\in$ $\Gamma_{\varName{parentC.type}}$}
-          	\IF{$\exists$ \varName{childC} $\in$ \varName{oneNextLevelPossibility} $:$ \varName{childC.type} == $i$ $\&\&$ \varName{childC.parentID} == \varName{parentC.ID}}
+          	\IF{$\exists$ \varName{childC} $\in$
+          	\varName{oneNextLevelPossibility} $:$ \varName{childC.type} == $i$
+          	$\&\&$ \varName{childC.parentID} == \varName{parentC.ID}}
           		\STATE \varName{addedAChildFlag} = True;
-          		\IF{$\varName{nFailed}[\varName{childC.type}] == r_{\varName{childC.type}}$}
+          		\IF{$\varName{nFailed}[\varName{childC.type}] ==
+          		r_{\varName{childC.type}}$}
 	            	\STATE goto line 2;
-              		\COMMENT {Invalid Tree, it requires more components than available}
+              		\COMMENT {Invalid Tree, it requires more components than
+              		available}
             	\ENDIF
-            	\STATE \varName{nFailed}[\varName{childC.type}] = \varName{nFailed}[\varName{childC.type}] + 1;
-	            \STATE add @ to \varName{BFHist}[\varName{childC.type}]; \COMMENT {One component of type \varName{childC.type} has failed}
+            	\STATE \varName{nFailed}[\varName{childC.type}] =
+            	\varName{nFailed}[\varName{childC.type}] + 1;
+	            \STATE add @ to \varName{BFHist}[\varName{childC.type}];
+	            \COMMENT {One component of type \varName{childC.type} has
+	            failed}
 	            \STATE $\rho = \rho \, * \, \phi_{parentC.type,\; childC.type};$
-	            \\*\COMMENT {Update rate with appropriate component-affected probability}
+	            \\*\COMMENT {Update rate with appropriate component-affected
+	            probability}
           	\ELSE
-           		\STATE add \varName{parentC.type} to \varName{BFHist}[\varName{childC.type}]; \COMMENT {One component of type \varName{childC.type} has not failed, but was present in $\Gamma_{\varName{parentC.type}}$}
+           		\STATE add \varName{parentC.type} to
+           		\varName{BFHist}[\varName{childC.type}]; \COMMENT {One component
+           		of type \varName{childC.type} has not failed, but was present in
+           		$\Gamma_{\varName{parentC.type}}$}
          	\ENDIF
       	\ENDFOR
     \ENDFOR
     \IF{\varName{addedAChildFlag}}
-      \STATE AddTreeLevel(\varName{oneNextLevelPossibility}, \varName{nFailed}, \varName{BFHist}, $\rho$, \varName{rootC.type});
+      \STATE AddTreeLevel(\varName{oneNextLevelPossibility}, \varName{nFailed},
+      \varName{BFHist}, $\rho$, \varName{rootC.type});
       \\*\COMMENT {Tree can be grown further}
     \ELSE
-      \STATE ComputeTreeRate(\varName{nFailed}, \varName{BFHist}, $\rho$, \varName{rootC.type});
+      \STATE ComputeTreeRate(\varName{nFailed}, \varName{BFHist}, $\rho$,
+      \varName{rootC.type});
       \\*\COMMENT {Current tree is complete because it cannot be grown further}
     \ENDIF
 \ENDFOR
@@ -215,20 +486,50 @@ where \varName{level} is the current level of failed components, \\*\varName{nFa
 
 \subsection{ComputeTreeRate}
 
-In ComputeTreeRate, for a given tree, we determine all of the transitions $(x, y)$ in the $Q$-matrix that use this tree, and then update the total rates of each of those transitions $(x, y)$ by adding in the rate of the current tree to the current rate for $(x, y)$. However, even if several transitions use the same tree, the rate of the tree may differ for those transitions since the failure rate of the root and $\eta$ are transition-dependent.
+In ComputeTreeRate, for a given tree, we determine all of the transitions $(x,
+y)$ in the $Q$-matrix that use this tree, and then update the total rates of
+each of those transitions $(x, y)$ by adding in the rate of the current tree to
+the current rate for $(x, y)$. However, even if several transitions use the same
+tree, the rate of the tree may differ for those transitions since the failure
+rate of the root and $\eta$ are transition-dependent.
 
-Let $x' = (x_{1}, x_{2}, \ldots, x_{N})$ and $S' = \{(x_{1}, x_{2}, \ldots, x_{N}): 0 \leq x_{i} \leq r_{i}, \, \forall i \in \Omega \}$. In line 1 of ComputeTreeRate, we only loop through $x' \in S'$ and not $x \in S$ because the structure of a tree does not depend on the environment; only the tree's rate does. Also, as we explained in the example tree-rate calculation in Section~\ref{sec:exrate}, computing $\eta$ in (\ref{eq:rate}) requires keeping track of the number $u_i$ of components of each type $i$ still up as we perform a breadth-first traversal through the supertree.
+Let $x' = (x_{1}, x_{2}, \ldots, x_{N})$ and $S' = \{(x_{1}, x_{2}, \ldots,
+x_{N}): 0 \leq x_{i} \leq r_{i}, \, \forall i \in \Omega \}$. In line 1 of
+ComputeTreeRate, we only loop through $x' \in S'$ and not $x \in S$ because the
+structure of a tree does not depend on the environment; only the tree's rate
+does. Also, as we explained in the example tree-rate calculation in
+Section~\ref{sec:exrate}, computing $\eta$ in (\ref{eq:rate}) requires keeping
+track of the number $u_i$ of components of each type $i$ still up as we perform
+a breadth-first traversal through the supertree.
 
-Each time we encounter the symbol @ in the \varName{BFHist}, we reduce the number available by one \citeBlock{5}{7}. If there are components still available, we update $\eta$ \citeBlock{8}{9}. As soon as $u_{i}$ reaches zero, we break because that type has then been exhausted and can no longer fail \citeBlock{10}{12}.
+Each time we encounter the symbol @ in the \varName{BFHist}, we reduce the
+number available by one \citeBlock{5}{7}. If there are components still
+available, we update $\eta$ \citeBlock{8}{9}. As soon as $u_{i}$ reaches zero,
+we break because that type has then been exhausted and can no longer fail
+\citeBlock{10}{12}.
 
-Once we have finished calculating $\eta$, we loop through all environments since the same tree can be used for transitions occurring in different environments \citeLine{15}. We convert $x' \in S'$ into a state $x \in S$ by appending an environment $e$ \citeLine{16}. We generate a potential state $y$ by adding \varName{nFailed} to $x'$ and appending environment $e$ \citeLine{17}. Invalid states $y$ will be generated in some instances because simply adding \varName{nFailed} will cause some component types' number failed to exceed their redundancies \citeBlock{18}{20}. We finally compute the rate of the tree for the transition $(x,y)$ using (\ref{eq:rate}), and add this to the current cumulative rate $Q(x, y)$ for the transition \citeLine{21}. 
+Once we have finished calculating $\eta$, we loop through all environments since
+the same tree can be used for transitions occurring in different environments
+\citeLine{15}. We convert $x' \in S'$ into a state $x \in S$ by appending an
+environment $e$ \citeLine{16}. We generate a potential state $y$ by adding
+\varName{nFailed} to $x'$ and appending environment $e$ \citeLine{17}. Invalid
+states $y$ will be generated in some instances because simply adding
+\varName{nFailed} will cause some component types' number failed to exceed their
+redundancies \citeBlock{18}{20}. We finally compute the rate of the tree for the
+transition $(x,y)$ using (\ref{eq:rate}), and add this to the current cumulative
+rate $Q(x, y)$ for the transition \citeLine{21}.
 
-\captionAmerica{3}{ComputeTreeRate(\varName{nFailed}, \varName{BFHist}, $\rho$, \varName{rootC.type})}
-where \varName{level}  is the current bottom level of failed components, \\*\varName{nFailed} counts the failed components of each type in the tree, \\*\varName{BFHist} is breadth-first history, \\*$\rho$ is a cumulative product of component-affected probabilities, \\*\varName{rootC.type} is the root's type in the tree
+\captionAmerica{3}{ComputeTreeRate(\varName{nFailed}, \varName{BFHist}, $\rho$,
+\varName{rootC.type})} where \varName{level}  is the current bottom level of
+failed components, \\*\varName{nFailed} counts the failed components of each
+type in the tree, \\*\varName{BFHist} is breadth-first history, \\*$\rho$ is a
+cumulative product of component-affected probabilities, \\*\varName{rootC.type}
+is the root's type in the tree
 \\*\vspace{0.3em}
 \begin{algorithmic}[1]
 \FOR{$x' \in S'$}
-  \STATE $\eta = 1;$ \COMMENT{Cumulative product of complement probabilities of components that could have failed but did not}
+  \STATE $\eta = 1;$ \COMMENT{Cumulative product of complement probabilities of
+  components that could have failed but did not}
   \FOR{$i \in \Omega$}
     \STATE $u_{i} = r_{i} - x'_{i};$
     \FOR{$\varName{parentC.type}\,$ in $\varName{BFHist}[\varName{i}]$}
@@ -238,7 +539,8 @@ where \varName{level}  is the current bottom level of failed components, \\*\var
         \STATE $\eta = \eta * (1 - \phi_{parentC.type,\; i});$
       \ELSE
         \STATE break;
-        \COMMENT{need $u_{i} > 0$ or else there cannot be any more failed nodes of type $i$}
+        \COMMENT{need $u_{i} > 0$ or else there cannot be any more failed nodes
+        of type $i$}
       \ENDIF
     \ENDFOR
   \ENDFOR
@@ -248,7 +550,8 @@ where \varName{level}  is the current bottom level of failed components, \\*\var
     \IF{$y$ is not a valid state}
     \STATE continue;
     \ENDIF
-    \STATE $\varName{Q}(x, y) = (r_{\varName{rootC.type}} - x[\varName{rootC.type}]) * \rho * \eta;$
+    \STATE $\varName{Q}(x, y) = (r_{\varName{rootC.type}} -
+    x[\varName{rootC.type}]) * \rho * \eta;$
   \ENDFOR
 \ENDFOR
 \end{algorithmic}
@@ -256,7 +559,11 @@ where \varName{level}  is the current bottom level of failed components, \\*\var
 
 \subsection{Computing a Tree's Rate Revisited}
 
-We now use our example in Section \ref{sec:exrate} to show how to compute $\eta$ from (\ref{eq:rate}) using the data structure \varName{BFHist} for Figure \ref{fig:tree}. We assume the tree in Figure \ref{fig:tree} was first constructed from several recursive calls to AddTreeLevel, which also built \varName{BFHist} as follows.
+We now use our example in Section \ref{sec:exrate} to show how to compute $\eta$
+from (\ref{eq:rate}) using the data structure \varName{BFHist} for Figure
+\ref{fig:tree}. We assume the tree in Figure \ref{fig:tree} was first
+constructed from several recursive calls to AddTreeLevel, which also built
+\varName{BFHist} as follows.
 
 \begin{center}
 	\begin{tabular}{| c | l |}
@@ -270,169 +577,299 @@ We now use our example in Section \ref{sec:exrate} to show how to compute $\eta$
 	\end{tabular}
 \end{center}
 
-We then proceed to ComputeTreeRate to compute $\eta$. As in Section \ref{sec:exrate}, prior to iterating through \varName{BFHist}, we have $u_A = 2$, $u_B = 2$ and $u_C = 1$. Iteration through \varName{BFHist} occurs as specified in ComputeTreeRate \citeBlock{3}{14}.
+We then proceed to ComputeTreeRate to compute $\eta$. As in Section
+\ref{sec:exrate}, prior to iterating through \varName{BFHist}, we have $u_A =
+2$, $u_B = 2$ and $u_C = 1$. Iteration through \varName{BFHist} occurs as
+specified in ComputeTreeRate \citeBlock{3}{14}.
 
 \begin{itemize}
-\item Iteration through the linked list at index $A$ is as follows: The \nodeLabel{@}{1} means a component of type $A$ has failed at ID 1, so we then decrement $u_{A}$ to 1. Then for the next two entries, since $u_{A}$ is still positive, $\eta$ includes $(1 - \phi_{B, A})$ and $(1 - \phi_{C, A})$ from \nodeLabel{B}{2} and \nodeLabel{C}{5} respectively in its product. Finally \nodeLabel{@}{8} means a component of type $A$ failed at ID 8, so we decrease $u_A$ to 0. 
-\item Iteration through the linked list at index $B$ is as follows: \nodeLabel{@}{2} and \nodeLabel{@}{7} mean components of type $B$ have failed at IDs 2 and 7 respectively, so we decrement $u_{B}$ from 2 to 1 and then from 1 to 0. Since $u_{B}$ is now 0, we cannot include any terms from this row in $\eta$.
-\item Iteration through the linked list at index $C$ is as follows: Since $u_{C}$ starts out positive, we include $(1 - \phi_{A, C})$ from \nodeLabel{A}{1}. \nodeLabel{@}{5} means a component of type $C$ has failed at ID 5, so we decrement $u_{C}$ to 0. Since $u_{C} = 0$, again we cannot include any terms from this row in $\eta$. 
+\item Iteration through the linked list at index $A$ is as follows: The
+\nodeLabel{@}{1} means a component of type $A$ has failed at ID 1, so we then
+decrement $u_{A}$ to 1. Then for the next two entries, since $u_{A}$ is still
+positive, $\eta$ includes $(1 - \phi_{B, A})$ and $(1 - \phi_{C, A})$ from
+\nodeLabel{B}{2} and \nodeLabel{C}{5} respectively in its product. Finally
+\nodeLabel{@}{8} means a component of type $A$ failed at ID 8, so we decrease
+$u_A$ to 0.
+
+\item Iteration through the linked list at index $B$ is as follows:
+\nodeLabel{@}{2} and \nodeLabel{@}{7} mean components of type $B$ have failed at
+IDs 2 and 7 respectively, so we decrement $u_{B}$ from 2 to 1 and then from 1 to
+0. Since $u_{B}$ is now 0, we cannot include any terms from this row in $\eta$.
+
+\item Iteration through the linked list at index $C$ is as follows: Since
+$u_{C}$ starts out positive, we include $(1 - \phi_{A, C})$ from
+\nodeLabel{A}{1}. \nodeLabel{@}{5} means a component of type $C$ has failed at
+ID 5, so we decrement $u_{C}$ to 0. Since $u_{C} = 0$, again we cannot include
+any terms from this row in $\eta$.
 \end{itemize}
-Multiplying the contributions from each index results in $\eta = (1 - \phi_{B, A}) (1 - \phi_{C, A}) (1 - \phi_{A, C})$.
+Multiplying the contributions from each index results in $\eta = (1 - \phi_{B,
+A}) (1 - \phi_{C, A}) (1 - \phi_{A, C})$.
  
 \section{Performance Analysis}
-When analyzing the performance of our algorithm, it is important to note that the systems with larger
-numbers of states do not necessarily correspond to larger numbers of trees.  When computing statistics
-such as Mean time to failure (MTTF) and Steady state unavailability (SSU), we rely on third-party libraries to
-perform efficient matrix operations.  We can easily swap out libraries for these tasks so there is no need
-to discuss the performance of the Q-Matrix operations.  When we look at the trends show in Figure~\ref{fig:graph}, we see an expontentially increasing Time to Generate Trees (TGT) as the number of trees generated increases.
+TODO: Discuss MTTF and SSU computations, and how we utilize Up-state condition
+to parition S into U and U'. 
 
-\begin{minipage}[c]{\textwidth}
+When computing dependability measures such as the mean time to failure (MTTF)
+and steady-state unavailability (SSU), we rely on third-party libraries to
+perform the matrix operations \cite{OJAL:2013}. We can easily swap out
+libraries for these tasks, so there is no need to discuss the performance of
+the $Q$-matrix operations.  As we look at models with larger $S$, we see the
+overhead for matrix operations become apparent.  However, for models with
+relatively small $S$ (less than 1000 states) we see an increasing time to
+generate trees (TGT) as the number of trees generated increases. Note that the
+systems with larger numbers of states do not necessarily correspond to larger
+numbers of trees.  However, we do perform certain matrix operations in
+Algorithm 3 which may have a significant overhead for relatively large models
+(more than 1000 states).
+\\
+
+TODO: Introduce Models
+81-State
+include graphics 81 graph
+288-State
+include graphics 288 graph
+640-State
+include graphics 640 graph
+1944-State
+include graphics 1944 graph
+125-State
+include graphics 125 graph
+
+\noindent\begin{minipage}[c]{\textwidth}
 	\centering
-	\begin{tikzpicture}
-	    \begin{axis}[
-	        symbolic x coords={0,978,4507,6328,27746,321372,1},
-	    	max space between ticks=20,
-	    	xtick=data,
-	        ylabel=TGT (seconds),
-	        xlabel=Number of Trees,
-	        ymin=0
-	      ]
-	        \addplot[ybar,fill=black] coordinates {
-	            (978,	0.12)
-	            (4507,	0.26)
-	            (6328,	1.42)
-	            (27746,	1.64)
-	            (321372,6.22)
-	        };
-	    \end{axis}
-	\end{tikzpicture}
-	\captionof{figure}{Relation of TGT vs Trees across various models}
-	\label{fig:graph}
+    \begin{tabular}{|r|r|l|}
+    \hline
+	    States & Trees  & TGT  \\ \hline
+	    81    & 978    & 0.12 \\ \hline
+	    288   & 4507   & 0.26 \\ \hline
+	    1944  & 6328   & 1.42 \\ \hline
+	    640   & 27746  & 1.64 \\ \hline
+	    125   & 321372 & 6.22 \\ \hline
+	\end{tabular}
+	\captionof{table}{Relation of TGT vs number of trees across various models}
+	\label{fig:table}
 \end{minipage}
 
 \vspace{1em}
-In an effort to improve the running time of our algorithm, we introduce certain thresholds to stop
-generating trees based on simple test conditions.  To properly stop the recursion of the trees, we need to
-insert the threshold logic in Algorithm 2 before line \citeLine{19}.  We will denote the new threshold pseudo-code with
-lines \citeLine{19.x}.   The breaking conditions will cause the program to continue to the next enumeration of
-the bottom-most tree level, thereby ignoring any rate computations of trees that do not satisfy
-the threshold criteria.
+The number of trees can grow exponentially in the number of components in the
+cascade (see \cite{ING:2009}), and this limits the size of the models that our
+algorithm can handle.  To address this issue, we explored heuristic approaches
+that reduce the computational effort by halting the generation of trees based
+on a stopping criterion. We insert the necessary breaking condition in
+\mbox{AddTreeLevel} before line \citeLine{19}, which will cause the program to
+skip over to the next enumeration of the bottom-most tree level. Ultimately,
+this leads to an approximation of the original $Q$-matrix, which we will
+denote as $Q'$. Note that we evalulate one stopping criterion at a time -
+trying to combine criteria would require prior knowledge of the behavior of
+each single criterion.  We could combine the criteria using logical AND
+statements, or in tuples of ANDs and ORs.  However, first we must ascertain
+that any single threshold is not superior to all other criteria.   Otherwise,
+combining criteria cannot result in a better efficiency than the single
+superior criterion.
 
-Our first threshold is the \textit{height threshold} where we stop generating trees after the height of a
-tree reaches $\tau_h$. \\
+% We will denote the new threshold pseudo-code with lines \citeLine{19.x}.
 
+\noindent\textbf{Line $<$19.a$>$}
 \begin{algorithmic}
-\IF{$\varName{depth} > \tau_h$}
+\IF{stopping criterion satisfied}
  	\STATE goto line 2;
 \ENDIF
 \end{algorithmic}
 
 \vspace{1em}
-The second threshold we consider is the \textit{node threshold}, where trees will contain a maximum of $\tau_n$ components. We compute the sum of components in \varName{nFailed} to count the number of failed components in $T$.\\
+\noindent\textbf{Stopping Criteria}
+\begin{enumerate}
+\item $\varName{height} > \tau_h$
 
-\begin{algorithmic}
-\IF{$\sum \varName{nFailed} > \tau_n$}
-		\STATE goto line 2;
-\ENDIF
-\end{algorithmic}
+We first consider the \textit{height threshold}, where we stop generating
+trees after the height of the current tree reaches $\tau_h$. It is necessary
+to create a global variable \varName{height} to keep track of the height.  Our
+implementation requires a slight modification to \mbox{AddTreeLevel}, where we
+introduce the \varName{height} as a method parameter. We also modified line
+\citeLine{20} to increment the \varName{height} on every successive call.
 
-\vspace{1em}
-The final threshold we analyze is the \textit{rate threshold}, where we stop generating trees after the $\rho$ drops below $\tau_r$.\\
+\item $\displaystyle\sum_{i=1}^N \varName{nFailed}[i] > \tau_n$
 
-\begin{algorithmic}
-	\IF{$\rho < \tau_r$}
-		\STATE goto line 2;
-	\ENDIF
-\end{algorithmic}
+We also considered the  \textit{node threshold}, so constructed trees will
+contain a maximum of $\tau_n$ failed components.
 
-\vspace{1em}
-The range of values for any $\tau$ is from 0 to $\infty$. However, it is important to note that $\tau_h$ and $\tau_n$ depend on variables that increase as more trees are generated.  $\rho$ decreases as more components are attached, thus $\tau_r$ needs to be zero to generate all trees, while $\tau_h$ and $\tau_n$ needs to be $\infty$.  In order to define a more appropriate range for our thresholds, we need to define the thresholds based on each model.   For initial loose bounds, we can assume the following limits: $\tau_n < \displaystyle\sum^i r_i$, $\tau_h < |LP|$ and $\tau_r < MAX(r_i \lambda_i)$.
+\item $\rho < \tau_r$
 
-To define the longest path ($LP$), we need to first describe our models as a graph data structure.  The graph's nodes are the component types, where each node's value is the $\lambda$ of that component type.  We define the directed edges to start at the parent component type and end at the cascading component type.  The value of each edge is $\phi_{i, j}$, where the edge starts at the node labeled $i$ and ends at the node labeled $j$.  The longest path problem is NP-hard for cyclic graphs, thus we cannot derive any finite upper bound for $\tau_h$.  It is possible to find the tallest tree in a model, however, we cannot calculate this height prior to running our algorithm.
+We also used a \textit{rate threshold}, where we stop generating trees after
+$\rho$ drops below $\tau_r$.
+\end{enumerate}
+
+
+Increasing $\tau_h$ and $\tau_n$ leads to a monotonically increasing number of
+generated trees, whereas the number of generated trees decreases monotonically
+in $\tau_r$. Clearly, setting $\tau_h = \tau_n = \infty$ or $\tau_r = 0$ leads
+to generating all trees, which results in the exact values for the MTTF and
+SSU.  We can also get the exact values for the dependability measures by
+choosing thresholds
+
+$\tau_{h_0} = \tau_{n_0} = \displaystyle\sum_{i=1}^N r_i$ and $\tau_{r_0} = 
+\max_{i,j \in \Omega : j \in \Gamma_i} \phi_{i,j}$.
+
+Although $\tau_r$ starts at zero, we must provide an upper bound so that we
+can analyze and compare all of the thresholds with the same control variable.
+Since we halt tree generation prematurely, the resulting matrix $Q'$ (that
+sums the rates over trees that are actually generated) can differ from the
+matrix $Q$ that results from summing over all trees. Solving for the MTTF and
+SSU with $Q'$ rather than $Q$ leads to inaccuracies in the values for these
+dependability measures.
+
+%$We investigated the trade-off in the time saved by
+%halting tree generation versus the resulting error in the dependability
+%measures computed from $Q'$.
 
 \begin{minipage}[c]{\textwidth}
 	\centering
-	\includegraphics[width=3.0in]{simulation125model.png}
-	\captionof{figure}{Graph of the 125-state model}
+	\includegraphics{simulation125model.png}
+	\captionof{figure}{Graph representation of the 125-state model}
 	\label{fig:model}
 \end{minipage}
 
-\vspace{1em}
-However, we can use our graph data structure to pursue a tighter bound for the $\tau_r$.
+\subsection{Enumerating thresholds}
+For the model shown in Figure~\ref{fig:model}, we try setting different values
+for the thresholds to examine the trade-off in the TGT and errors in the
+resulting MTTF and SSU.  Starting from $i = 0$, we can calculate the next
+subsequent value of a threshold based on the index $i$.  Here are simple
+recursive equations for our thresholds:
 
-\subsection{Iterating over thresholds}
-Using the model shown in Figure~\ref{fig:model}, we step through each of the thresholds.
-Since the results vary from model to model, we use the loose upper bounds as starting points.  From there, 
-we simply subtract $\tau_n$ by 1.  $\tau_r$ starts at the largest $\lambda r$ and to calculate the next step we multiply by the smallest $\phi$.
+\begin{enumerate}
+\item $\tau_{h_{i+1}} = \tau_{h_i} - 1$
+\item $\tau_{n_{i+1}} = \tau_{n_i} - 1$
+\item $\tau_{r_{i+1}} = \tau_{r_i} / \min_{i,j \in \Omega : j \in \Gamma_i} \phi_{i,j}$
+\end{enumerate}
 
-$\tau_n$
+\iffalse
 \begin{center}
-	\begin{tabular}{| c | lllll |}
-    N  & Trees   & TGT (s) & MTTF   & SSU    \\ \hline
-    12 & 321372  & 6.69    & 44.12  & 0.0326 \\ \hline
-    11 & 167022  & 4.83    & 47.66  & 0.0291 \\ \hline
-    10 & 63072   & 3.12    & 54.15  & 0.0246 \\ \hline
-    9  & 20322   & 1.77    & 65.42  & 0.0198 \\ \hline
-    8  & 6165    & 1.18    & 83.35  & 0.0152 \\ \hline
-    7  & 1875    & 0.65    & 110.62 & 0.0152 \\ \hline
-    6  & 588     & 0.41    & 156.08 & 0.0152 \\ \hline
-    5  & 192     & 0.21    & 252.28 & 0.0152 \\ \hline
+	\begin{tabular}{|l|l|l|l|l|}
+	\hline
+    $\tau_h$  & Trees   & TGT (s) & MTTF   & SSU    \\ \hline
+	3	&	1701	&	0.678962855	&	211.76789101563693	&	0.00485821014338367	\\ \hline
+	4	&	21873	&	1.330667589	&	102.28326868846004	&	0.01220394254356029	\\ \hline
+	5	&	80604	&	2.5681346	&	67.47691830610874	&	0.02012865520579172	\\ \hline
+	6	&	161622	&	4.089599327	&	53.42339598844301	&	0.02628699745556959	\\ \hline
+	7	&	236586	&	5.051676486	&	47.40501639870173	&	0.03003494756466149	\\ \hline
+	8	&	287910	&	5.746202715	&	45.01922033674289	&	0.03186821297461374	\\ \hline
+	9	&	312732	&	6.393402559	&	44.28601244966885	&	0.03251784995527114	\\ \hline
+	10	&	320280	&	6.127569083	&	44.13901596884107	&	0.03266235351149184	\\ \hline
+	11	&	321372	&	6.204861941	&	44.1244629272665	&	0.03267778135277639 \\ \hline
     \end{tabular}
 \end{center}
 
-$\tau_r$
 \begin{center}
-	\begin{tabular}{| c | lllll |}
-    R      & Trees  & TGT (s) & MTTF    & SSU    \\ \hline
-    4E-2   & 31     & 0.09    & 1018.21 & 0.0006 \\ \hline
-    8E-3   & 114    & 0.18    & 321.09  & 0.0028 \\ \hline
-    16E-4  & 486    & 0.35    & 157.52  & 0.0071 \\ \hline
-    32E-5  & 2378   & 0.72    & 98.95   & 0.0125 \\ \hline
-    64E-6  & 11688  & 1.42    & 69.48   & 0.0186 \\ \hline
-    128E-7 & 50396  & 2.83    & 53.93   & 0.0186 \\ \hline
-    256E-8 & 163722 & 4.37    & 46.42   & 0.0186 \\ \hline
-    512E-9 & 300316 & 6.41    & 44.18   & 0.0186 \\ \hline
+	\begin{tabular}{|l|l|l|l|l|}
+	\hline
+    $\tau_n$  & Trees   & TGT (s) & MTTF   & SSU    \\ \hline
+    3	&	24	&	0.06	&	1642.68	&	0.0003	\\ \hline
+	4	&	66	&	0.12	&	524.14	&	0.0015	\\ \hline
+	5	&	192	&	0.16	&	252.28	&	0.0038	\\ \hline
+	6	&	588	&	0.33	&	156.08	&	0.0071	\\ \hline
+	7	&	1875	&	0.56	&	110.62	&	0.0110	\\ \hline
+	8	&	6165	&	1.01	&	83.35	&	0.0152	\\ \hline
+	9	&	20322	&	1.68	&	65.42	&	0.0198	\\ \hline
+	10	&	63072	&	2.48	&	54.14	&	0.0246	\\ \hline
+	11	&	167022	&	4.28	&	47.66	&	0.0291	\\ \hline
     \end{tabular}
 \end{center}
 
-\begin{minipage}[c]{\textwidth}
+\begin{center}
+	\begin{tabular}{|l|l|l|l|l|}
+	\hline
+    $\tau_r$      & Trees  & TGT (s) & MTTF    & SSU    \\ \hline
+    4E-1	&	18	&	0.06	&	2409.70	&	0.0002	\\ \hline
+	8E-2	&	64	&	0.12	&	501.80	&	0.0015	\\ \hline
+	16E-3	&	249	&	0.18	&	208.48	&	0.0049	\\ \hline
+	32E-4	&	1142	&	0.38	&	119.48	&	0.0099	\\ \hline
+	64E-5	&	5838	&	0.92	&	79.83	&	0.0159	\\ \hline
+	128E-6	&	27955	&	1.85	&	58.97	&	0.0224	\\ \hline
+	256E-7	&	105462	&	3.27	&	48.77	&	0.0284	\\ \hline
+	512E-8	&	251637	&	5.31	&	44.58	&	0.0322	\\ \hline
+	1024E-9	&	320861	&	6.22	&	44.12	&	0.0327	\\ \hline
+    \end{tabular}
+\end{center}
+\fi 
+
+\noindent\begin{minipage}[c]{\textwidth}
 	\centering
-	\begin{tikzpicture}
+	\begin{tikzpicture}[scale=0.9]
 	    \begin{axis}[
 	    	max space between ticks=30,
 	        ylabel=MTTF,
 	        xlabel=TGT (seconds),
-	        ymin=40
+	        ymin=40,
+            legend style={at={(0.95,0.95)},anchor=north east},
 	      ]
-	        \addplot+[const plot mark right,draw=blue] coordinates {
-	            %(6.69, 44.12)%
-	            (4.83, 47.66)
-	            (3.12, 54.15)
-	            (1.77, 65.42)
-	            (1.18, 83.35)
-	            (0.65, 110.62)
-	            (0.41, 156.08)
-	            %(0.21,252.28)
+	        \addplot[only marks,red,mark=square*] coordinates {
+	            (4.28, 47.66)
+	            (2.48, 54.15)
+	            (1.68, 65.42)
+	            (1.01, 83.35)
+	            (0.56, 110.62)
 	        };
 	        \addlegendentry{$\tau_n$}
-	        \addplot+[smooth,draw=red] coordinates {
-	            %(6.41, 44.180)%
-	            (4.37, 46.420)
-	            (2.83, 53.930)
-	            (1.42, 69.480)
-	            (0.72, 98.950)
-	            (0.35, 157.52)
-	            %(0.18, 321.09)
-	            %(0.09, 1018.21)
+	        \addplot[only marks,black,mark=triangle*] coordinates {
+	            (5.05, 47.41)
+	            (4.08, 53.42)
+	            (2.56, 67.47)
+	            (1.33, 102.28)
+	        };
+	        \addlegendentry{$\tau_h$}
+	        \addplot[only marks,blue] coordinates {
+	            (5.31, 44.58)
+	            (3.27, 48.77)
+	            (1.85, 58.97)
+	            (0.92, 79.83)
 	        };
 	        \addlegendentry{$\tau_r$}
 	    \end{axis}
 	\end{tikzpicture}
-	\captionof{figure}{Comparing rate and node thresholds}
-	\label{fig:graph1}
+	\hspace{2em}
+	\begin{tikzpicture}[scale=0.9]
+	    \begin{axis}[
+	    	max space between ticks=30,
+	        ylabel=SSU,
+	        xlabel=TGT (seconds),
+            legend style={at={(0.95,0.05)},anchor=south east},
+	      ]
+	        \addplot[only marks,red,mark=square*] coordinates {
+	            (4.28, 0.0291)
+	            (2.48, 0.0246)
+	            (1.68, 0.0198)
+	            (1.01, 0.0152)
+	            (0.56, 0.0110)
+	        };
+	        \addlegendentry{$\tau_n$}
+	        \addplot[only marks,black,mark=triangle*] coordinates {
+	            (5.05, 0.0300)
+	            (4.08, 0.0263)
+	            (2.56, 0.0201)
+	            (1.33, 0.0122)
+	            (0.67, 0.0049)
+	        };
+	        \addlegendentry{$\tau_h$}
+	        \addplot[only marks,blue] coordinates {
+	            (5.31, 0.0322)
+	            (3.27, 0.0284)
+	            (1.85, 0.0224)
+	            (0.92, 0.0159)
+	            (0.38, 0.0099)
+	        };
+	        \addlegendentry{$\tau_r$}
+	    \end{axis}
+	\end{tikzpicture}
+	\captionof{figure}{Two graphs showing the relation between TGT and MTTF/SSU}
+	\label{fig:graph2}
 \end{minipage}
 
-For the sake of brevity, we removed certain outlying points from the graph.  We used the constant left markup for the $\tau_n$ plot because the x-value represent the minimum required amount of time to achieve MTTF.  The $\tau_r$ is a generic smooth line, since the precision of the rate threshold can be very minute, it will still produce some increase in MTTF.  With enough points for $\tau_r$ we see a stepping effect at a smaller scale, similar to the $\tau_n$ plot.
+Points closer to the origin of the graph represent more efficienct threshold
+values. Decimal values for $\tau_n$ and $\tau_h$ are not valid, since we do
+not define a fraction of a component. On the other hand, $\tau_r$ can be
+sliced into more points with a slight modification to our recursive equation.
+As shown in Figure~\ref{fig:graph3}, $\tau_r$ is the superior threshold.
+
 \begin{minipage}[c]{\textwidth}
 	\centering
 	\begin{tikzpicture}
@@ -442,19 +879,24 @@ For the sake of brevity, we removed certain outlying points from the graph.  We 
 	        xlabel=TGT (seconds),
 	        ymin=40
 	      ]
-	        \addplot+[const plot mark right,draw=blue] coordinates {
-	            %(6.69, 44.12)%
+	        \addplot[only marks,red,mark=square*] coordinates {
 	            (4.83, 47.66)
 	            (3.12, 54.15)
 	            (1.77, 65.42)
 	            (1.18, 83.35)
 	            (0.65, 110.62)
 	            (0.41, 156.08)
-	            %(0.21,252.28)
 	        };
 	        \addlegendentry{$\tau_n$}
-	        \addplot+[const plot mark right,draw=red,opacity=0.2] coordinates {
-(0.344502149, 157.5190885463175)
+	        \addplot[only marks,black,mark=triangle*] coordinates {
+	            (5.74, 45.02)
+	            (5.05, 47.41)
+	            (4.08, 53.42)
+	            (2.56, 67.47)
+	            (1.33, 102.28)
+	        };
+	        \addlegendentry{$\tau_h$}
+	        \addplot[only marks,blue,opacity=0.4] coordinates {
 (0.344082552, 157.5190885463175)
 (0.378330792, 147.9078317370886)
 (0.382740174, 147.9078317370886)
@@ -538,11 +980,9 @@ For the sake of brevity, we removed certain outlying points from the graph.  We 
 	        \addlegendentry{$\tau_r$}
 	    \end{axis}
 	\end{tikzpicture}
-	\captionof{figure}{Smaller stepping for $\tau_r$}
-	\label{fig:graph2}
+	\captionof{figure}{Minute stepping in $\tau_r$ shows a clear improvement over any other $\tau$}
+	\label{fig:graph3}
 \end{minipage}
-
-Points closer to the origin of the graph represent more efficient thresholds.  As shown in Figure~\ref{fig:graph2}, it is clear that stepping over $\tau_r$ results in better efficiency than $\tau_n$. Furthermore, since we cannot have decimal values for $\tau_n$, there is little reason to pursue this threshold.
 
 \subsection{Choosing an appropriate $\tau_r$}
 Use Djikstra's algorithm to find the shortest path with the largest rate.
@@ -552,7 +992,8 @@ Use Djikstra's algorithm to find the shortest path with the largest rate.
 We remove the down-states from the matrix to speed up MTTF calculation.
 
 \subsection{Bookmarks}
-We do not store all failed components \varname{BFHist}, we simply multiply until we hit a not-failed component.
+We do not store all failed components \varName{BFHist}, we simply multiply until
+we hit a not-failed component.
 
 \bibliographystyle{plain}
 \bibliography{mkn}
