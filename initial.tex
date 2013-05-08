@@ -305,9 +305,11 @@ Computing the rate (\ref{eq:rate}) of a given tree depends on the state from
 which the cascading failure began and the multiset of components that fail in
 the cascade. We do not actually construct the supertree in our algorithm to
 compute a tree's rate, but instead build a \varName{breadth-first history} to
-keep track of the information necessary to compute $\eta$ in (\ref{eq:rate}).
-This is all done in Algorithms 1 (SeedTrees), 2 \mbox{(AddTreeLevel)} and 3
-(ComputeTreeRate).
+keep track of the information necessary to compute $\eta$ in (\ref{eq:rate}). 
+\changed{This breadth-first history concisely recounts the creation of the tree
+and thus allows us to obtain $\eta$ without having to build supertrees per
+transition as was done in \cite{ING:2009}}. This is all done in Algorithms 1
+(SeedTrees), 2 \mbox{(AddTreeLevel)} and 3 (ComputeTreeRate).
 
 SeedTrees starts the tree generation and initializes the necessary data
 structures for \mbox{AddTreeLevel}. \mbox{AddTreeLevel} adds a new level to an
@@ -378,13 +380,15 @@ cause which other components to fail
 
 \subsection{AddTreeLevel}
 
-Given a tree, \mbox{AddTreeLevel} determines all the possibilities for the next
-level that can be added to the current tree by taking the Cartesian product of
-the power sets of the nonempty $\Gamma_{i}$ for each of the failed components at
-the current bottom level. For each possible next level, we recursively call
-\mbox{AddTreeLevel}. We use $\mathcal{P}$ to denote the power set-like operation
-on an ordered set. In our realization of the power-set operation, components in
-each subset maintain their relative ordering from the original set.
+\changed{Given the bottom-most tree level,} \mbox{AddTreeLevel} determines all
+the possibilities for the next level that can be added to the current tree by
+taking the Cartesian product of the power sets of the nonempty $\Gamma_{i}$ for
+each of the failed components at the current bottom level. For each possible
+next level, we recursively call \mbox{AddTreeLevel}. We use $\mathcal{P}$ to
+denote the power set-like operation on an ordered set. In our realization of the
+power-set operation, components in each subset maintain their relative ordering
+from the original set. \changed{Note that by only maintaining one bottom-most level
+at a time, as opposed to passing the entire tree per recursive call, we save some memory.}
 
 We implement this power set-like operation by generating all possible binary
 numbers with $\sum\limits_{i \, = \, 1}^{|level|}\Gamma_{level[i]}$ bits. A
@@ -628,6 +632,38 @@ matrix operations significantly effects the total computation time (CT).
 
 \noindent\begin{minipage}[c]{\textwidth}
 	\centering
+    \begin{tabular}{|r|l|p{3cm}|p{5cm}|c|}
+    \hline
+	    States & Comp. Types & Redudancies & $\Gamma_{sets}$ & Env. \\ \hline 
+	    
+	    81 & A, B, C, D & $r_A = 2$, $r_B = 2$, \newline $r_C = 2$, $r_D = 2$ &
+	    $\Gamma_{A} = \{B, C\}$, $\Gamma_{B} = \{A, D\}$, \newline $\Gamma_{C} =
+	    \{\}$, $\Gamma_{D} = \{A, B, C\}$ & 1 \\ \hline
+	    
+	    288 & A, B, C, D & $r_A = 3$, $r_B = 3$, \newline $r_C = 2$, $r_D = 2$ &
+	    $\Gamma_{A} = \{B, C\}$, $\Gamma_{B} = \{A, C\}$, \newline $\Gamma_{C} =
+	    \{B, D\}$, $\Gamma_{D} = \{C\}$ & 2 \\ \hline
+
+	    640 & A, B, C, D & $r_A = 4$, $r_B = 3$, \newline $r_C = 3$, $r_D = 3$ &
+	    $\Gamma_{A} = \{B, C\}$, $\Gamma_{B} = \{A, C\}$, \newline $\Gamma_{C} =
+	    \{B, D\}$, $\Gamma_{D} = \{B\}$ & 2 \\ \hline
+	    
+	    125 & A, B, C & $r_A = 4$, $r_B = 4$, \newline $r_C = 4$ & $\Gamma_{A} =
+	    \{B, C\}$, $\Gamma_{B} = \{A, C\}$, \newline $\Gamma_{C} = \{A, B\}$ & 1
+	    \\ \hline
+
+	    1944 & A, B, C, D, E, F & $r_A = 2$, $r_B = 2$, \newline $r_C = 2$, $r_D
+	    = 2$, \newline $r_E = 2$, $r_F = 2$ & $\Gamma_{A} = \Gamma_{B} = \{C,
+	    D\} $, \newline $\Gamma_{C} = \{A, E\}$, $\Gamma_{D} = \{B, F\}$,
+	    \newline $\Gamma_{E} = \{\}$, $\Gamma_{F} = \{\}$ & 2 \\ \hline
+
+	\end{tabular}
+	\captionof{table}{Relation of TGT vs number of trees across various models}
+	\label{fig:table}
+\end{minipage}
+
+\noindent\begin{minipage}[c]{\textwidth}
+	\centering
     \begin{tabular}{|r|r|r|r|}
     \hline
 	    States & Trees  & TGT	& CT  \\ \hline
@@ -647,7 +683,7 @@ cascade (see \cite{ING:2009}), and this limits the size of the models that our
 algorithm can handle.  To address this issue, we explored heuristic approaches
 that reduce the computational effort by halting the generation of trees based
 on a stopping criterion. We insert the necessary breaking condition in
-\mbox{AddTreeLevel} before line \citeLine{19}, which will cause the program to
+\mbox{AddTreeLevel} as line \citeLine{18.1}, which will cause the program to
 skip over to the next enumeration of the bottom-most tree level. By skipping
 over the bottom-most tree level we don't generate a particular tree and thus
 neither evaluate its rate nor update the Q-matrix with said rate. The goal is
@@ -656,7 +692,7 @@ SSU while saving time by skipping trees with relatively lower rates.
 \\
 % We will denote the new threshold pseudo-code with lines \citeLine{19.x}.
 
-\noindent\textbf{New lines inserted before $<$19$>$}
+\noindent\textbf{New lines inserted as $<$18.1, 2, 3$>$}
 \begin{algorithmic}[1]
 \IF{stopping criterion satisfied}
  	\STATE goto line 2;
@@ -731,11 +767,13 @@ resulting MTTF and SSU.  Starting from $i = 0$, we can calculate the next
 subsequent value of a threshold based on the index $i$.  Here are governing
 recursive equations for choosing our thresholds:
 
+\iffalse
 \begin{enumerate}
 \item $\tau_{h_{i+1}} = \tau_{h_i} - 1$
 \item $\tau_{n_{i+1}} = \tau_{n_i} - 1$
 \item $\tau_{r_{i+1}} = \tau_{r_i} * \min_{i,j \in \Omega : j \in \Gamma_i} \phi_{i,j}$
 \end{enumerate}
+\fi
 
 \noindent\begin{minipage}[c]{\textwidth}
 	\centering
