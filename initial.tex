@@ -14,8 +14,10 @@
 \usepackage[left = 1.0in, top = 1in, right = 1.0in, bottom = 1in, nohead]{geometry}
 \usepackage{color}
 \usepackage{ulem}
+\usepackage{tikz}
 \usepackage{pgfplots}
 \usepackage{caption}
+\usetikzlibrary{arrows}
 
 \def\myxout{\bgroup \markoverwith{\textcolor{red}{\hbox to.35em{\hss/\hss}}}\ULon}
 \def\myxoutii{\bgroup \markoverwith{\textcolor{blue}{\hbox to.35em{\hss/\hss}}}\ULon}
@@ -50,7 +52,8 @@
 \newcommand{\citeLine}[1]{$\langle \, #1 \, \rangle$}
 \newcommand{\citeBlock}[2]{$\langle \, #1 - #2 \, \rangle$}
 \newcommand{\nodeLabel}[2]{\mbox{$#1$-$#2$}}
-
+\newcommand{\modelgraphlabel}[4]{$#1$ \\ $r=#2$ \\ $q=#3$ \\ $\lambda=#4$}
+\newcommand{\scale}{8}
 
 \begin{document}
 \title{Working Title}
@@ -606,46 +609,33 @@ Multiplying the contributions from each index results in $\eta = (1 - \phi_{B,
 A}) (1 - \phi_{C, A}) (1 - \phi_{A, C})$.
  
 \section{Performance Analysis}
-TODO: Discuss MTTF and SSU computations, and how we utilize Up-state condition
+\textbf{TODO} Discuss MTTF and SSU computations, and how we utilize Up-state condition
 to parition S into U and U'. 
 
 When computing dependability measures such as the mean time to failure (MTTF)
 and steady-state unavailability (SSU), we rely on third-party libraries to
 perform the matrix operations \cite{OJAL:2013}. We can easily swap out
 libraries for these tasks, so there is no need to discuss the performance of
-the $Q$-matrix operations.  As we look at models with larger $S$, we see the
-overhead for matrix operations become apparent.  However, for models with
-relatively small $S$ (less than 1000 states) we see an increasing time to
-generate trees (TGT) as the number of trees generated increases. Note that the
-systems with larger numbers of states do not necessarily correspond to larger
-numbers of trees.  However, we do perform certain matrix operations in
-Algorithm 3 which may have a significant overhead for relatively large models
-(more than 1000 states).
+the $Q$-matrix operations. Note that the models with larger numbers of states
+do not necessarily correspond to larger numbers of trees. The time to generate
+trees (TGT) increases as the number of trees generated increases, and the
+number of trees increases as the number of cascading failures increases. When
+models have a state-space larger than 1000 states, the overhead from the
+matrix operations significantly effects the total computation time (CT).
 \\
 
-TODO: Introduce Models
-81-State
-include graphics 81 graph
-288-State
-include graphics 288 graph
-640-State
-include graphics 640 graph
-1944-State
-include graphics 1944 graph
-125-State
-include graphics 125 graph
-\changed{Total Run Times}
+\textbf{TODO} Introduce Models, Show Total Run times, TGT, MTTF and SSU for each model
 
 \noindent\begin{minipage}[c]{\textwidth}
 	\centering
-    \begin{tabular}{|r|r|l|}
+    \begin{tabular}{|r|r|r|r|}
     \hline
-	    States & Trees  & TGT  \\ \hline
-	    81    & 978    & 0.12 \\ \hline
-	    288   & 4507   & 0.26 \\ \hline
-	    1944  & 6328   & 1.42 \\ \hline
-	    640   & 27746  & 1.64 \\ \hline
-	    125   & 321372 & 6.22 \\ \hline
+	    States & Trees  & TGT	& CT  \\ \hline
+	    81    & 978    & 0.12 	& 0.58 \\ \hline
+	    288   & 4507   & 0.26	& 0.78 \\ \hline
+	    640   & 27746  & 1.64	& 2.48 \\ \hline
+	    125   & 321372 & 6.22	& 6.69 \\ \hline
+	    1944  & 6328   & 1.42	& 21.21 \\ \hline
 	\end{tabular}
 	\captionof{table}{Relation of TGT vs number of trees across various models}
 	\label{fig:table}
@@ -657,21 +647,21 @@ cascade (see \cite{ING:2009}), and this limits the size of the models that our
 algorithm can handle.  To address this issue, we explored heuristic approaches
 that reduce the computational effort by halting the generation of trees based
 on a stopping criterion. We insert the necessary breaking condition in
-\mbox{AddTreeLevel} at line \citeLine{19} \changed{(moving the code currently at line \citeLine{19} down to accomodate this)}, which will cause the program to skip over to the next enumeration of the bottom-most tree level. \changed{By skipping over the bottom-most tree level we don't generate a particular tree and thus neither evaluate its rate nor update the $Q$-matrix with said rate. The goal is to generate trees with relatively higher rates to get an approximate MTTF and SSU while saving time by skipping trees with relatively lower rates.}
+\mbox{AddTreeLevel} before line \citeLine{19}, which will cause the program to
+skip over to the next enumeration of the bottom-most tree level. By skipping
+over the bottom-most tree level we don't generate a particular tree and thus
+neither evaluate its rate nor update the Q-matrix with said rate. The goal is
+to generate trees with relatively higher rates to get an approximate MTTF and
+SSU while saving time by skipping trees with relatively lower rates.
+\\
 % We will denote the new threshold pseudo-code with lines \citeLine{19.x}.
 
-\vspace{1em}
-\noindent\textbf{New lines starting at \citeLine{19}}
-\changed{
+\noindent\textbf{New lines inserted before $<$19$>$}
 \begin{algorithmic}[1]
 \IF{stopping criterion satisfied}
  	\STATE goto line 2;
 \ENDIF
 \end{algorithmic}
-}
-\vspace{1em}
-
-Ultimately, this leads to an approximation of the original $Q$-matrix, which we will denote as $Q'$. Note that we evalulate one stopping criterion at a time - trying to combine criteria would require prior knowledge of the behavior of each single criterion.  We could combine the criteria using logical AND statements, or in tuples of ANDs and ORs.  However, first we must ascertain that any single threshold is not superior to all other criteria.   Otherwise, combining criteria cannot result in a better efficiency than the single superior criterion.
 
 \vspace{1em}
 \noindent\textbf{Stopping Criteria}
@@ -693,15 +683,14 @@ contain a maximum of $\tau_n$ failed components.
 \item $\rho < \tau_r$
 
 We also used a \textit{rate threshold}, where we stop generating trees after
-$\rho$ \changed{in (\ref{eq:rate})} drops below $\tau_r$.
+$\rho$ in (1) drops below $\tau_r$.
 \end{enumerate}
-
 
 Increasing $\tau_h$ and $\tau_n$ leads to a monotonically increasing number of
 generated trees, whereas the number of generated trees decreases monotonically
-\changed{with} $\tau_r$. Clearly, setting $\tau_h = \tau_n = \infty$ or $\tau_r = 0$ leads
-to generating all trees, which results in the exact values for the MTTF and
-SSU.  We can also get the exact values for the dependability measures by
+in $\tau_r$. Setting $\tau_h = \tau_n = \infty$ or $\tau_r = 0$ leads to
+generating all trees, in other words, we do not approximate MTTF and SSU and
+$Q$ = $Q'$. We can also get the exact values for the dependability measures by
 choosing thresholds
 
 $\tau_{h_0} = \tau_{n_0} = \displaystyle\sum_{i=1}^N r_i$ and $\tau_{r_0} = 
@@ -721,106 +710,76 @@ dependability measures.
 
 \begin{minipage}[c]{\textwidth}
 	\centering
-	\includegraphics{simulation125model.png}
+	\begin{tikzpicture}[scale = 1, auto = left, every node/.style = {circle, draw = black, fill = gray!25}, bend angle = 90]
+		\node (A) at (0, 0) [align = center] {\modelgraphlabel{A}{4}{1}{0.02}};
+		\node (B) at (\scale / 2, \scale / 2^0.5) [align = center] {\modelgraphlabel{B}{4}{1}{0.02}};
+		\node (C) at (\scale, 0) [align = center] {\modelgraphlabel{C}{4}{1}{0.01}};
+
+	  	\foreach \from/\phiEdge/\to in {A/0.2/B, A/0.4/C, B/0.3/A, B/0.2/C, C/0.3/A, C/0.4/B}
+	    	\path (\from) edge [-triangle 60, bend left=15] node[fill=none, draw=none] {\phiEdge} (\to);
+	\end{tikzpicture} 
 	\captionof{figure}{Graph representation of the 125-state model}
 	\label{fig:model}
 \end{minipage}
 
-\vspace{1em}
-\changed{WE NEED TO DISCUSS THE UTILITY OF GIVING MODEL DETAILS!}
+\textbf{TODO} Discuss the utility of giving model details
 
 \subsection{Enumerating thresholds}
 For the model shown in Figure~\ref{fig:model}, we try setting different values
 for the thresholds to examine the trade-off in the TGT and errors in the
 resulting MTTF and SSU.  Starting from $i = 0$, we can calculate the next
-subsequent value of a threshold based on the index $i$.  Here are \changed{the governing} recursive equations for \changed{choosing} our thresholds:
+subsequent value of a threshold based on the index $i$.  Here are governing
+recursive equations for choosing our thresholds:
 
 \begin{enumerate}
 \item $\tau_{h_{i+1}} = \tau_{h_i} - 1$
 \item $\tau_{n_{i+1}} = \tau_{n_i} - 1$
-\item $\tau_{r_{i+1}} = \tau_{r_i} / \min_{i,j \in \Omega : j \in \Gamma_i} \phi_{i,j}$
+\item $\tau_{r_{i+1}} = \tau_{r_i} * \min_{i,j \in \Omega : j \in \Gamma_i} \phi_{i,j}$
 \end{enumerate}
-
-\iffalse
-\begin{center}
-	\begin{tabular}{|l|l|l|l|l|}
-	\hline
-    $\tau_h$  & Trees   & TGT (s) & MTTF   & SSU    \\ \hline
-	3	&	1701	&	0.678962855	&	211.76789101563693	&	0.00485821014338367	\\ \hline
-	4	&	21873	&	1.330667589	&	102.28326868846004	&	0.01220394254356029	\\ \hline
-	5	&	80604	&	2.5681346	&	67.47691830610874	&	0.02012865520579172	\\ \hline
-	6	&	161622	&	4.089599327	&	53.42339598844301	&	0.02628699745556959	\\ \hline
-	7	&	236586	&	5.051676486	&	47.40501639870173	&	0.03003494756466149	\\ \hline
-	8	&	287910	&	5.746202715	&	45.01922033674289	&	0.03186821297461374	\\ \hline
-	9	&	312732	&	6.393402559	&	44.28601244966885	&	0.03251784995527114	\\ \hline
-	10	&	320280	&	6.127569083	&	44.13901596884107	&	0.03266235351149184	\\ \hline
-	11	&	321372	&	6.204861941	&	44.1244629272665	&	0.03267778135277639 \\ \hline
-    \end{tabular}
-\end{center}
-
-\begin{center}
-	\begin{tabular}{|l|l|l|l|l|}
-	\hline
-    $\tau_n$  & Trees   & TGT (s) & MTTF   & SSU    \\ \hline
-    3	&	24	&	0.06	&	1642.68	&	0.0003	\\ \hline
-	4	&	66	&	0.12	&	524.14	&	0.0015	\\ \hline
-	5	&	192	&	0.16	&	252.28	&	0.0038	\\ \hline
-	6	&	588	&	0.33	&	156.08	&	0.0071	\\ \hline
-	7	&	1875	&	0.56	&	110.62	&	0.0110	\\ \hline
-	8	&	6165	&	1.01	&	83.35	&	0.0152	\\ \hline
-	9	&	20322	&	1.68	&	65.42	&	0.0198	\\ \hline
-	10	&	63072	&	2.48	&	54.14	&	0.0246	\\ \hline
-	11	&	167022	&	4.28	&	47.66	&	0.0291	\\ \hline
-    \end{tabular}
-\end{center}
-
-\begin{center}
-	\begin{tabular}{|l|l|l|l|l|}
-	\hline
-    $\tau_r$      & Trees  & TGT (s) & MTTF    & SSU    \\ \hline
-    4E-1	&	18	&	0.06	&	2409.70	&	0.0002	\\ \hline
-	8E-2	&	64	&	0.12	&	501.80	&	0.0015	\\ \hline
-	16E-3	&	249	&	0.18	&	208.48	&	0.0049	\\ \hline
-	32E-4	&	1142	&	0.38	&	119.48	&	0.0099	\\ \hline
-	64E-5	&	5838	&	0.92	&	79.83	&	0.0159	\\ \hline
-	128E-6	&	27955	&	1.85	&	58.97	&	0.0224	\\ \hline
-	256E-7	&	105462	&	3.27	&	48.77	&	0.0284	\\ \hline
-	512E-8	&	251637	&	5.31	&	44.58	&	0.0322	\\ \hline
-	1024E-9	&	320861	&	6.22	&	44.12	&	0.0327	\\ \hline
-    \end{tabular}
-\end{center}
-\fi 
 
 \noindent\begin{minipage}[c]{\textwidth}
 	\centering
 	\begin{tikzpicture}[scale=0.9]
 	    \begin{axis}[
 	    	max space between ticks=30,
-	        ylabel=MTTF,
-	        xlabel=TGT (seconds),
-	        ymin=40,
+	        ylabel=\% TGT,
+	        xlabel=\% Error MTTF,
             legend style={at={(0.95,0.95)},anchor=north east},
 	      ]
 	        \addplot[only marks,red,mark=square*] coordinates {
-	            (4.28, 47.66)
-	            (2.48, 54.15)
-	            (1.68, 65.42)
-	            (1.01, 83.35)
-	            (0.56, 110.62)
+				%(36.2283821103523,	1.131498272)
+				%(10.8786955953901,	2.0599948)
+				%(4.71755048985506,	2.926328112)
+				(2.53732952715346,	5.310854768)
+				(1.50720646565421,	9.43458592)
+				(0.889037571328778,	16.21424912)
+				(0.482749275852648,	26.56263144)
+				(0.227135116763804,	41.153888896)
+				(0.080131519802844,	67.78028296)
 	        };
 	        \addlegendentry{$\tau_n$}
 	        \addplot[only marks,black,mark=triangle*] coordinates {
-	            (5.05, 47.41)
-	            (4.08, 53.42)
-	            (2.56, 67.47)
-	            (1.33, 102.28)
+				%(15.2851051823572,	5.065407888)
+				(3.79933073326488,	10.55315872)
+				(1.31806263244633,	21.607843456)
+				(0.529240557949356,	42.444563712)
+				(0.210743257691422,	64.033783088)
+				(0.074347725814652,	81.17720832)
+				(0.020278035133284,	92.977935568)
+				(0.003661223540978,	98.040626224)
+				(0.000329817987781,	99.235025232)
 	        };
 	        \addlegendentry{$\tau_h$}
 	        \addplot[only marks,blue] coordinates {
-	            (5.31, 44.58)
-	            (3.27, 48.77)
-	            (1.85, 58.97)
-	            (0.92, 79.83)
+	            %(53.6115397530694,	0.917438928)
+				%(10.3724266177443,	1.873340144)
+				(3.72475662384617,	2.934580832)
+				(1.70774969809274,	6.27211712)
+				(0.809117898074521,	14.623058272)
+				(0.336501695329488,	29.640801488)
+				(0.105215457995291,	52.52442624)
+				(0.010279358713953,	83.38141984)
+				(0.000009595371626,	95.930529824)
 	        };
 	        \addlegendentry{$\tau_r$}
 	    \end{axis}
@@ -829,159 +788,224 @@ subsequent value of a threshold based on the index $i$.  Here are \changed{the g
 	\begin{tikzpicture}[scale=0.9]
 	    \begin{axis}[
 	    	max space between ticks=30,
-	        ylabel=SSU,
-	        xlabel=TGT (seconds),
-            legend style={at={(0.95,0.05)},anchor=south east},
+	        ylabel=\% TGT,
+	        xlabel=\% Error SSU,
+            legend style={at={(0.95,0.95)},anchor=north east},
 	      ]
 	        \addplot[only marks,red,mark=square*] coordinates {
-	            (4.28, 0.0291)
-	            (2.48, 0.0246)
-	            (1.68, 0.0198)
-	            (1.01, 0.0152)
-	            (0.56, 0.0110)
+		        (99.997820138894, 0.597874032)
+				(99.9190691529866, 0.690664304)
+				(98.9400899955787, 1.131498272)
+				(95.4067719798257, 2.0599948)
+				(88.2268633635062, 2.926328112)
+				(78.0336186597343, 5.310854768)
+				(66.3306911661053, 9.43458592)
+				(53.4052347601024, 16.21424912)
+				(39.2033637637174, 26.56263144)
+				(24.49364613515, 41.153888896)
+				(10.7288011862567, 67.78028296)
 	        };
 	        \addlegendentry{$\tau_n$}
 	        \addplot[only marks,black,mark=triangle*] coordinates {
-	            (5.05, 0.0300)
-	            (4.08, 0.0263)
-	            (2.56, 0.0201)
-	            (1.33, 0.0122)
-	            (0.67, 0.0049)
+		        (99.870014762329, 1.004211856)
+				(96.9670506258595, 5.065407888)
+				(85.1329865668151, 10.55315872)
+				(62.6536991241504, 21.607843456)
+				(38.4026259662758, 42.444563712)
+				(19.5569700042169, 64.033783088)
+				(8.08755576023673, 81.17720832)
+				(2.47742761181436, 92.977935568)
+				(0.48941938798856, 98.040626224)
+				(0.047212021885594, 99.235025232)
 	        };
 	        \addlegendentry{$\tau_h$}
 	        \addplot[only marks,blue] coordinates {
-	            (5.31, 0.0322)
-	            (3.27, 0.0284)
-	            (1.85, 0.0224)
-	            (0.92, 0.0159)
-	            (0.38, 0.0099)
+	            (99.3410468520112, 0.917438928)
+				(95.1059074056778, 1.873340144)
+				(84.900750769067, 2.934580832)
+				(69.5121048248012, 6.27211712)
+				(51.1240231864542, 14.623058272)
+				(31.3717210540309, 29.640801488)
+				(13.1024452694744, 52.52442624)
+				(1.45530814163918, 83.38141984)
+				(0.001373917182918, 95.930529824)
 	        };
 	        \addlegendentry{$\tau_r$}
 	    \end{axis}
 	\end{tikzpicture}
-	\captionof{figure}{Two graphs showing the relation between TGT and MTTF/SSU}
+	\captionof{figure}{Two graphs showing the relation between \% TGT and \%Error in MTTF/SSU}
 	\label{fig:graph2}
 \end{minipage}
-
-Points closer to the origin of the graph represent more efficienct threshold
-values. Decimal values for $\tau_n$ and $\tau_h$ are not valid, since we do
-not define a fraction of a component. On the other hand, $\tau_r$ can be
-sliced into more points with a slight modification to our recursive equation.
-As shown in Figure~\ref{fig:graph3}, $\tau_r$ is the superior threshold.
-
-\begin{minipage}[c]{\textwidth}
+\noindent\begin{minipage}[c]{\textwidth}
 	\centering
-	\begin{tikzpicture}
+	\vspace{2em}
+	\begin{tikzpicture}[scale=0.9]
 	    \begin{axis}[
 	    	max space between ticks=30,
-	        ylabel=MTTF,
-	        xlabel=TGT (seconds),
-	        ymin=40
+	        xlabel=\% Error MTTF,
+	        ylabel=\% TGT
 	      ]
 	        \addplot[only marks,red,mark=square*] coordinates {
-	            (4.83, 47.66)
-	            (3.12, 54.15)
-	            (1.77, 65.42)
-	            (1.18, 83.35)
-	            (0.65, 110.62)
-	            (0.41, 156.08)
+	            %(36.2283821103523, 1.131498272)
+				%(10.8786955953901, 2.0599948)
+				%(4.71755048985506, 2.926328112)
+				(2.53732952715346, 5.310854768)
+				(1.50720646565421, 9.43458592)
+				(0.889037571328778, 16.21424912)
+				(0.482749275852648, 26.56263144)
+				(0.227135116763804, 41.153888896)
+				(0.080131519802844, 67.78028296)
 	        };
 	        \addlegendentry{$\tau_n$}
 	        \addplot[only marks,black,mark=triangle*] coordinates {
-	            (5.74, 45.02)
-	            (5.05, 47.41)
-	            (4.08, 53.42)
-	            (2.56, 67.47)
-	            (1.33, 102.28)
+	            %(15.2851051823572, 5.065407888)
+				(3.79933073326488, 10.55315872)
+				(1.31806263244633, 21.607843456)
+				(0.529240557949356, 42.444563712)
+				(0.210743257691422, 64.033783088)
+				(0.074347725814652, 81.17720832)
+				(0.020278035133284, 92.977935568)
+				(0.003661223540978, 98.040626224)
 	        };
 	        \addlegendentry{$\tau_h$}
 	        \addplot[only marks,blue,opacity=0.4] coordinates {
-(0.344082552, 157.5190885463175)
-(0.378330792, 147.9078317370886)
-(0.382740174, 147.9078317370886)
-(0.379160362, 147.57625733995283)
-(0.404638214, 134.58099951972483)
-(0.407693398, 134.5105420836673)
-(0.408394303, 132.1944063794543)
-(0.422157951, 127.63862497221515)
-(0.4417392, 123.2682365622926)
-(0.447972678, 119.47800116980984)
-(0.446970534, 119.2609377366602)
-(0.499038684, 112.29985247933837)
-(0.526347074, 111.74281155144094)
-(0.576919899, 106.7691734648383)
-(0.622748098, 105.46713919346436)
-(0.634484917, 104.13078705240042)
-(0.720985005, 98.95502803212393)
-(0.723733977, 98.95502803212393)
-(0.742169427, 96.4620897905325)
-(0.747129889, 94.65375600479332)
-(0.748421806, 94.6483505713123)
-(0.82217861, 89.46596320539086)
-(0.818284129, 88.9319343901071)
-(0.825973617, 87.44953414900172)
-(0.891425726, 84.79442627438799)
-(0.908426726, 83.83796267263895)
-(0.945712346, 79.95200429617726)
-(0.97197172, 79.59074177462524)
-(1.152168268, 77.50326279827235)
-(1.178107901, 76.66838521971795)
-(1.278671691, 74.03705549185341)
-(1.306646895, 73.17459250012516)
-(1.317523567, 73.03713554330994)
-(1.423942375, 69.49588337998549)
-(1.439930543, 69.13775642408925)
-(1.447929816, 68.95959482654695)
-(1.503310099, 66.58295027531301)
-(1.580233072, 65.02199768949912)
-(1.586738225, 64.89884555254417)
-(1.607290545, 63.99041962668084)
-(1.640153371, 63.185081407549525)
-(1.762170192, 61.93014732885827)
-(1.762673321, 61.7841287726133)
-(2.026623655, 59.06709866009019)
-(2.040350385, 58.9177603427415)
-(2.202156341, 58.01120401464048)
-(2.378737703, 57.21566964408839)
-(2.548764516, 56.38877165851812)
-(2.589307001, 55.58690557429628)
-(2.591811272, 55.46368707648622)
-(2.797474913, 53.97297770438325)
-(2.815541258, 53.89772517671483)
-(2.921684062, 52.51281500942996)
-(3.001292371, 52.22648610967988)
-(3.068945932, 51.926465274486326)
-(3.235270871, 50.859779060861655)
-(3.230514106, 50.859779060861655)
-(3.414576006, 50.3358291324884)
-(3.440186832, 50.04789682353884)
-(3.440772488, 50.04088922919791)
-(3.767284412, 48.76703850295514)
-(3.783551227, 48.76703850295514)
-(3.892158063, 48.3199391302121)
-(4.120468587, 47.77464150795925)
-(4.171618623, 47.662915667165436)
-(4.429253872, 46.88154637849341)
-(4.413631229, 46.881328101249686)
-(4.357047837, 46.42155167256497)
-(4.358408584, 46.419419723163394)
-(4.98801497, 45.88158176521943)
-(4.764117562, 45.74789890258021)
-(5.575508072, 45.72257131523723)
-(5.662311278, 44.97715874824674)
-(5.307410718, 44.97715874824674)
-(5.396393051, 44.90584140426985)
-(5.784158034, 44.90584140426985)
-(5.424027912, 44.90584140426985)
-(5.725843844, 44.578034109756366)
-(5.662620359, 44.578034109756366)
+				%(77.8389169546306, 00.861523664)
+				%(53.6115397530694, 00.974922144)
+				%(36.9436300763677, 01.152995024)
+				%(19.6691222136954, 01.345055408)
+				%(12.7403247404829, 01.904005072)
+				%(10.3724266177443, 01.981527472)
+				%(8.03701794393446, 02.251020576)
+				%(5.44037121681866, 02.664600432)
+				%(4.30725484221952, 02.719792576)
+				(3.72475662384617, 03.040657568)
+				(2.91070806039755, 03.582141952)
+				(2.3520596495621, 05.126460944)
+				(1.99594369221807, 05.54379928)
+				(1.70283035361238, 06.145844688)
+				(1.39021921620469, 09.046704608)
+				(1.15419515287708, 10.136940352)
+				(0.981883253585455, 11.18185456)
+				(0.803778142429072, 14.81874224)
+				(0.658367890409094, 17.559864032)
+				(0.51894407728556, 19.877736832)
+				(0.431973948594048, 22.436950304)
+				(0.335262945633125, 30.392851952)
+				(0.259775233206219, 33.959527536)
+				(0.190106610385051, 39.480168544)
+				(0.1484695504721, 43.655010816)
+				(0.105215457995291, 53.421811456)
+				(0.062484238182606, 62.918921632)
+				(0.039821874791978, 69.478455152)
+				(0.019324786397644, 79.03968496)
+				(0.010279358713953, 85.14784744)
+				(0.003281976729983, 92.620473392)
+				(0.000287846441507, 98.61676752)
+				(0.000074191212126, 98.965718112)
+				(0.000009595371626, 99.49783808)
+				(0.000001197524504, 99.10566392)
+				(0.000000113524206, 98.86297784)
 	        };
 	        \addlegendentry{$\tau_r$}
 	    \end{axis}
 	\end{tikzpicture}
-	\captionof{figure}{Minute stepping in $\tau_r$ shows a clear improvement over any other $\tau$}
+	\hspace{2em}
+	\begin{tikzpicture}[scale=0.9]
+	    \begin{axis}[
+	    	max space between ticks=30,
+	        xlabel=\% Error SSU,
+	        ylabel=\% TGT
+	      ]
+	        \addplot[only marks,red,mark=square*] coordinates {
+		        (99.997820138894, 0.597874032)
+				(99.9190691529866, 0.690664304)
+				(98.9400899955787, 1.131498272)
+				(95.4067719798257, 2.0599948)
+				(88.2268633635062, 2.926328112)
+				(78.0336186597343, 5.310854768)
+				(66.3306911661053, 9.43458592)
+				(53.4052347601024, 16.21424912)
+				(39.2033637637174, 26.56263144)
+				(24.49364613515, 41.153888896)
+				(10.7288011862567, 67.78028296)
+	        };
+	        \addlegendentry{$\tau_n$}
+	        \addplot[only marks,black,mark=triangle*] coordinates {
+		        (99.870014762329, 1.004211856)
+				(96.9670506258595, 5.065407888)
+				(85.1329865668151, 10.55315872)
+				(62.6536991241504, 21.607843456)
+				(38.4026259662758, 42.444563712)
+				(19.5569700042169, 64.033783088)
+				(8.08755576023673, 81.17720832)
+				(2.47742761181436, 92.977935568)
+				(0.48941938798856, 98.040626224)
+				(0.047212021885594, 99.235025232)
+	        };
+	        \addlegendentry{$\tau_h$}
+	        \addplot[only marks,blue,opacity=0.4] coordinates {
+				(99.9580166591334, 0.64276816)
+				(99.9190691529866, 0.666556016)
+				(99.5757277129978, 0.861523664)
+				(99.3410468520113, 0.974922144)
+				(98.9719987443901, 1.152995024)
+				(97.7642769573984, 1.345055408)
+				(96.1780559196505, 1.904005072)
+				(95.1059074056779, 1.981527472)
+				(93.4890534789559, 2.251020576)
+				(89.8503866887823, 2.664600432)
+				(86.9987828239507, 2.719792576)
+				(84.9007507690672, 3.040657568)
+				(80.7086068375894, 3.582141952)
+				(76.5274064875573, 5.126460944)
+				(72.8353681144488, 5.54379928)
+				(69.4344925074714, 6.145844688)
+				(64.3716966475546, 9.046704608)
+				(59.8972972893015, 10.136940352)
+				(55.8034316220035, 11.18185456)
+				(50.9758925995969, 14.81874224)
+				(46.1163102305292, 17.559864032)
+				(40.5375554585927, 19.877736832)
+				(36.475003450293, 22.436950304)
+				(31.292572177161, 30.392851952)
+				(26.2435957216562, 33.959527536)
+				(20.9369931625395, 39.480168544)
+				(17.2863722414051, 43.655010816)
+				(13.1024452694755, 53.421811456)
+				(8.13986333059419, 62.918921632)
+				(5.38496052678585, 69.478455152)
+				(2.67446059455362, 79.03968496)
+				(1.45530814164037, 85.14784744)
+				(0.468285490683692, 92.620473392)
+				(0.041154518338355, 98.61676752)
+				(0.010622504245067, 98.965718112)
+				(0.001373917184128, 99.49783808)
+				(0.000171469279963, 99.10566392)
+				(0.000016255143934, 98.86297784)
+	        };
+	        \addlegendentry{$\tau_r$}
+	    \end{axis}
+	\end{tikzpicture}
+	\captionof{figure}{This graph shows an alternative view with smaller stepping in $\tau_r$}
 	\label{fig:graph3}
 \end{minipage}
+\\*\\
+
+Figure~\ref{fig:graph3} plots the (TGT, MTTF) pairs for the different stopping
+criteria considered using different values for each threshold. Decimal values
+for $\tau_n$ and $\tau_h$ are not valid, since we do not define a fraction of
+a component. On the other hand, $\tau_r$ can be sliced into more points with a
+slight modification to our recursive equation. The true value of the MTTF,
+obtained when all trees are generated, is 44.124, and this defines the
+horizontal asymptote to which the approximate MTTFs for each stopping
+criterion are approaching as TGT increases. 
+
+Points closer to the origin of the graph represent more efficienct thresholds.
+For a fixed TGT, the stopping criterion based on $\tau_r$ leads to an
+approximate MTTF with lower error than the other thresholds.  Also, for a
+fixed approximate MTTF value, the stopping criterion based on $\tau_r$ again
+leads to a smaller TGT than the other thresholds.  Thus, the points plotted
+from using $\tau_r$ define the efficient frontier.
 
 \subsection{Choosing an appropriate $\tau_r$}
 Use Djikstra's algorithm to find the shortest path with the largest rate.
