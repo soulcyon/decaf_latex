@@ -634,6 +634,7 @@ include graphics 640 graph
 include graphics 1944 graph
 125-State
 include graphics 125 graph
+\changed{Total Run Times}
 
 \noindent\begin{minipage}[c]{\textwidth}
 	\centering
@@ -656,25 +657,21 @@ cascade (see \cite{ING:2009}), and this limits the size of the models that our
 algorithm can handle.  To address this issue, we explored heuristic approaches
 that reduce the computational effort by halting the generation of trees based
 on a stopping criterion. We insert the necessary breaking condition in
-\mbox{AddTreeLevel} before line \citeLine{19}, which will cause the program to
-skip over to the next enumeration of the bottom-most tree level. Ultimately,
-this leads to an approximation of the original $Q$-matrix, which we will
-denote as $Q'$. Note that we evalulate one stopping criterion at a time -
-trying to combine criteria would require prior knowledge of the behavior of
-each single criterion.  We could combine the criteria using logical AND
-statements, or in tuples of ANDs and ORs.  However, first we must ascertain
-that any single threshold is not superior to all other criteria.   Otherwise,
-combining criteria cannot result in a better efficiency than the single
-superior criterion.
-
+\mbox{AddTreeLevel} at line \citeLine{19} \changed{(moving the code currently at line \citeLine{19} down to accomodate this)}, which will cause the program to skip over to the next enumeration of the bottom-most tree level. \changed{By skipping over the bottom-most tree level we don't generate a particular tree and thus neither evaluate its rate nor update the $Q$-matrix with said rate. The goal is to generate trees with relatively higher rates to get an approximate MTTF and SSU while saving time by skipping trees with relatively lower rates.}
 % We will denote the new threshold pseudo-code with lines \citeLine{19.x}.
 
-\noindent\textbf{Line $<$19.a$>$}
-\begin{algorithmic}
+\vspace{1em}
+\noindent\textbf{New lines starting at \citeLine{19}}
+\changed{
+\begin{algorithmic}[1]
 \IF{stopping criterion satisfied}
  	\STATE goto line 2;
 \ENDIF
 \end{algorithmic}
+}
+\vspace{1em}
+
+Ultimately, this leads to an approximation of the original $Q$-matrix, which we will denote as $Q'$. Note that we evalulate one stopping criterion at a time - trying to combine criteria would require prior knowledge of the behavior of each single criterion.  We could combine the criteria using logical AND statements, or in tuples of ANDs and ORs.  However, first we must ascertain that any single threshold is not superior to all other criteria.   Otherwise, combining criteria cannot result in a better efficiency than the single superior criterion.
 
 \vspace{1em}
 \noindent\textbf{Stopping Criteria}
@@ -696,13 +693,13 @@ contain a maximum of $\tau_n$ failed components.
 \item $\rho < \tau_r$
 
 We also used a \textit{rate threshold}, where we stop generating trees after
-$\rho$ drops below $\tau_r$.
+$\rho$ \changed{in (\ref{eq:rate})} drops below $\tau_r$.
 \end{enumerate}
 
 
 Increasing $\tau_h$ and $\tau_n$ leads to a monotonically increasing number of
 generated trees, whereas the number of generated trees decreases monotonically
-in $\tau_r$. Clearly, setting $\tau_h = \tau_n = \infty$ or $\tau_r = 0$ leads
+\changed{with} $\tau_r$. Clearly, setting $\tau_h = \tau_n = \infty$ or $\tau_r = 0$ leads
 to generating all trees, which results in the exact values for the MTTF and
 SSU.  We can also get the exact values for the dependability measures by
 choosing thresholds
@@ -729,12 +726,14 @@ dependability measures.
 	\label{fig:model}
 \end{minipage}
 
+\vspace{1em}
+\changed{WE NEED TO DISCUSS THE UTILITY OF GIVING MODEL DETAILS!}
+
 \subsection{Enumerating thresholds}
 For the model shown in Figure~\ref{fig:model}, we try setting different values
 for the thresholds to examine the trade-off in the TGT and errors in the
 resulting MTTF and SSU.  Starting from $i = 0$, we can calculate the next
-subsequent value of a threshold based on the index $i$.  Here are simple
-recursive equations for our thresholds:
+subsequent value of a threshold based on the index $i$.  Here are \changed{the governing} recursive equations for \changed{choosing} our thresholds:
 
 \begin{enumerate}
 \item $\tau_{h_{i+1}} = \tau_{h_i} - 1$
