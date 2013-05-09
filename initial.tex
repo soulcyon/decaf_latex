@@ -306,9 +306,9 @@ which the cascading failure began and the multiset of components that fail in
 the cascade. We do not actually construct the supertree in our algorithm to
 compute a tree's rate, but instead build a \varName{breadth-first history} to
 keep track of the information necessary to compute $\eta$ in (\ref{eq:rate}). 
-\changed{This breadth-first history concisely recounts the creation of the tree
+This breadth-first history concisely recounts the creation of the tree
 and thus allows us to obtain $\eta$ without having to build supertrees per
-transition as was done in \cite{ING:2009}}. This is all done in Algorithms 1
+transition as was done in \cite{ING:2009}. This is all done in Algorithms 1
 (SeedTrees), 2 \mbox{(AddTreeLevel)} and 3 (ComputeTreeRate).
 
 SeedTrees starts the tree generation and initializes the necessary data
@@ -380,15 +380,16 @@ cause which other components to fail
 
 \subsection{AddTreeLevel}
 
-\changed{Given the bottom-most tree level,} \mbox{AddTreeLevel} determines all
-the possibilities for the next level that can be added to the current tree by
-taking the Cartesian product of the power sets of the nonempty $\Gamma_{i}$ for
-each of the failed components at the current bottom level. For each possible
-next level, we recursively call \mbox{AddTreeLevel}. We use $\mathcal{P}$ to
-denote the power set-like operation on an ordered set. In our realization of the
-power-set operation, components in each subset maintain their relative ordering
-from the original set. \changed{Note that by only maintaining one bottom-most level
-at a time, as opposed to passing the entire tree per recursive call, we save some memory.}
+Given the bottom-most tree level, \mbox{AddTreeLevel} determines all the
+possibilities for the next level that can be added to the current tree by
+taking the Cartesian product of the power sets of the nonempty $\Gamma_{i}$
+for each of the failed components at the current bottom level. For each
+possible next level, we recursively call \mbox{AddTreeLevel}. We use
+$\mathcal{P}$ to denote the power set-like operation on an ordered set. In our
+realization of the power-set operation, components in each subset maintain
+their relative ordering from the original set. Note that by only maintaining
+one bottom-most level at a time, as opposed to passing the entire tree per
+recursive call, we save some memory.
 
 We implement this power set-like operation by generating all possible binary
 numbers with $\sum\limits_{i \, = \, 1}^{|level|}\Gamma_{level[i]}$ bits. A
@@ -632,21 +633,21 @@ when running the algorithm from \cite{ING:2009}.
 	    125    & 321372 & 6.01	& 6.11  & 0.09  & 114.25  & 114.58  \\ \hline
 	    1944   & 6328   & 1.35	& 1.51  & 8.27  & 6124.01  & 6358.85 \\ \hline
 	\end{tabular}
-	\captionof{times}{Number of trees, $TGT$, $QPT$ and $QST$ across our models and algorithms}
+	\captionof{table}{Number of trees, $TGT$, $QPT$ and $QST$ across our models and algorithms}
 	\label{fig:times}
 \end{minipage}
 \\
 \\*\indent
 Note that the models with larger numbers of states do not necessarily
 correspond to larger numbers of trees. The time to generate trees (TGT)
-increases as the number of trees generated increases, and the number( of trees
+increases as the number of trees generated increases, and the number of trees
 increases as the number of cascading failures increases.  In order to show
 that $Q$-matrix population and matrix operations are not a bottleneck, we
-recorded the times for $QPT$.  As shown in \ref{fig:times}, there is a
-polynomial increase in ($TGT$ - $QPT$), which occurs due to the increasing
-number of states. The main bottleneck in the old algorithm is the tree
-generation, which has been improved exponentially.
-\\
+recorded the times $QPT_1$ and $QPT_2$.  As shown in Table~\ref{fig:times},
+there is a polynomial trend in ($TGT$ - $QPT$), which is increasing as the
+number of states increases.  However, this polynomial trend is insignificant
+when we see the exponential trend in the $TGT$.
+\\*\\
 \noindent\begin{minipage}[c]{\textwidth}
 	\centering
     \begin{tabular}{|r|l|p{3cm}|p{5cm}|c|}
@@ -727,24 +728,15 @@ $\rho$ in (1) drops below $\tau_r$.
 Increasing $\tau_h$ and $\tau_n$ leads to a monotonically increasing number of
 generated trees, whereas the number of generated trees decreases monotonically
 in $\tau_r$. Setting $\tau_h = \tau_n = \infty$ or $\tau_r = 0$ leads to
-generating all trees, in other words, we do not approximate MTTF and SSU and
-$Q$ = $Q'$. We can also get the exact values for the dependability measures by
-choosing thresholds
+generating all trees, in other words, we do not approximate MTTF and SSU.
 
-$\tau_{h_0} = \tau_{n_0} = \displaystyle\sum_{i=1}^N r_i$ and $\tau_{r_0} = 
-\max_{i,j \in \Omega : j \in \Gamma_i} \phi_{i,j}$.
-
-Although $\tau_r$ starts at zero, we must provide an upper bound so that we
-can analyze and compare all of the thresholds with the same control variable.
 Since we halt tree generation prematurely, the resulting matrix $Q'$ (that
 sums the rates over trees that are actually generated) can differ from the
 matrix $Q$ that results from summing over all trees. Solving for the MTTF and
 SSU with $Q'$ rather than $Q$ leads to inaccuracies in the values for these
-dependability measures.
-
-%$We investigated the trade-off in the time saved by
-%halting tree generation versus the resulting error in the dependability
-%measures computed from $Q'$.
+dependability measures.  We investigated the trade-off in the time saved by
+halting tree generation versus the resulting error in the dependability
+measures computed from $Q'$.
 
 \begin{minipage}[c]{\textwidth}
 	\centering
@@ -760,16 +752,15 @@ dependability measures.
 	\label{fig:model}
 \end{minipage}
 
-\textbf{TODO} Discuss the utility of giving model details
-
 \subsection{Enumerating thresholds}
 For the model shown in Figure~\ref{fig:model}, we try setting different values
-for the thresholds to examine the trade-off in the TGT and errors in the
-resulting MTTF and SSU.  Starting from $i = 0$, we can calculate the next
-subsequent value of a threshold based on the index $i$.  Here are governing
-recursive equations for choosing our thresholds:
+for the thresholds and plot the fraction of $TGT$ versus percent error in $MTTF$.
 
 \iffalse
+
+$\tau_{h_0} = \tau_{n_0} = \displaystyle\sum_{i=1}^N r_i$ and $\tau_{r_0} = 
+\max_{i,j \in \Omega : j \in \Gamma_i} \phi_{i,j}$.
+
 \begin{enumerate}
 \item $\tau_{h_{i+1}} = \tau_{h_i} - 1$
 \item $\tau_{n_{i+1}} = \tau_{n_i} - 1$
@@ -927,29 +918,71 @@ recursive equations for choosing our thresholds:
 	        \addlegendentry{$\tau_r$}
 	    \end{axis}
 	\end{tikzpicture}
-	\captionof{figure}{This graph shows an alternative view with smaller stepping in $\tau_r$}
+	\captionof{figure}{Two graphs showing \%$TGT$ versus \%$MTTF$/$SSU$ when iterating each $\tau$}
 	\label{fig:graph3}
 \end{minipage}
 \\*\\
 
-Figure~\ref{fig:graph3} plots the (TGT, MTTF) pairs for the different stopping
-criteria considered using different values for each threshold. Decimal values
-for $\tau_n$ and $\tau_h$ are not valid, since we do not define a fraction of
-a component. On the other hand, $\tau_r$ can be sliced into more points with a
-slight modification to our recursive equation. The true value of the MTTF,
-obtained when all trees are generated, is 44.124, and this defines the
-horizontal asymptote to which the approximate MTTFs for each stopping
-criterion are approaching as TGT increases. 
+Figure~\ref{fig:graph3} plots the ($TGT$, $MTTF$) and ($TGT$, $SSU$) pairs for
+each of the stopping criteria considered using different values for each
+threshold. Both $\tau_n$ and $\tau_h$ are fixed to be Real numbers, on the
+other hand, $\tau_r$ can be sliced into finer granularity. The true value of
+the $MTTF$, obtained when all trees are generated, is 44.124, and this defines
+the vertical asymptote to which the approximate $MTTF$s for each stopping
+criterion are approaching as $TGT$ increases.
 
 Points closer to the origin of the graph represent more efficienct thresholds.
-For a fixed TGT, the stopping criterion based on $\tau_r$ leads to an
-approximate MTTF with lower error than the other thresholds.  Also, for a
-fixed approximate MTTF value, the stopping criterion based on $\tau_r$ again
-leads to a smaller TGT than the other thresholds.  Thus, the points plotted
-from using $\tau_r$ define the efficient frontier.
+For a fixed $TGT$, the stopping criterion based on $\tau_r$ leads to an
+approximate $MTTF$ with lower error than the other thresholds.  Also, for a
+fixed approximate $MTTF$ value, the stopping criterion based on $\tau_r$ again
+leads to a smaller $TGT$ than the other thresholds.  Thus, the points plotted
+using $\tau_r$ define our efficient frontier.
 
 \subsection{Choosing an appropriate $\tau_r$}
-Use Djikstra's algorithm to find the shortest path with the largest rate.
+We will use the model in Figure~\ref{fig:model} to explain the algorithm in
+finding samples of $\tau_r$. Choosing a large rate threshold allows many
+smaller trees to fill into the $Q$-matrix.  These smaller trees will have
+large rates, since these tree rates include fewer products of $\phi$. However,
+the diagonal of the $Q$-matrix is the sum of the whole row, which means many
+larger trees can effect the diagonal entry.
+
+In order to guage which trees will effect the dependability measures, we
+utilize Djikstra's shortest path algorithm on a modified version of the model.
+We would like to traverse the graph such that we obtain a valid failure tree,
+and the rate of this tree will represent a threshold.  Unfortunately,
+Djikstra's algorithm only works for summation of the edges on a graph, while
+our tree rate is a product of the edges. To account for this limitation, we
+changed all the edges on our model: $\mid\ln(E)\mid$.
+\\
+\begin{minipage}[c]{\textwidth}
+	\centering
+	\begin{tikzpicture}[scale = 1, auto = left, every node/.style = {circle, draw = black, fill = gray!25}, bend angle = 90]
+		\node (A) at (0, 0) [align = center] {\modelgraphlabel{A}{4}{1}{0.02}};
+		\node (B) at (\scale / 2, \scale / 2^0.5) [align = center] {\modelgraphlabel{B}{4}{1}{0.02}};
+		\node (C) at (\scale, 0) [align = center] {\modelgraphlabel{C}{4}{1}{0.01}};
+
+	  	\foreach \from/\phiEdge/\to in {A/1.61/B, A/0.92/C, B/1.20/A, B/1.61/C, C/1.20/A, C/0.92/B}
+	    	\path (\from) edge [-triangle 60, bend left=15] node[fill=none, draw=none] {\phiEdge} (\to);
+	\end{tikzpicture} 
+	\captionof{figure}{Graph representation of the 125-state model}
+	\label{fig:model}
+\end{minipage}
+\\\\*
+$Rates = i,j \in \Omega : j \in \Gamma_i (\lambda_i \prod {D(j)_E})$\\
+
+\textbf{TODO} This equation is important, describe/prove equation or show example of usage?
+
+\deleted{Starting with node A, we traverse to node B, and finally back to node A. Along
+this path, we multiply all the edges, or $\phi$, and the lambda of the
+starting node: $0.2 * 0.3 * 0.02 = 12e-4 = \tau_r$.}
+
+\deleted{Starting with node B, we traverse to node A, and finally back to node B. Along
+this path, we multiply all the edges, or $\phi$, and the lambda of the
+starting node: $0.2 * 0.3 * 0.02 = 12e-4 = \tau_r$.}
+
+\deleted{Starting with node C, we traverse to node A, then to B and finally back to
+node C. Along this path, we multiply all the edges, or $\phi$, and the lambda
+of the starting node: $0.3 * 0.3 * 0.02 = 12e-4 = \tau_r$.}
 
 \section{Model}
 
@@ -958,8 +991,10 @@ Use Djikstra's algorithm to find the shortest path with the largest rate.
 We remove the down-states from the matrix to speed up MTTF calculation. 
 
 \subsection{Bookmarks}
-We do not store all failed components \varName{BFHist}, we simply multiply until
-we hit a not-failed component. \changed{OR We cache BFH between succesive @  symbols to get complement cumulative component affected probabilities in constant time.}
+We do not store all failed components \varName{BFHist}, we simply multiply
+until we hit a not-failed component. We cache BFH between succesive @  symbols
+to get complement cumulative component affected probabilities in constant
+time.
 
 \bibliographystyle{plain}
 \bibliography{mkn}
