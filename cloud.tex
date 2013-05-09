@@ -1,0 +1,27 @@
+\documentclass{article}
+\usepackage{tikz}
+\usepackage{ifthen}
+\usetikzlibrary{arrows}
+
+% type, redundancy, required, lambda 
+\newcommand{\modelgraphlabel}[4]{$#1$ \\ $r=#2$ \\ $\nu=#3$ \\ $\lambda=#4$}
+
+\begin{document}
+% Cloud Model 
+% draw - outline, fill - color!alpha, align - allows for manual linebreak
+\begin{tikzpicture}[scale = 1, auto = left, every node/.style = {circle, draw = black, fill = gray!25}, bend angle = 90]
+
+	\node (NS)  at ( 3, 16) [align = center] {\modelgraphlabel{NS}  {5}{1} {0.01} };
+	\node (FW)  at ( 3,  12) [align = center] {\modelgraphlabel{FW}  {2}{1} {0.01} };
+	\node (HV1) at ( 0,  8) [align = center] {\modelgraphlabel{HV1} {2}{1} {0.01} };
+	\node (HV2) at ( 6,  8) [align = center] {\modelgraphlabel{HV2} {2}{1} {0.01} };
+	\node (LB1) at ( 0,  4) [align = center] {\modelgraphlabel{LB1} {2}{1} {0.01} };
+	\node (LB2) at ( 6,  4) [align = center] {\modelgraphlabel{LB2} {2}{1} {0.01} };
+	\node (SR1) at ( 0,  0) [align = center] {\modelgraphlabel{SR1} {8}{4} {0.01} };
+	\node (SR2) at ( 6,  0) [align = center] {\modelgraphlabel{SR2} {8}{4} {0.01} };
+
+    \foreach \from/\phy/\to in {NS/0.1/FW, FW/0.1/HV1, FW/0.1/HV2, HV1/0.1/LB1, HV2/0.1/LB2, HV1/0.1/LB2, HV2/0.1/LB1, LB1/0.1/SR1, LB2/0.1/SR2, FW/0.1/NS, HV1/0.1/FW, HV2/0.1/FW, LB1/0.1/HV1, LB2/0.1/HV2, LB1/0.1/HV2, LB2/0.1/HV1, SR1/0.1/LB1, SR2/0.1/LB2}
+    	\path (\from) edge [-triangle 60, bend left = 15] node[fill=none, draw=none] {\phy} (\to);
+\end{tikzpicture}
+
+\end{document}

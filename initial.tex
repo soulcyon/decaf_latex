@@ -1048,13 +1048,15 @@ from using $\tau_r$ define the efficient frontier.
 \subsection{Choosing an appropriate $\tau_r$}
 Use Djikstra's algorithm to find the shortest path with the largest rate.
 
+\section{Model}
+
 \section{Remarks}
 \subsection{MTTF Computation}
-We remove the down-states from the matrix to speed up MTTF calculation.
+We remove the down-states from the matrix to speed up MTTF calculation. 
 
 \subsection{Bookmarks}
 We do not store all failed components \varName{BFHist}, we simply multiply until
-we hit a not-failed component.
+we hit a not-failed component. \changed{OR We cache BFH between succesive @  symbols to get complement cumulative component affected probabilities in constant time.}
 
 \bibliographystyle{plain}
 \bibliography{mkn}
