@@ -613,23 +613,40 @@ Multiplying the contributions from each index results in $\eta = (1 - \phi_{B,
 A}) (1 - \phi_{C, A}) (1 - \phi_{A, C})$.
  
 \section{Performance Analysis}
-\textbf{TODO} Discuss MTTF and SSU computations, and how we utilize Up-state condition
-to parition S into U and U'. 
-
-When computing dependability measures such as the mean time to failure (MTTF)
-and steady-state unavailability (SSU), we rely on third-party libraries to
-perform the matrix operations \cite{OJAL:2013}. We can easily swap out
-libraries for these tasks, so there is no need to discuss the performance of
-the $Q$-matrix operations. Note that the models with larger numbers of states
-do not necessarily correspond to larger numbers of trees. The time to generate
-trees (TGT) increases as the number of trees generated increases, and the
-number of trees increases as the number of cascading failures increases. When
-models have a state-space larger than 1000 states, the overhead from the
-matrix operations significantly effects the total computation time (CT).
+With the complete overhaul of the algorithm, we have achieved a vast
+improvement in tree generation time ($TGT$) and $Q$-matrix processing time
+($QPT$).  We utilized the OJAlgo package (\cite{OJAL:2013}) to calculate the
+mean time to failure ($MTTF$) and steady-state unavailability ($SSU$). The
+time required to calculate both of these dependability measures is denoted as
+$Q$-matrix solving time ($QST$).  The values $TGT_1$ and $QPT_1$ are measured
+when running the algorithm from \cite{ING:2009}.
+\\*\\
+\noindent\begin{minipage}[c]{\textwidth}
+	\centering
+    \begin{tabular}{|r|r|r|r|r|r|r|}
+    \hline
+	    States  & Trees  & $TGT_{2}$ & $QPT_{2}$ & $QST_{2}$ & $TGT_{1}$    & $QPT_{1}$    \\ \hline
+	    81     & 978    & 0.12 	& 0.22  & 0.08  & 1.30 	    & 1.60    \\ \hline
+	    288    & 4507   & 0.26	& 0.36  & 0.16  & 19.00  & 19.62   \\ \hline
+	    640    & 27746  & 1.56	& 1.67  & 0.61  & 137.29  & 143.27  \\ \hline
+	    125    & 321372 & 6.01	& 6.11  & 0.09  & 114.25  & 114.58  \\ \hline
+	    1944   & 6328   & 1.35	& 1.51  & 8.27  & 6124.01  & 6358.85 \\ \hline
+	\end{tabular}
+	\captionof{times}{Number of trees, $TGT$, $QPT$ and $QST$ across our models and algorithms}
+	\label{fig:times}
+\end{minipage}
 \\
-
-\textbf{TODO} Introduce Models, Show Total Run times, TGT, MTTF and SSU for each model
-
+\\*\indent
+Note that the models with larger numbers of states do not necessarily
+correspond to larger numbers of trees. The time to generate trees (TGT)
+increases as the number of trees generated increases, and the number( of trees
+increases as the number of cascading failures increases.  In order to show
+that $Q$-matrix population and matrix operations are not a bottleneck, we
+recorded the times for $QPT$.  As shown in \ref{fig:times}, there is a
+polynomial increase in ($TGT$ - $QPT$), which occurs due to the increasing
+number of states. The main bottleneck in the old algorithm is the tree
+generation, which has been improved exponentially.
+\\
 \noindent\begin{minipage}[c]{\textwidth}
 	\centering
     \begin{tabular}{|r|l|p{3cm}|p{5cm}|c|}
@@ -653,27 +670,12 @@ matrix operations significantly effects the total computation time (CT).
 	    \\ \hline
 
 	    1944 & A, B, C, D, E, F & $r_A = 2$, $r_B = 2$, \newline $r_C = 2$, $r_D
-	    = 2$, \newline $r_E = 2$, $r_F = 2$ & $\Gamma_{A} = \Gamma_{B} = \{C,
-	    D\} $, \newline $\Gamma_{C} = \{A, E\}$, $\Gamma_{D} = \{B, F\}$,
-	    \newline $\Gamma_{E} = \{\}$, $\Gamma_{F} = \{\}$ & 2 \\ \hline
+	    = 3$, \newline $r_E = 2$, $r_F = 2$ & $\Gamma_{A} = \Gamma_{B} = \{C,
+	    D\} $, \newline $\Gamma_{C} = \{A, E\}$,  $\Gamma_{D} = \{B, F\}$,
+	    \newline $\Gamma_{E} = \Gamma_{F} = \{\}$ & 2 \\ \hline
 
 	\end{tabular}
-	\captionof{table}{Relation of TGT vs number of trees across various models}
-	\label{fig:table}
-\end{minipage}
-
-\noindent\begin{minipage}[c]{\textwidth}
-	\centering
-    \begin{tabular}{|r|r|r|r|}
-    \hline
-	    States & Trees  & TGT	& CT  \\ \hline
-	    81    & 978    & 0.12 	& 0.58 \\ \hline
-	    288   & 4507   & 0.26	& 0.78 \\ \hline
-	    640   & 27746  & 1.64	& 2.48 \\ \hline
-	    125   & 321372 & 6.22	& 6.69 \\ \hline
-	    1944  & 6328   & 1.42	& 21.21 \\ \hline
-	\end{tabular}
-	\captionof{table}{Relation of TGT vs number of trees across various models}
+	\captionof{table}{Description of the various models we used to analyze our algorithm}
 	\label{fig:table}
 \end{minipage}
 
@@ -775,105 +777,6 @@ recursive equations for choosing our thresholds:
 \end{enumerate}
 \fi
 
-\noindent\begin{minipage}[c]{\textwidth}
-	\centering
-	\begin{tikzpicture}[scale=0.9]
-	    \begin{axis}[
-	    	max space between ticks=30,
-	        ylabel=\% TGT,
-	        xlabel=\% Error MTTF,
-            legend style={at={(0.95,0.95)},anchor=north east},
-	      ]
-	        \addplot[only marks,red,mark=square*] coordinates {
-				%(36.2283821103523,	1.131498272)
-				%(10.8786955953901,	2.0599948)
-				%(4.71755048985506,	2.926328112)
-				(2.53732952715346,	5.310854768)
-				(1.50720646565421,	9.43458592)
-				(0.889037571328778,	16.21424912)
-				(0.482749275852648,	26.56263144)
-				(0.227135116763804,	41.153888896)
-				(0.080131519802844,	67.78028296)
-	        };
-	        \addlegendentry{$\tau_n$}
-	        \addplot[only marks,black,mark=triangle*] coordinates {
-				%(15.2851051823572,	5.065407888)
-				(3.79933073326488,	10.55315872)
-				(1.31806263244633,	21.607843456)
-				(0.529240557949356,	42.444563712)
-				(0.210743257691422,	64.033783088)
-				(0.074347725814652,	81.17720832)
-				(0.020278035133284,	92.977935568)
-				(0.003661223540978,	98.040626224)
-				(0.000329817987781,	99.235025232)
-	        };
-	        \addlegendentry{$\tau_h$}
-	        \addplot[only marks,blue] coordinates {
-	            %(53.6115397530694,	0.917438928)
-				%(10.3724266177443,	1.873340144)
-				(3.72475662384617,	2.934580832)
-				(1.70774969809274,	6.27211712)
-				(0.809117898074521,	14.623058272)
-				(0.336501695329488,	29.640801488)
-				(0.105215457995291,	52.52442624)
-				(0.010279358713953,	83.38141984)
-				(0.000009595371626,	95.930529824)
-	        };
-	        \addlegendentry{$\tau_r$}
-	    \end{axis}
-	\end{tikzpicture}
-	\hspace{2em}
-	\begin{tikzpicture}[scale=0.9]
-	    \begin{axis}[
-	    	max space between ticks=30,
-	        ylabel=\% TGT,
-	        xlabel=\% Error SSU,
-            legend style={at={(0.95,0.95)},anchor=north east},
-	      ]
-	        \addplot[only marks,red,mark=square*] coordinates {
-		        (99.997820138894, 0.597874032)
-				(99.9190691529866, 0.690664304)
-				(98.9400899955787, 1.131498272)
-				(95.4067719798257, 2.0599948)
-				(88.2268633635062, 2.926328112)
-				(78.0336186597343, 5.310854768)
-				(66.3306911661053, 9.43458592)
-				(53.4052347601024, 16.21424912)
-				(39.2033637637174, 26.56263144)
-				(24.49364613515, 41.153888896)
-				(10.7288011862567, 67.78028296)
-	        };
-	        \addlegendentry{$\tau_n$}
-	        \addplot[only marks,black,mark=triangle*] coordinates {
-		        (99.870014762329, 1.004211856)
-				(96.9670506258595, 5.065407888)
-				(85.1329865668151, 10.55315872)
-				(62.6536991241504, 21.607843456)
-				(38.4026259662758, 42.444563712)
-				(19.5569700042169, 64.033783088)
-				(8.08755576023673, 81.17720832)
-				(2.47742761181436, 92.977935568)
-				(0.48941938798856, 98.040626224)
-				(0.047212021885594, 99.235025232)
-	        };
-	        \addlegendentry{$\tau_h$}
-	        \addplot[only marks,blue] coordinates {
-	            (99.3410468520112, 0.917438928)
-				(95.1059074056778, 1.873340144)
-				(84.900750769067, 2.934580832)
-				(69.5121048248012, 6.27211712)
-				(51.1240231864542, 14.623058272)
-				(31.3717210540309, 29.640801488)
-				(13.1024452694744, 52.52442624)
-				(1.45530814163918, 83.38141984)
-				(0.001373917182918, 95.930529824)
-	        };
-	        \addlegendentry{$\tau_r$}
-	    \end{axis}
-	\end{tikzpicture}
-	\captionof{figure}{Two graphs showing the relation between \% TGT and \%Error in MTTF/SSU}
-	\label{fig:graph2}
-\end{minipage}
 \noindent\begin{minipage}[c]{\textwidth}
 	\centering
 	\vspace{2em}
