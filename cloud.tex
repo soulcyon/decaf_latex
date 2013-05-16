@@ -8,43 +8,122 @@
 
 \begin{document}
 % Cloud Model 
-% draw - outline, fill - color!alpha, align - allows for manual linebreak
-\begin{tikzpicture}[scale = 1, auto = center, every node/.style = {circle, draw = black, fill = gray!25}, bend angle = 90]
+\begin{figure}
+	% draw - outline, fill - color!alpha, align - allows for manual linebreak
+	\begin{tikzpicture}[scale = 1, auto = center, every node/.style = {circle, draw = black, fill = gray!25}, bend angle = 90]
 
-	\node (NS)  at ( 0, 16) [align = center] {\iffalse \modelgraphlabel{NS}  {2}{1} {0.01} \fi {NS}  };
-	\node (LB1) at (-3, 12) [align = center] {\iffalse \modelgraphlabel{LB1} {2}{1} {0.01} \fi {LB1} };
-	\node (LB2) at ( 3, 12) [align = center] {\iffalse \modelgraphlabel{LB2} {2}{1} {0.01} \fi {LB2} };
-	\node (FW1) at (-3,  8) [align = center] {\iffalse \modelgraphlabel{FW1} {2}{1} {0.01} \fi {FW1} };  
-	\node (FW2) at ( 3,  8) [align = center] {\iffalse \modelgraphlabel{FW2} {2}{1} {0.01} \fi {FW2} };
-	\node (HV1) at (-7,  8) [align = center] {\iffalse \modelgraphlabel{HV1} {2}{1} {0.01} \fi {HV1} };
-	\node (HV2) at ( 7,  8) [align = center] {\iffalse \modelgraphlabel{HV2} {2}{1} {0.01} \fi {HV2} };  
-	\node (SR1) at (-3,  4) [align = center] {\iffalse \modelgraphlabel{SR1} {3}{2} {0.01} \fi {SR1} };
-	\node (SR2) at ( 3,  4) [align = center] {\iffalse \modelgraphlabel{SR2} {3}{2} {0.01} \fi {SR2} };
-	\node (PB)  at ( 0, 19) [align = center, fill=none, draw=none] {Public\\Internet};
+		\node (NS)  at ( 0, 16) [align = center] {\iffalse \modelgraphlabel{NS}  {2}{1} {0.01} \fi {NS}  };
+		\node (LB1) at (-3, 12) [align = center] {\iffalse \modelgraphlabel{LB1} {2}{1} {0.01} \fi {LB1} };
+		\node (LB2) at ( 3, 12) [align = center] {\iffalse \modelgraphlabel{LB2} {2}{1} {0.01} \fi {LB2} };
+		\node (FW1) at (-3,  8) [align = center] {\iffalse \modelgraphlabel{FW1} {2}{1} {0.01} \fi {FW1} };  
+		\node (FW2) at ( 3,  8) [align = center] {\iffalse \modelgraphlabel{FW2} {2}{1} {0.01} \fi {FW2} };
+		\node (HV1) at (-7,  8) [align = center] {\iffalse \modelgraphlabel{HV1} {2}{1} {0.01} \fi {HV1} };
+		\node (HV2) at ( 7,  8) [align = center] {\iffalse \modelgraphlabel{HV2} {2}{1} {0.01} \fi {HV2} };  
+		\node (SR1) at (-3,  4) [align = center] {\iffalse \modelgraphlabel{SR1} {3}{2} {0.01} \fi {SR1} };
+		\node (SR2) at ( 3,  4) [align = center] {\iffalse \modelgraphlabel{SR2} {3}{2} {0.01} \fi {SR2} };
+		\node (PB)  at ( 0, 19) [align = center, fill=none, draw=none] {Public\\Internet};
 
-    \foreach \from/\phy/\to in {NS/1/LB1, NS/1/LB2, LB1/0.1/NS, LB2/0.1/NS, 
-    LB2/1/FW2, FW2/0.1/LB2, LB2/1/HV2, SR2/0.1/HV2, HV2/1/SR2}
-    	\path (\from) edge [-triangle 60, bend left = 15] node[fill=white, draw=none] {\phy} (\to);
-    \foreach \from/\phy/\to in {LB1/1/FW1, FW1/0.1/LB1, LB1/1/HV1, SR1/0.1/HV1, HV1/1/SR1}
-    	\path (\from) edge [-triangle 60, bend right = 15] node[fill=white, draw=none] {\phy} (\to);
-    \foreach \from/\phy/\to in {HV1/0.1/FW1, HV2/0.1/FW2}
-    	\path (\from) edge [-triangle 60] node[fill=white, draw=none] {\phy} (\to);
+	    \foreach \from/\phy/\to in {NS/1/LB2, LB2/1/FW2, FW2/0.5/LB2,
+	    LB2/1/HV2, HV2/1/SR2, HV1/0.9/FW1, FW1/0.1/HV1}
+	    	\path (\from) edge [-triangle 60, bend left = 15] node[fill=white, draw=none] {\phy} (\to);
+	    \foreach \from/\phy/\to in {NS/1/LB1, LB1/1/FW1, FW1/0.5/LB1, FW2/0.1/HV2, HV2/0.9/FW2, LB1/1/HV1, HV1/1/SR1}
+	    	\path (\from) edge [-triangle 60, bend right = 15] node[fill=white, draw=none] {\phy} (\to);
+	    \foreach \from/\phy/\to in {FW1/0.01/SR1, FW2/0.01/SR2}
+	    	\path (\from) edge [-triangle 60] node[fill=white, draw=none] {\phy} (\to);
 
-    \path (NS) edge [-triangle 60] node[fill=none, draw=none] {} (PB);
-
-\end{tikzpicture}
+	    \path (PB) edge [dashed] node[fill=none, draw=none] {} (NS);
+	\end{tikzpicture}
+	\caption{Cloud-Computing Architechture}
+    \label{fig:cloud}
+\end{figure}
 
 \newpage
 
-We now consider a model representing a cloud computing architecture. Our system is designed to handle Hyper Text Transfer Protocol (HTTP) requests and Simple Mail Transfer Protocol (SMTP) requests. NS represents a Network Switch; LB1, 2 represent two types of Load Balancers; FW 1, 2 represent two types of firewalls; HV 1, 2 represent two types hypervisors and SR 1, 2 represent two types of server racks. This organization of components specifically shows a firewall ``sandwich" as described in \cite{Salch:2004}. 
+We now consider a model representing a cloud-computing architecture shown in
+Fig~(\ref{fig:cloud}). Solid undirected edges from component type $i$ to
+component type $j$ represent $\phi_{i, j}$. The dashed directed edge represents the
+connection of our system to the public internet. Our system is designed to
+handle hypertext transfer protocol (HTTP) requests and simple mail transfer
+protocol (SMTP) requests. NS represents a network switch; LB1 and LB2
+represent two types of load balancers; FW1 and FW2 represent two types of
+firewalls; HV1 and HV2 represent two types of hypervisors; and SR1 and SR2
+represent two types of server racks. This organization of components
+specifically shows a firewall ``sandwich" as described in \cite{Salch:2004}.
 
-We set $r_{NS} = r_{LB1} = r_{LB2} = r_{FW1} = r_{FW2} = r_{HV1} = r_{HV2} = 2$ and $r_{SR1} = r_{SR2} = 3$. We need at least two server racks of both types SR 1, 2 to be up to be able to parallel process across server racks. For other component types, we require at least one component of each type of the system up in order for the system to remain operational. Thus, $\upsilon_{NS} = \upsilon_{LB1} = \upsilon_{LB2} = \upsilon_{FW1} = \upsilon_{FW2} = \upsilon_{HV1} = \upsilon_{HV2} = 1$ and $\upsilon_{SR1} = \upsilon_{SR2} = 2$. Additionally, our system operates in two environments - high demand and low demand. This gives us a state space of size 69984. Traditionally solving a model of this size using DECAF1 would take a very long time whereas using DECAF2's tree generation algorithms given in section \ref{sec:alg} it takes xxxx seconds. 
+We set $r_{NS} = r_{LB1} = r_{LB2} = r_{FW1} = r_{FW2} = r_{HV1} = r_{HV2} =
+2$ and $r_{SR1} = r_{SR2} = 3$. Let $\upsilon_i$ define the number of
+components of type $i$ that need to be up for the system to remain
+operational. We need at least two server racks of both types SR1 and SR2 to
+be up to be able to parallel process across server racks. For other component
+types, we require at least one component of each type of the system up in
+order for the system to remain operational. Thus, $\upsilon_{NS} =
+\upsilon_{LB1} = \upsilon_{LB2} = \upsilon_{FW1} = \upsilon_{FW2} =
+\upsilon_{HV1} = \upsilon_{HV2} = 1$ and $\upsilon_{SR1} = \upsilon_{SR2} =
+2$. In this model the system up condition is an AND of the individual up
+conditions. Note that DECaF1 and DECaF2 allow for a general boolean
+combination of inequalities. Additionally, our system operates in two
+environments: high demand ($e = 0$) and low demand ($e = 1$). The environment
+transition rates $\nu_{0, 1} = 0.01$ and $\nu_{1, 0} = 0.01$. This gives us a
+state space of size 69984. Solving a model of this size using DECaF1 would
+take a very long time, whereas using DECAF2 tree generation algorithms given
+in section \ref{sec:alg} it takes xxx seconds.
 
-We build the system such that all component types that are located to the left of network switch (i.e. types with a 1 in their name) handle SMTP requests only whereas all component types located to the right of the network switch (i.e types with a 2 in their name) handle HTTP requests only. Thus both the branches need to be operational for the system to be able to handle HTTP and SMTP requests.
+We build the system such that all component types that are located to the left
+of the network switch (i.e., types with a 1 in their names) handle SMTP
+requests only, whereas all component types located to the right of the network
+switch (i.e types with a 2 in their names) handle HTTP requests only. Thus,
+both the branches need to be operational for the system to be able to handle
+HTTP and SMTP requests. This type of decoupling ensures that hardware failure
+from one side does not immediately propagate to the other.
 
-We assume that failure of any component causes a certain, downward propagating, cascading failure because components have no option but to go offline and reach a dormant state. To comply with our model dormancy is treated as a failure.        
+We assume that failure of any component causes a certain, downward
+propagating, cascading failure because components on levels below the failed
+component end up going offline and reach a dormant state. To comply with our
+model, dormancy is treated as a failure. We define the public internet to be
+at $depth$ 0, the network switch to be at $depth = 1$ and so on. Thus,
+\{$\phi_{i,\,j}  = 1 \, | \, i, j \in \Omega, \; depth(j) > depth(i)$\} As
+stated in \cite{ReHype:2011} ``hypervisors almost always cause other system
+components to fail" and certainly cause server racks to fail because of state
+corruption. Thus, there is probability 0.9 that a hypervisor causes a firewall
+to fail. A firewall that solely implements an access-control-list verification
+is one example of a vulnerable firewall. A firewall that is not robust may let
+malicious packets get through and cause a failure of a load balancer. We model
+the probability of this is 0.5 assuming half the packets received are malicious. A
+firewall can cause a hypervisor to fail by sending malformed packets due to
+software bugs or hardware failure. We model the probability of this is 0.1. A
+firewall in rare cases (which we model by setting $\phi_{FW1, \, SR1} =
+\phi_{FW2, \, SR2} = 0$.01) can expose server racks to attack, though most
+likely server racks become inaccessible because of a hypervisor failure.
+
+To estimate $\lambda_i$ for each $i$, we assume that in a high-demand
+environment an ``over-clocked"" component is going to fail on average in a
+quarter of the time of its warranty and in a low-demand environment a
+component fails in about the period of its warranty. Note that our time unit
+is in hours. Typical commercial network switches, load balancers and
+hypervisors have warranties of 90 days (2160 hours). Thus, $\lambda_{NS, \, 0}
+= \lambda_{LB1, \, 0} = \lambda_{LB2, \, 0} = \lambda_{HV1, \, 0} =
+\lambda_{HV2, \, 0} = \frac{1}{540} $ and $\lambda_{NS, \, 1} = \lambda_{LB1,
+\, 1} = \lambda_{LB2, \, 1} = \lambda_{HV1, \, 1} = \lambda_{HV2, \, 1} =
+\frac{1}{4320}$. Since firewalls almost never fail in isolation, we set
+$\lambda_{FW1, 0} = \lambda_{FW2, 0} = \lambda_{FW2, 1} = \lambda_{FW1, 1} = 1
+\times 10^{-10}$. Commercial server racks often have 3-year (26280 hour)
+warranties giving us $\lambda_{SR1, \, 0} = \lambda_{SR2, \, 0} =
+\frac{1}{6570}$ and $\lambda_{SR1, \, 1} = \lambda_{SR2, \, 1} =
+\frac{1}{52560}$
+
+For the components' repair rates, we assume that all hardware components are
+swapped out with a repair rate of 1, i.e., we can replace one component an
+hour on average. A repair for a hardware component may also be having to
+restart that part of the system if the component is in a dormant condition.
+For somplicity we asume this rate is 1 as well. Firewalls being non hardware
+components need to be reconfigured and this occurs with a repair rate of 0.1
+which means it takes 10 hours.
 
 \bibliographystyle{plain}
-\bibliography{cloud} 
+\bibliography{cloud}
 
 \end{document}
+
+% I would like to keep 25 % warranty time for high-demand and 200 % warranty time for low-demand. What is your justification ? 
+
+% Salch:2004 is a white paper. (http://en.wikipedia.org/wiki/White_paper) How do I cite one?
