@@ -40,14 +40,13 @@
 \newpage
 
 We now consider a model depicting a cloud-computing architecture shown in
-Fig~\ref{fig:cloud}. There is a solid, directed edge from component type $i$
+Fig~\ref{fig:cloud}. There is a directed edge from component type $i$
 to component type $j$ if $j \in \Gamma_i$, and the label on the edge is
-$\phi_{i,j}$. The dashed, undirected edge shows the connection of our system
-to the public Internet. Our system is designed to handle hypertext transfer
-protocol (HTTP) requests and simple mail transfer protocol (SMTP) requests. $NS$
-represents a network switch; $LB1$ and $LB2$ are two types of load
-balancers; $FW1$ and $FW2$ denote two types of firewalls; $HV1$ and $HV2$ signify
-two types of hypervisors; and $SR1$ and $SR2$ portray two types of server racks.
+$\phi_{i,j}$. Our system is designed to handle hypertext transfer protocol
+(HTTP) requests and simple mail transfer protocol (SMTP) requests. $NS$
+represents a network switch; $LB1$ and $LB2$ are two types of load balancers;
+$FW1$ and $FW2$ denote two types of firewalls; $HV1$ and $HV2$ signify two
+types of hypervisors; and $SR1$ and $SR2$ portray two types of server racks.
 This organization of components specifically shows a firewall ``sandwich" as
 described in \cite{Salch:2004}.
 
@@ -62,20 +61,19 @@ for the system to remain operational. Thus, $\upsilon_{NS} =
 \upsilon_{HV1} = \upsilon_{HV2} = 1$ and $\upsilon_{SR1} = \upsilon_{SR2} =
 2$. Additionally, our system operates in two environments: high demand ($e =
 0$) and low demand ($e = 1$). This gives us a state space of size 69984.
-Solving this using the previous version of DECaF takes xxx
+Solving this using the previous version of DECaF should take an estimated xxx
 seconds, whereas using the new version's tree-generation algorithms given in
 Section \ref{sec:alg} takes xxx seconds. 
 
-We build the system such that all component types that are located to the left
-of the network switch (i.e., types with a ``1" in their names) handle SMTP
-requests only, whereas all component types located to the right of the network
-switch (i.e., types with a ``2" in their names) handle HTTP requests only.
-Thus, both the branches need to be operational for the system to be able to
-handle HTTP and SMTP requests. This type of decoupling ensures that hardware
-failure on one side does not immediately propagate to the other. In this model
-the system-up condition is an AND of the individual-up conditions. Note that
-both the previous and new versions of DECaF allow for a general boolean
-combination of inequalities.
+We work with a system such that all component types that are located to the
+left of $NS$ (i.e., types with a ``1" in their names) handle SMTP requests
+only, whereas all component types located to the right of $NS$ (i.e., types
+with a ``2" in their names) handle HTTP requests only. Thus, both the branches
+need to be operational for the system to be able to handle HTTP and SMTP
+requests. This type of decoupling ensures that hardware failure on one side
+does not immediately propagate to the other as is by standard design. In this
+model the system-up condition is an AND of the individual-up conditions. Note
+that DECaF allows for a general boolean combination of inequalities.
 
 \iffalse We assume that failure of any component causes a downward-propagating
 cascading failure because components on levels below the failed component end
