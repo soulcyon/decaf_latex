@@ -9,7 +9,7 @@
 \begin{document}
 % Cloud Model 
 \begin{figure}
-	% draw - outline, fill - color!alpha, align - allows for manual linebreak
+	% draw - outline, fill - color!alpha, align - allows for manual line-break
 	\begin{tikzpicture}[scale = 1, auto = center, every node/.style = {circle,
 	draw = black, fill = gray!25}, bend angle = 90]
 
@@ -33,7 +33,7 @@
 	    	\path (\from) edge [-triangle 60] node[fill=white, draw=none] {\phy} (\to);
 	
 	\end{tikzpicture}
-	\caption{Cloud-computing architechture}
+	\caption{Cloud-computing architecture}
     \label{fig:cloud}
 \end{figure}
 
@@ -69,9 +69,9 @@ left of $NS$ (i.e., types with a ``1" in their names) handle SMTP requests
 only, whereas all component types located to the right of $NS$ (i.e., types
 with a ``2" in their names) handle HTTP requests only. Thus, both groups of
 components (i.e., to the left and to the right of $NS$) need to be operational
-for the system to be able to handle HTTP and SMTP requests. This type of
-decoupling ensures that hardware failure on one side does not immediately
-propagate to the other.
+for the system to be able to handle HTTP and SMTP requests. The decoupling
+ensures that hardware failure on one side does not immediately propagate to
+the other.
 
 As stated in \cite{ReHype:2011}, ``hypervisors almost always cause other
 system components to fail and certainly cause server racks to fail because of
@@ -80,8 +80,8 @@ state corruption." Thus, we assume $\phi_{HVi,LBi} = \phi_{HVi,FWi} =
 \phi_{FWi,HVi} = \phi_{FWi,SRi} = 0.1$ for $i = 1, 2$.
 
 To estimate the component failure rates, we assume that in a high-demand
-(resp., low-demand) environment a hardware component is going to fail
-on average in twice (resp., eight times) the time of its warranty. Time unit
+(resp., low-demand) environment, a hardware component is going to fail
+on average in twice (resp., eight times) the time of its warranty. The time unit
 is hours. Typical commercial network switches, load balancers and hypervisors
 have warranties of 90 days (2160 hours). Thus, $\lambda_{NS, \, 0} =
 \lambda_{LB1, \, 0} = \lambda_{LB2, \, 0} = \lambda_{HV1, \, 0} =
@@ -89,18 +89,18 @@ have warranties of 90 days (2160 hours). Thus, $\lambda_{NS, \, 0} =
 = \lambda_{LB2, \, 1} = \lambda_{HV1, \, 1} = \lambda_{HV2, \, 1} = 1 /
 17280$. Commercial server racks often have 3-year warranties giving us
 $\lambda_{SR1,\, 0} = \lambda_{SR2, \, 0} = 1 / 52560$ and $\lambda_{SR1, \,
-1} = \lambda_{SR2, \, 1} = 1 / 210240$. Since firewalls fail on average once
-in five years and we assume the use of firewalls that are software, we set
-$\lambda_{FW1, 0} = \lambda_{FW2, 0} = \lambda_{FW2, 1} = \lambda_{FW1, 1} = 1
-/ 43800 $.
+1} = \lambda_{SR2, \, 1} = 1 / 210240$. Since firewalls fail due to numerous
+reasons such as software bugs or from targeted attacks, it is difficult to
+find a single representative failure rate. Thus we assume a software firewall
+fails on average once in five years, and set $\lambda_{FW1, 0} =
+\lambda_{FW2, 0} = \lambda_{FW2, 1} = \lambda_{FW1, 1} = 1 / 43800$.
 
-For the components' repair rates, we assume that all failed hardware
-components are swapped out with a repair rate of 1 regardless of the
-environment, i.e., we can replace one component an hour on average. Firewalls
-being non-hardware components need to be reconfigured after they fail, and this
-occurs with a repair rate of 0.25. The environment switches
-once every 12 hours on average, giving us the environment transition
-rates $\nu_{0, 1} = \nu_{1, 0} = 1 / 12$.
+As given in \cite{Godd:2001}, failed hardware components are repaired with a
+rate of $1 / 24$ regardless of the environment, i.e., we can replace one component
+a day on average. Firewalls being non-hardware components need to be rebooted
+after they fail, and this occurs with a rate of 10, which is also taken from
+\cite{Godd:2001}. The environment switches once every 12 hours on average,
+giving us the environment transition rates $\nu_{0, 1} = \nu_{1, 0} = 1 / 12$.
 
 \bibliographystyle{plain}
 \bibliography{cloud}
