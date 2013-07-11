@@ -57,7 +57,7 @@
 \title{Efficient Algorithms for
 Analyzing Cascading Failures in a
 Markovian Dependability Model}
-\author{Mihir Sanghavi, Sashank Tadepalli, 
+\author{Mihir Sanghavi, Sashank Tadepalli,
 and Marvin K. Nakayama
 \\
 Computer Science Department
@@ -70,13 +70,16 @@ Newark, NJ \ 07102}
 
 \abstract{
 We develop an efficient algorithm to
-construct and solve 
+construct and solve
 a Markovian dependability system
 with cascading failures.
 Our algorithm reduces runtimes by
 orders of magnitude compared to a
 previous method.
 We also develop some heuristics
+%mkn
+\changed{based on the idea of most
+likely paths to failure}
 to further reduce the computational efforts
 by instead constructing an approximate
 model.  We present numerical results
@@ -115,20 +118,20 @@ damage.
 In this paper we develop methods for
 analyzing a dependability
 system with cascading failures.
-We model such a system as 
+We model such a system as
 a continuous-time
 Markov chain (CTMC; e.g., Chapter~5 of
 \cite{Ross:1995}),
-where the system is 
+where the system is
 a collection
 of components operating
-in a randomly changing environment, 
+in a randomly changing environment,
 where each component can
 fail and be repaired with
 specified failure and repair rates.
 % We allow for cascading failures, where the
 % failure of one component can
-% probabilistically 
+% probabilistically
 % cause other
 % components to simultaneously fail.
 We represent a cascading failure as
@@ -136,14 +139,14 @@ a tree of probabilistically
 failing components that fail
 simultaneously, where the
 root of the tree is the
-failing component that 
+failing component that
 \textit{triggers}
 the cascade.  The root probabilistically
 causes components from a specified
 set to
 fail simultaneously, with
 each component in the set having
-its own \textit{component-affected 
+its own \textit{component-affected
 probability}.
 Each of these secondary
 failures subsequently
@@ -176,7 +179,7 @@ probabilities.
 For a CTMC transition $(x,y)$ in which
 all three components fail simultaneously,
 there are $9$ corresponding
-cascading-failure 
+cascading-failure
 trees:
 $A$ causing $B$ to fail, and then $B$
 causes $C$ to fail;
@@ -188,7 +191,7 @@ components' failure rates
 and the component-affected probabilities
 differ, then each of the $9$ trees
 has a different rate,
-and 
+and
 computing the $(x,y)$-entry in $Q$
 requires summing the rates
 of all $9$ trees.
@@ -196,7 +199,14 @@ In general, the number of trees
 corresponding to a single collection
 of components simultaneously failing
 can grow exponentially in the size of the
-set \cite{ING:2009}.  
+set,
+%mkn
+\changed{with up to
+$m^{m-1}$ different trees
+corresponding to a collection of $m$
+components failing in a cascade
+in the worst case}
+\cite{ING:2009}.
 Moreover, we need to examine
 each possible set of components
 that can simultaneously fail,
@@ -207,13 +217,13 @@ Thus, just constructing the $Q$-matrix
 for the CTMC can require tremendous
 computational effort.
 
-The paper \cite{ING:2009} 
+The paper \cite{ING:2009}
 considers the same dependability model
 and develops
 an algorithm to generate the $Q$-matrix,
 but that algorithm
 there often requires enormous
-runtimes to build and solve larger models.  
+runtimes to build and solve larger models.
 We now develop
 new algorithms, which are significantly
 more efficient and can decrease the
@@ -223,23 +233,6 @@ implementing our techniques,
 and we call the package
 the Dependability Evaluator
 of Cascading Failures (DECaF).
-
-In addition, since the time to 
-construct the $Q$-matrix 
-inherently grows exponentially,
-we also propose heuristics
-to reduce the
-computational effort by only 
-generating a subset of the trees.
-The omission
-leads to an approximate $Q$-matrix,
-which incurs errors in 
-the resulting dependability measures.
-We explore the trade-off
-of the time savings from
-skipping trees
-with the error in the dependability
-measures.
 
 Previous tree-generation
 algorithms exist (e.g.,
@@ -258,12 +251,47 @@ needed to develop
 new tree-generation
 algorithms.
 
-
+In addition, since the time to
+construct the $Q$-matrix
+inherently grows exponentially
+%mkn
+\changed{because of the trees to build},
+we also propose heuristics
+to reduce the
+computational effort by only
+generating a subset of the trees.
+%mkn
+\changed{Our method exploits
+the idea of the
+\textit{most likely paths to failure},
+which has been previously utilized to
+design effective quick simulation methods based
+on importance sampling for
+analyzing highly dependable systems
+\cite{GSHNG:1992,Naka:1996}.
+We apply the concept to try to generate only
+the cascading-failure trees that arise
+on the most likely paths to failure,
+since these paths typically contribute most to
+the dependability measures computed,
+and leave out those trees on less likely paths.}
+The omission
+leads to an approximate $Q$-matrix,
+which incurs errors in
+the resulting dependability measures.
+We explore the trade-off
+of the time savings from
+skipping trees
+with the error in the dependability
+measures,
+%mkn
+\changed{and numerical results show
+that our techniques can work well in practice.}
 
 The rest of the paper has the
 following layout.
 Section~\ref{sec:prior} reviews
-related work on 
+related work on
 dependability models,
 with a particular focus
 on cascading failures
@@ -286,7 +314,7 @@ expense of introducing error
 in the dependability measures,
 and we explore the trade-off
 through experiments.
-We apply our methods to 
+We apply our methods to
 a large cloud-computing model
 in Section~\ref{sec:cloud},
 and Section~\ref{sec:conc}
@@ -323,11 +351,11 @@ difficult to construct.
 Other modeling techniques,
 such as fault trees, reliability
 block diagrams (RBDs), and reliability graphs,
-have also been applied to study 
+have also been applied to study
 dependability systems, but these
-approaches do not allow for 
+approaches do not allow for
 the level of details that are
-possible with CTMCs \cite{MFT:2000}.  
+possible with CTMCs \cite{MFT:2000}.
 However,
 a notable drawback of CTMCs is the
 explosive growth in the size of the
@@ -427,7 +455,7 @@ as follows. The ordered set $\Gamma_i$ specifies the types of components that a
 failure of a type-$i$ component can cause to simultaneously fail. When a
 component of type $i$ fails, it causes a single  component of type~$j \in
 \Gamma_i$ to fail at the same time with probability $\phi_{i, j}$ (if there are
-components of type $j$ up), and we call 
+components of type $j$ up), and we call
 $\phi_{i, j}$  a \textit{component-affected probability}. The events that the individual components of types $j \in
 \Gamma_i$ fail immediately are independent. Thus, when a component of type $i$
 fails, there are independent ``coin flips'' to determine which components in
@@ -493,7 +521,7 @@ and $y_{N + 1} = x_{N + 1}$, then $(x, y)$ is a \textit{failure transition} in
 which $y_i - x_i$ components of type~$i$ fail, $i \in \Omega$. Any other $(x,
 y)$ with $x \neq y$ not falling into one of the above three categories is not
 possible, so $Q(x, y) = 0$. The diagonal entry $Q(x, x) = -\sum_{y \neq x} Q(x,
-y)$, as required for a CTMC; e.g., see Chapter~5 of 
+y)$, as required for a CTMC; e.g., see Chapter~5 of
 \cite{Ross:1995}.
 
 We now determine the rate $Q(x, y)$ of a failure transition $(x, y)$. First
@@ -508,11 +536,18 @@ Cascading failures complicate the computation of $Q(x, y)$ for a failure
 transition $(x, y)$. As mentioned before, a cascading failure is modeled as a
 tree $T$ built from the multiset $B$ of simultaneously failing components, where
 $B$ has $y_\ell - x_\ell$ failing components of type $\ell$, $\ell \in \Omega$.
-A tree $T$ has a rate
-
+A tree $T$
+%mkn
+\changed{in a transition starting
+from a state $x$}
+has a rate
 \begin{equation}
 \label{eq:rate}
-R(T) = (r_i - x_i) \lambda_{i,x_{N + 1}} \, \rho \, \eta,
+R(T)
+%mkn
+\changed{ \, \equiv
+R(T,x)}
+= (r_i - x_i) \lambda_{i,x_{N + 1}} \, \rho \, \eta,
 \end{equation}
 where
 \begin{itemize}
@@ -762,8 +797,9 @@ counted because once a tree passes through \mbox{AddTreeLevel} unmodified, it is
 processed and discarded. We avoid making duplicate trees because each
 oneNextLevelPossibility is unique.
 
-\captionAmerica{2}{AddTreeLevel(\varName{level}, \varName{nFailed},
-\varName{BFHist}, $\rho$, \varName{rootC.type})} where \varName{level} is the
+\captionAmerica{2\label{alg:atl}}{AddTreeLevel(\varName{level}, \varName{nFailed},
+\varName{BFHist}, $\rho$, \varName{rootC.type})}
+where \varName{level} is the
 current level of failed components,
 \\*\varName{nFailed} counts failed components by type in the tree,
 \\*\varName{BFHist} is breadth-first history, \\*$\rho$ is a cumulative product
@@ -995,7 +1031,7 @@ Let $x_*$ denote the state in
 which all components are
 operational and the environment is
 $0 \in \mathcal{E}$;
-we previously 
+we previously
 assumed that the CTMC $Z$
 starts in state $x_*$.
 Define $T_F = \inf\{ t > 0 : Z(t) \in F\}$,
@@ -1095,7 +1131,7 @@ possible.
 \end{table}
 % \end{minipage}
 
-Table~\ref{tab:times} 
+Table~\ref{tab:times}
 gives the computation times for
 various parts of the overall algorithms
 of the original code \cite{ING:2009}
@@ -1111,7 +1147,7 @@ and environment transitions.
 For the current implementation,
 we also give the $Q$-matrix solving time
 (QST), which includes the time to
-compute the MTTF and SSU, 
+compute the MTTF and SSU,
 as described
 in Section~\ref{sec:depend}.
 While the MTTF and SSU computations are performed
@@ -1147,7 +1183,8 @@ of the number of trees.
 
 
 
-% With the complete overhaul of the algorithm, we have achieved a vast
+% With the complete overhaul of the algorithm,
+% we have achieved a vast
 % improvement in tree generation time ($TGT$) and $Q$-matrix processing time
 % ($QPT$).  We utilized the OJAlgo package
 % (\cite{OJAL:2013}) to calculate the
@@ -1166,36 +1203,36 @@ of the number of trees.
 & \multicolumn{3}{c|}{New Version}
 \\
 \cline{3-7}
-	    States & Trees  & TGT & QPT 
-& TGT & QPT    & QST    \\ 
+	    States & Trees  & TGT & QPT
+& TGT & QPT    & QST    \\
 \hline
-	    81     & 978    
+	    81     & 978
 & 1.30 	  & 1.60
-& 0.12 	& 0.22  & 0.08  
+& 0.12 	& 0.22  & 0.08
 \\ \hline
-	    288    & 4507   
-& 19.00   & 19.62   
+	    288    & 4507
+& 19.00   & 19.62
 & 0.26	& 0.36  & 0.16
 \\ \hline
-	    640    & 27746  
-& 137.29  & 143.27  
+	    640    & 27746
+& 137.29  & 143.27
 & 1.56	& 1.67  & 0.61
 \\ \hline
-	    125    & 321372 
-& 114.25  & 114.58  
+	    125    & 321372
+& 114.25  & 114.58
 & 6.01	& 6.11  & 0.09
 \\ \hline
-	    1944   & 6328   
-& 6124.01 & 6358.85 
+	    1944   & 6328
+& 6124.01 & 6358.85
 & 1.35	& 1.51  & 8.27
 \\ \hline
 	\end{tabular}
-	\captionof{table}{Number of trees, 
-tree-generation time, 
+	\captionof{table}{Number of trees,
+tree-generation time,
 $Q$-matrix processing time,
-and 
-$Q$-matrix solving time 
-across several models and 
+and
+$Q$-matrix solving time
+across several models and
 the previous and new versions
 of the code.}
 	\label{tab:times}
@@ -1218,25 +1255,36 @@ of the code.}
 
 
 
-\section{Eliminating Trees and
+\section{Not Generating All Trees and
 the Resulting Error}
 \label{sec:approx}
 
 
 The number of trees can grow exponentially in the number of components in the
-cascade \cite{ING:2009}, and this limits the size of the models that our
-current algorithm can handle.  To address this issue, we explored heuristic approaches
-that reduce the computational effort by 
-not generating all the trees.
+cascade \cite{ING:2009}, and this limits the size of the
+models that our
+%mkn
+\changed{algorithms in Section~\ref{sec:alg}}
+can handle.
+To address this issue, we explored heuristic approaches
+that reduce the computational effort by
+%mkn
+\changed{selectively generating only
+certain trees}.
+% not generating all the trees.
 We implement this by
 inserting the following
-extra code 
+extra code
 immediately after
 line \citeLine{18} of
 \mbox{AddTreeLevel}
-to 
-halt the tree generation based
-on a stopping criterion. 
+%mkn
+\changed{(Algorithm~2)}
+to
+halt
+%mkn
+\changed{building trees based}
+on a stopping criterion.
 % \vspace*{-0.6em}
 \begin{tabbing}
 \hspace*{1em} \=
@@ -1244,7 +1292,7 @@ on a stopping criterion.
 \textbf{if} stopping criterion satisfied
 \textbf{then}
 \\
-\> 
+\>
 {\small 18.2:}
 \> \hspace*{0.5em}
 goto line 2;
@@ -1263,17 +1311,17 @@ goto line 2;
 This causes the algorithm to
 skip over to the next enumeration of the
 bottom-most tree level,
-so 
+so
 we do not generate certain trees;
 the omitted trees' rates are not
-computed and are not included in the 
+computed and are not included in the
 $Q$-matrix.
 % Halting tree generation prematurely
 This saves computation time,
 but the resulting matrix $Q'$ (that
-sums the rates of trees that are generated) 
+sums the rates of trees that are generated)
 can differ from the
-matrix $Q$ that 
+matrix $Q$ that
 includes all trees. Solving for the MTTF and
 SSU with $Q'$ rather than $Q$ leads to inaccuracies in the values for these
 dependability measures.  We investigated the trade-off in the time saved by
@@ -1281,41 +1329,48 @@ halting tree generation versus the resulting error in the dependability
 measures computed from $Q'$ instead of $Q$.
 
 In designing a stopping criterion,
-we want to allow trees with large rates 
+we want to allow trees with large rates
 to be generated,
-since these have a larger impact on
+since these
+%mkn
+\changed{often}
+have a larger impact on
 the MTTF and SSU, and skip trees
 with small rates.
 We considered three
-criteria based on different 
+criteria based on different
 types of thresholds.
 
 
-We first consider a \textit{height threshold}, 
-and the stopping criterion is 
-$\varName{height} > \tau_h$,
-where the global variable \varName{height} 
+We first consider a \textit{height threshold},
+and the stopping criterion is
+$\varName{height} > \changed{\tau_{\textrm h}}$,
+where the global variable \varName{height}
 keeps track of the current tree height
-and $\tau_h$ is the threshold.  
-Our implementation requires a 
-slight change to \mbox{AddTreeLevel}, 
-where we introduce \varName{height} 
+and $\tau_{\textrm h}$ is the threshold.
+Our implementation requires a
+slight change to \mbox{AddTreeLevel},
+where we introduce \varName{height}
 as a method parameter. We also modified line
-\citeLine{20} to increment \varName{height} 
+\citeLine{20} to increment \varName{height}
 on every successive recursive call.
 
 
-We also consider a \textit{node threshold} 
-$\tau_n$ in the stopping criterion 
+We also consider a \textit{node threshold}
+\changed{$\tau_{\textrm n}$}
+in the stopping criterion
 $\sum_{i \in \Omega} \varName{nFailed}[i]
-> \tau_n$.
+> \tau_{\textrm n}$.
 % where $\tau_n$ is the specified threshold.
 Hence, constructed trees will
-contain a maximum of $\tau_n$ 
+contain a maximum of $\tau_{\textrm n}$
 failed components.
 
 For the third stopping criterion,
-we use a \textit{rate threshold}.
+we use a \textit{rate threshold}
+%mkn
+\changed{to stop tree generation when
+the tree rates get too small}.
 Define
 \begin{equation}
 \label{eq:R'}
@@ -1331,7 +1386,10 @@ and $\rho$ is as defined in \eqref{eq:rate}.
 Note that $R'(T)$ differs from
 the tree rate $R(T)$
 in \eqref{eq:rate} since
-$R'(T)$ omits $\eta$,
+$R'(T)$ omits
+%mkn
+\changed{both}
+$\eta$,
 which is the
 product of the $1-\phi_{i,j}$
 terms for components of types $j$
@@ -1343,20 +1401,44 @@ of type~$i$ that did fail),
 and the
 current number of up components
 of the root type.
+%mkn
+\changed{Also, $R'(T)$ uses the maximum
+failure rate $\bar{\lambda}_i$
+of the root type $i$ instead of
+the environment-specific failure rate.}
 Then the stopping criterion is
-$R'(T) < \tau_r$,
-where $\tau_r$ is the specified
+$R'(T) < \changed{\tau_{\textrm r}}$,
+where $\tau_{\textrm r}$ is the specified
 threshold.
 
+%mkn
+\changed{
+For each of the three stopping criteria,
+once a given tree $T$ satisfies the criterion,
+the current tree will not be grown any further.
+This is clear for the node and height thresholds.
+For the rate threshold,
+adding additional nodes to $T$
+decreases $\rho$ in \eqref{eq:R'}
+since it is multiplied by additional
+factors $\phi_{j,k} \leq 1$,
+so once the rate stopping
+criterion is satisfied,
+$T$ will not be further enlarged.}
 
 
-Increasing $\tau_h$ and $\tau_n$ leads to a 
+
+Increasing $\tau_{\textrm h}$ and $\tau_{\textrm n}$
+leads to a
 monotonic increase in the number of
 generated trees, whereas the number of generated trees decreases monotonically
-in $\tau_r$. Setting $\tau_h = \tau_n = \infty$ 
-or $\tau_r = 0$ results in 
-generating all trees; i.e., 
-there is then no error in the 
+in $\tau_{\textrm r}$. Setting
+$\tau_{\textrm h} = \tau_{\textrm n} = \infty$
+or $\tau_{\textrm r} = 0$ results in
+generating all trees,
+%mkn
+\changed{so the computed $Q$-matrix is exact and}
+there is then no error in the
 computed MTTF and SSU.
 
 
@@ -1376,15 +1458,15 @@ computed MTTF and SSU.
 % \end{minipage}
 % \end{figure}
 
-We now present numerical results 
+We now present numerical results
 when applying one stopping criterion
 at a time
 for the $125$-state model,
 where
-we set 
+we set
 the failure rates
 $\lambda_{A,1} = \lambda_{B,1} = 0.02$,
-$\lambda_{C,1} = 0.01$, 
+$\lambda_{C,1} = 0.01$,
 and
 component-affect
 probabilities
@@ -1392,12 +1474,12 @@ $\phi_{A,B} = \phi_{B,C} = 0.2$,
 $\phi_{C,A} = \phi_{B,A} = 0.3$,
 $\phi_{A,C} = \phi_{C,B} = 0.4$.
 Also, the repair rates $\mu_{i,1} = 1$
-for all types $i$, 
+for all types $i$,
 and the system is operational as long
 as at least $1$ component is up
 of each type.
 Figure~\ref{fig:graph125}
-shows 
+shows
 the relative error
 of the MTTF and SSU
 (relative to the values
@@ -1410,16 +1492,16 @@ the number of trees increases.
 Also, for a fixed number of trees generated,
 the stopping criterion based on
 the rate threshold leads to smaller
-error; 
-similarly, 
+error;
+similarly,
 if we fix a level of error,
 the rate criterion requires
 fewer trees than the other two
 criteria to achieve that error.
 Hence,
-the points from using the rate threshold 
+the points from using the rate threshold
 define the \textit{efficient frontier},
-analogous to the idea introduced by 
+analogous to the idea introduced by
 \cite{Mark:1952}
 in the context of financial portfolio
 selection.
@@ -1430,7 +1512,8 @@ qualitatively similar.)
 
 \iffalse
 
-$\tau_{h_0} = \tau_{n_0} = \displaystyle\sum_{i=1}^N r_i$ and $\tau_{r_0} =
+$\tau_{h_0} = \tau_{n_0} = \displaystyle\sum_{i=1}^N r_i$
+and $\tau_{r_0} =
 \max_{i,j \in \Omega : j \in \Gamma_i} \phi_{i,j}$.
 
 \begin{enumerate}
@@ -1461,7 +1544,7 @@ $\tau_{h_0} = \tau_{n_0} = \displaystyle\sum_{i=1}^N r_i$ and $\tau_{r_0} =
 				(0.227135116763804, 41.153888896)
 				(0.080131519802844, 67.78028296)
 	        };
-	        \addlegendentry{$\tau_n$}
+	        \addlegendentry{$\tau_{\textrm n}$}
 	        \addplot[only marks,black,mark=triangle*] coordinates {
 	            %(15.2851051823572, 5.065407888)
 				(3.79933073326488, 10.55315872)
@@ -1472,7 +1555,7 @@ $\tau_{h_0} = \tau_{n_0} = \displaystyle\sum_{i=1}^N r_i$ and $\tau_{r_0} =
 				(0.020278035133284, 92.977935568)
 				(0.003661223540978, 98.040626224)
 	        };
-	        \addlegendentry{$\tau_h$}
+	        \addlegendentry{$\tau_{\textrm h}$}
 	        \addplot[only marks,blue,opacity=0.4] coordinates {
 				%(77.8389169546306, 00.861523664)
 				%(53.6115397530694, 00.974922144)
@@ -1511,7 +1594,7 @@ $\tau_{h_0} = \tau_{n_0} = \displaystyle\sum_{i=1}^N r_i$ and $\tau_{r_0} =
 				(0.000001197524504, 99.10566392)
 				(0.000000113524206, 98.86297784)
 	        };
-	        \addlegendentry{$\tau_r$}
+	        \addlegendentry{$\tau_{\textrm r}$}
 	    \end{axis}
 	\end{tikzpicture}
 	\hspace{2em}
@@ -1534,7 +1617,7 @@ $\tau_{h_0} = \tau_{n_0} = \displaystyle\sum_{i=1}^N r_i$ and $\tau_{r_0} =
 				(24.49364613515, 41.153888896)
 				(10.7288011862567, 67.78028296)
 	        };
-	        \addlegendentry{$\tau_n$}
+	        \addlegendentry{$\tau_{\textrm n}$}
 	        \addplot[only marks,black,mark=triangle*] coordinates {
 		        (99.870014762329, 1.004211856)
 				(96.9670506258595, 5.065407888)
@@ -1547,7 +1630,7 @@ $\tau_{h_0} = \tau_{n_0} = \displaystyle\sum_{i=1}^N r_i$ and $\tau_{r_0} =
 				(0.48941938798856, 98.040626224)
 				(0.047212021885594, 99.235025232)
 	        };
-	        \addlegendentry{$\tau_h$}
+	        \addlegendentry{$\tau_{\textrm h}$}
 	        \addplot[only marks,blue,opacity=0.4] coordinates {
 				(99.9580166591334, 0.64276816)
 				(99.9190691529866, 0.666556016)
@@ -1588,51 +1671,62 @@ $\tau_{h_0} = \tau_{n_0} = \displaystyle\sum_{i=1}^N r_i$ and $\tau_{r_0} =
 				(0.000171469279963, 99.10566392)
 				(0.000016255143934, 98.86297784)
 	        };
-	        \addlegendentry{$\tau_r$}
+	        \addlegendentry{$\tau_{\textrm r}$}
 	    \end{axis}
 	\end{tikzpicture}
-	\captionof{figure}{Two graphs showing \%$TGT$ versus \%$MTTF$/$SSU$ when iterating each $\tau$}
+	\captionof{figure}{\changed{\%TGT
+versus \% Error in MTTF and SSU
+when iterating each threshold $\tau$}}
 	\label{fig:graph125}
 \end{minipage}
 % \end{figure}
 
 
 
-\subsection{Choosing an appropriate $\tau_r$}
+\subsection{Choosing an appropriate $\tau_{\textrm r}$}
 \label{sec:dijkstra}
 
 The previous discussion shows that
 a stopping criterion based on
-a rate threshold appears to do
-better than the other thresholds
+a rate threshold appears to \changed{outperform}
+the other thresholds
 we considered.
-We now discuss a heuristic, based
-on the building blocks of the model, to
+We now discuss a heuristic
+%mkn
+\changed{that uses only
+the building blocks of the model} to
 try to select an appropriate value for
 the rate threshold
-$\tau_r$ so that only a relatively
+$\tau_{\textrm r}$ so that only a relatively
 small number of trees are generated
 but the resulting error in the
 dependability measures is small.
 The method exploits the idea
-that trees corresponding to the
+that trees
+%mkn
+\changed{that occur in
+the
 most likely way the system fails
-are the ones whose rates contribute most
-to the computed dependability measures.
+are probably the ones whose rates
+contribute most
+to the computed dependability measures}.
 Exactly identifying these trees is
 complicated,
 so we instead use various
 approximations and simplifying
 assumptions to roughly determine
-a value for $\tau_r$ that allows
-such trees to be built but precludes
-those with significantly smaller
-rates.
+a value for $\tau_{\textrm r}$ that allows
+such trees to be built 
+\changed{while precluding
+trees on less likely paths to
+failure}.
 
+\changed{We first give an overview
+of our approach.}
 Assume that the system consists
 of highly reliable components
 \cite{GSHNG:1992}
-in the sense 
+in the sense
 that the component
 failure rates are much smaller than
 the repair rates.
@@ -1641,25 +1735,121 @@ conditions require that
 at least $\upsilon_i$ components
 of each type $i$ are up
 for the system to be operational,
-and recall that $r_i$ is the
-redundancy of type $i$.
-Also suppose the system is currently
-in a state with all components
-up,
-and we will focus only on trees
-starting from such a state and that
-lead to the system failing
-in a single cascade.
-The most likely way the
-system fails in a single cascade is
-when exactly $r_k - \upsilon_k + 1$ components
-of some type $k$
-fail (along with
-other component types failing)
-in the cascade.
-We now want to roughly determine
-what these trees look like
-and their approximate rates.
+% and recall that $r_i$ is the
+% redundancy of type $i$,
+%mkn
+\changed{so the system is failed
+when at least $d_i = r_i - \upsilon_i + 1$
+components have failed for some type~$i$.
+We will focus on
+sequences of states (i.e., paths
+of the embedded DTMC)
+for which the first state in the
+sequence has all components up,
+the last state in the sequence is a
+failed state (i.e., in $F$),
+all states in between are operational
+(i.e., in $U$),
+and
+each successive pair of
+states is a failure transition
+(possibly a cascade).
+Such a sequence of states is a path
+to system failure,
+% starting from such a state and that
+% lead to the system failing
+% in a single cascade.
+and the most likely way the
+system fails
+% in a single cascade
+is usually
+when exactly
+$d_i$ components
+of some type $i$
+fail (along with possibly
+other component types failing
+in cascades)
+along the path.
+For each component type $i$
+and each $1 \leq k \leq d_i$,
+we examine
+paths consisting of exactly $k$
+(failure) transitions (possibly some
+being cascades) in which
+a total
+of $d_i$ components of type $i$ fail.
+For each failure transition in the path,
+we only consider one tree (possibly with
+just a single node), even if there
+are multiple trees corresponding to
+that transition.  If there is
+more than one tree corresponding to
+a particular transition in the path,
+we try to determine
+the tree that has the largest rate.
+% using the heuristics described below.
+We then use the single tree in a rough
+approximation for the probability
+of the transition for the embedded DTMC.\@
+The product of the approximate transition
+probabilities along the path then gives
+an approximate probability of the entire path.
+The path that
+maximizes the approximate path probabilities
+over all types $i$ and numbers $k$
+of transitions in the path then
+provides an approximation to the
+most likely path to failure.
+Finally we set the rate threshold
+as the smallest rate
+of a tree along the approximate most
+likely path to failure.}
+
+\changed{We now provide details
+of the approach.
+First fix a component type $i$
+and a number $k$,
+$1 \leq k \leq d_{i}$, of transitions
+in a path to failure in which exactly
+$d_{i}$ components of type $i$ fail.
+We consider a path of the embedded
+DTMC having
+a succession of $k$ cascading-failure
+trees, each with $f_{i} \equiv d_{i}/k$
+components of type~$i$ (and possibly other component
+types) failing, where we initially assume
+$f_i$ is an integer.
+For each of the $k$ transitions along the path,
+we now want to approximate the
+structure of the most likely
+(i.e., highest-rate) tree $T$
+with $f_{i}$ components of type $i$
+(and possibly other component types) failing.
+If $f_i = 1$, then the tree is just
+a single node of type $i$.
+(When $d_{i}/k$ is not an integer,
+we first allocate $\lfloor d_{i}/k \rfloor$
+failing components of type~$i$ to each
+of the $k$ transitions,
+where $\lfloor \, \cdot \, \rfloor$
+denotes the floor function.
+Then for the remaining $b_{i} \equiv
+d_{i} - k \lfloor d_{i}/k \rfloor$ failing
+components
+of type~$i$, we allocate one
+additional failing component of type $i$ to
+$b_{i}$ of the transitions.
+Thus, $b_i$ of the transitions
+along the path each have
+$\lfloor d_{i}/k \rfloor + 1$
+type-$i$ components failing,
+and the other $k - b_i$ transitions
+each have $\lfloor d_{i}/k \rfloor$
+type-$i$ failures.
+In this case, we let $f_{i}$ be
+either $\lfloor d_{i}/k \rfloor$
+or $\lfloor d_{i}/k \rfloor + 1$
+in the discussion below.)}
 
 % Recall that the rate $R(T)$ of a tree $T$
 % with root type $i$ is
@@ -1671,86 +1861,104 @@ and their approximate rates.
 % the root's type $i$
 % over all the different environments,
 % and $\rho$ is as defined in \eqref{eq:rate}.
-Recall $R'(T)$ in \eqref{eq:R'}
+\changed{For any tree $T$,
+recall $R'(T)$ in \eqref{eq:R'}
 is the product of the
 maximum failure rate of the root and the
 product of the component-affected
-probabilities $\phi_{i,j}$ of
+probabilities $\phi_{j,l}$ of
 components that fail in
 the cascade.
-Now we want to
-identify trees $T$ that lead to
-the system failing in a single cascade
-starting from an all-operational state
-for which $R'(T)$ is large.
+% and for each transition along the
+% path, we want to build a tree $T$
+% with $f_{i}$ type-$i$ components
+% and large $R'(T)$.}
+% Now we want to
+% identify trees $T$ that lead to
+% the system failing in a single cascade
+% starting from an all-operational state
+% for which $R'(T)$ is large.
 Since adding more nodes to
 a tree will multiply its rate
-by additional $\phi_{i,j}$ terms,
+by additional $\phi_{j,l}$ terms,
 each of which is no greater than $1$,
-such trees $T$
+a tree $T$
 with large $R'(T)$
 will
 typically have not too many nodes
-and the $\phi_{i,j}$ terms included
+and the $\phi_{j,l}$ terms}
+included
 in $\rho$ from \eqref{eq:rate} will
 often be relatively large.
-
 We equivalently try to find
-such trees $T$ with large $\ln(R'(T))$,
+such a tree $T$ with large $\ln(R'(T))$,
 which converts the product $R'(T)$
 into a sum of logs.
-The advantage of this transformation
-is that we can now use
+\changed{This transformation allows us to
+use}
 a shortest-path algorithm on
 an appropriately defined graph
 to help identify
-such trees.
+such a tree.
+
+\changed{
 Specifically,
 construct a weighted graph
 $G = (V,E,W)$,
 where $V = \Omega$ is the set of
-vertices, $E = \{ (i,j) : j \in \Gamma_i \}$
+vertices, $E = \{ (j,l) : l \in \Gamma_j \}$
 is its set of edges,
-and $W = \{ w_{i,j} : (i,j) \in E \}$
+and $W = \{ w_{j,l} : (j,l) \in E \}$
 is the set of weights (costs),
-with $w_{i,j} = | \ln \phi_{i,j} |$.
-Because $\ln \phi_{i,j} \leq 0$,
-large $\phi_{i,j}$ corresponds to
-small $w_{i,j}$.
-To try to identify trees $T$ with large
-$\ln(R'(T))$, we will build them
-by first find//ing low-cost cycles
-in $G$, which correspond roughly to
-the most likely ways a component triggers
-a cascade in which another component
-of the same type fails.
-Then repeat the cycles 
-enough times so that the system
-fails, thereby resulting in trees
+with $w_{j,l} = -\ln \phi_{j,l}$.
+Because $\ln \phi_{j,l} \leq 0$,
+large $\phi_{j,l}$ corresponds to
+small $w_{j,l}$.
+To try to identify a tree $T$ with large
+$\ln(R'(T))$ and with exactly
+$f_i$ type-$i$ components failing,
+we will build it
+by first finding the lowest-cost cycle
+in $G$
+starting and ending in node $i$.
+This cycle
+corresponds roughly to
+the most likely way a type-$i$
+component triggers
+a cascade in which another type-$i$ component
+fails.
+Then repeat the cycle
+enough times so that exactly
+$f_{i}$ type-$i$
+components fail, thereby resulting in a
+tree
 for which $\ln(R'(T))$ should
 be large.
+}
 
-
-For each type $i \in \Omega$ and
-$j \in \Gamma_i$,
-let $c_{j,i}$ be the cost of
-the shortest path in the
+\changed{
+To find the lowest-cost cycle,
+we first
+use Dijkstra's algorithm
+(Section~24.3 of \cite{CLRS:2001})
+to determine the minimum-cost path
+in the
 weighted graph $G$ from vertex~$j$
-to vertex $i$, and this can be determined
-using Dijkstra's algorithm
-(Section~24.3 of \cite{CLRS:2001}).
-Let $c_i = \min_{j \in \Gamma_i}
+to vertex $i$ for each $j \in \Gamma_i$, 
+and let $c_{j,i}$ be
+the path's cost.
+Let $c_{i} = \min_{j \in \Gamma_{i}}
 (w_{i,j} + c_{j,i})$,
 which is the cost of the
-minimum-cost cycle from vertex $i$
+minimum-cost cycle in $G$ from vertex $i$
 back to itself.
-Let $g_i = (g_{i,1}, g_{i,2},
-\dots, g_{i,l_i})$ be the sequence of
-nodes on this minimum cost cycle,
-where $g_{i,1} = g_{i,l_i} = i$
-and $l_i$ is the number
+Let $g_{i} = (g_{i,1}, g_{i,2},
+\dots, g_{i,l_{i}})$ be the sequence of
+nodes on this minimum-cost cycle,
+where $g_{i,1} = g_{i,l_{i}} = i$
+and $l_{i}$ is the number
 of vertices in the cycle
-(including $i$ twice).
+(including $i$ twice).}
 % This roughly corresponds to
 % the product of the component-affected
 % probabilities of
@@ -1759,35 +1967,40 @@ of vertices in the cycle
 % failing
 % (along with some other component types).
 
-Using the minimum-cost cycle $g_i$,
-we then build a tree $T_i$ that is
+\changed{
+Using the minimum-cost cycle $g_{i}$,
+we then build a tree $T_{i}$ that is
 a chain having
-exactly $r_i - \upsilon_i + 1$
+exactly $f_{i}$
 components of type $i$ failing
 by repeating this minimum-cost cycle
-$r_i - \upsilon_i$ times.
-Specifically, let $g_i' =
-(g_{i,2}, g_{i,3}, \ldots, g_{i,l_i})$,
-which is the minimum-cost cycle $g_i$
+$f_{i} - 1$ times.
+Specifically, let $g_{i}' =
+(g_{i,2}, g_{i,3}, \ldots, g_{i,l_{i}})$,
+which is the minimum-cost cycle $g_{i}$
 with the starting vertex omitted.
-Then $T_i$ is a chain with root
-of type $i$, to which $g_i'$
+Then $T_{i}$ is a chain with root
+of type $i$, to which $g_{i}'$
 is concatenated
-$r_i - \upsilon_i$ times.
+$f_{i} - 1$ times.
 % Thus, $T_i$ has exactly
 % $r_i - \upsilon_i + 1$ nodes
 % of type $i$, along with nodes
 % of other types.
-We then use $T_i$ as
+We use $T_{i}$ as
 our approximation of
 the tree corresponding to the
-most likely way for the system
-to fail from an all-operational state
-with a single cascade triggered by a failure of
-a component of type $i$.
-For this tree $T_i$, we compute
-$R'(T_i)$ as $\bar{\lambda}_i
-a_i^{r_i - \upsilon_i}$,
+most likely cascading-failure tree
+triggered by a failure of a
+component of type $i$ and in which
+exactly $f_{i}$ components fail.
+Recall that this tree is for one of
+the transitions along the path
+having $k$ transitions.
+For this tree $T_{i}$, we can compute
+$R'(T_{i_0})$ in
+\eqref{eq:R'} as $\bar{\lambda}_i
+a_i^{f_i-1}$,
 where
 $a_i = \prod_{j=1}^{l_i-1}
 \phi_{g_{i,j}, g_{i,j+1}}$,
@@ -1795,59 +2008,75 @@ which is the product of
 component-affected probabilities
 along the minimum-cost
 cycle.
-Now we maximize over the types
-to get
-$\bar{R}' = \max_{i \in \Omega} R'(T_i)$,
-and then set $\tau_r = \alpha \bar{R}'$,
-where $\alpha$ is some constant.
+}
 
 
-\subsection{Extrapolation}
+\changed{Now we build our approximation
+to the most likely path to failure
+consisting of exactly $k$ transitions with a
+total of $d_{i}$ components failing such
+that each transition $(x,y)$ along the path has a
+tree $T_{i}$ as constructed above.
+We also choose the environment in each
+state along the path to be the
+same $e_0 \in \mathcal{E}$,
+where $e_0$ is such that
+$\lambda_{i, e_0}
+= \max_{e \in \mathcal{E}} \lambda_{i, e}$.
+Now for each $(x,y)$, we compute an
+approximate DTMC transition probability
+as
+$$
+P'(x,y) = \frac{R(T_i,x)}
+{\sum_{j \in \Omega} (r_j - x_j) \lambda_{j, e_0}
++ \sum_{j \in \Omega} x_j \mu_{j,e_0}/
+(\sum_{l \in \Omega} x_l)},
+$$
+where the numerator is the
+(exact) rate for the tree $T_i$
+from \eqref{eq:rate}
+and the denominator is the total rate
+out of state~$x$.
+Then define $\zeta_{i, k}$ as
+the approximate probability of the entire
+path, which is the product of the $P'(x,y)$
+for the transitions $(x,y)$ along the path.
+Maximizing $\zeta_{i,k}$ over all types $i$
+and path lengths $1 \leq k \leq d_{i}$
+leads to our approximation of
+the most likely path to failure.
+}
 
-The method described in 
-Section~\ref{sec:dijkstra}
-tries to identify a ``good''
-value for the rate threshold $\tau_r$,
-but the resulting values for the MTTF
-and the SSU may still have
-significant errors.
-We now consider a heuristic
-to try to obtain better
-estimates of the dependability
-measures
-using extrapolation.
-The idea here is to compute
-the MTTF and SSU for different
-rate thresholds $\tau_r^{(1)} > 
-\tau_r^{(2)} > \cdots >
-\tau_r^{(b-1)}$
-for some $b > 2$,
-where $\tau_r^{(1)}$ is the
-value of $\tau_r$ from
-Section~\ref{sec:dijkstra}.
-Let the corresponding values
-for the MTTF and SSU be
-$\mbox{MTTF}^{(j)}$
-and $\mbox{SSU}^{(j)}$,
-respectively,
-for $j = 1, 2, \ldots, b-1$.
-Then we extrapolate
-$\mbox{MTTF}^{(j)}$
-and $\mbox{SSU}^{(j)}$,
-$j = 1, 2, \ldots, b-1$,
-to obtain estimates
-$\mbox{MTTF}^{(b)}$
-and 
-$\mbox{SSU}^{(b)}$.
 
-In our experiments,
-we set $b = ???$,
-and set $\tau_r^{(j)} = 
-\beta \tau_r^{(j-1)}$
-for $j = 2, 3, \dots, b-1$,
-where $0 < \beta < 1$ is a constant.
-We performed the extrapolation
-using \dots.
+\changed{
+Suppose that this approximate
+most likely path to failure
+corresponds to type~$i_0$
+and path length $k_0$.
+For this path,
+we now want to use the smallest rate
+of the trees along the path as the rate
+threshold $\tau_{\textrm r}$.
+Specifically, let $x^{(0)}, x^{(1)},
+\ldots, x^{(k_0)}$ be the sequence
+of states on the path,
+and let $T_{i_0,l}$ be the
+tree on the $l$th
+transition $(x^{(l-1)}, x^{(l)})$
+along the path.
+We then define
+$\tau_{\textrm r} = \min_{1 \leq l \leq k_0}
+R'(T_{i_0,l})$.
+With this choice for $\tau_{\textrm r}$,
+we are trying
+to ensure those trees
+corresponding
+to the approximate most likely path to failure
+are generated but omit trees
+on less likely paths to failure.
+}
+
+
 
 
 
@@ -1879,7 +2108,7 @@ This work has been supported
 in part by
 the National Science Foundation under
 Grants No.\
-CMMI-0926949 
+CMMI-0926949
 and CMMI-1200065.
 Any opinions, findings, and conclusions or recommendations
 expressed in this material are those of the author and
@@ -1891,3 +2120,75 @@ Science Foundation.
 \bibliography{mkn}
 
 \end{document}
+
+
+
+
+
+\subsection{Extrapolation}
+
+The method described in
+Section~\ref{sec:dijkstra}
+tries to identify a ``good''
+value for the rate threshold $\tau_{\textrm r}$,
+but the resulting values for the MTTF
+and the SSU may still have
+significant errors.
+We now consider a heuristic
+to try to obtain better
+estimates of the dependability
+measures
+using extrapolation.
+The idea here is to compute
+the MTTF and SSU for different
+rate thresholds $\tau_{\textrm r}^{(1)} >
+\tau_{\textrm r}^{(2)} > \cdots >
+\tau_{\textrm r}^{(b-1)}$
+for some $b > 2$,
+where $\tau_{\textrm r}^{(1)}$ is the
+value of $\tau_{\textrm r}$ from
+Section~\ref{sec:dijkstra}.
+Let the corresponding values
+for the MTTF and SSU be
+$\mbox{MTTF}^{(j)}$
+and $\mbox{SSU}^{(j)}$,
+respectively,
+for $j = 1, 2, \ldots, b-1$.
+Then we extrapolate
+$\mbox{MTTF}^{(j)}$
+and $\mbox{SSU}^{(j)}$,
+$j = 1, 2, \ldots, b-1$,
+to obtain estimates
+$\mbox{MTTF}^{(b)}$
+and
+$\mbox{SSU}^{(b)}$.
+
+In our experiments,
+we set $b = ???$,
+and set $\tau_{\textrm r}^{(j)} =
+\beta \tau_{\textrm r}^{(j-1)}$
+for $j = 2, 3, \dots, b-1$,
+where $0 < \beta < 1$ is a constant.
+We performed the extrapolation
+using \dots.
+
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%
+For this tree $T_{i_0}$, we compute
+$R'(T_{i_0})$ as $\bar{\lambda}_i
+a_i^{r_i - \upsilon_i}$,
+where
+$a_i = \prod_{j=1}^{l_i-1}
+\phi_{g_{i,j}, g_{i,j+1}}$,
+which is the product of
+component-affected probabilities
+along the minimum-cost
+cycle.
+Now we maximize over the types
+to get
+$\bar{R}' = \max_{i \in \Omega} R'(T_i)$,
+and then set $\tau_{\textrm r} = \alpha \bar{R}'$,
+where $\alpha$ is some constant.
